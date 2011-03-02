@@ -57,7 +57,7 @@ class RdfService {
 		
 		def writer = new StringWriter()
 		writer<<builder.bind(rdfBuilder)
-		writer.toString()www
+		writer.toString()
 	}
 	
 	//TODO:validate RDF request against RDF schema
