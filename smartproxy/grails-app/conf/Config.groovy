@@ -52,12 +52,15 @@ grails.spring.bean.packages = []
 environments {
     production {
         grails.serverURL = "http://www.changeme.com"
+		grails.moURL = 'changeme'
     }
     development {
         grails.serverURL = "http://localhost:8080/${appName}"
+		grails.moURL = 'http://soatstweb2:8888/CHMObjectsToolkit/servlet/'
     }
     test {
         grails.serverURL = "http://localhost:8080/${appName}"
+		grails.moURL = 'http://soatstweb2:8888/CHMObjectsToolkit/servlet/'
     }
 
 }

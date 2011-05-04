@@ -1,15 +1,12 @@
 package smartproxy
+import org.codehaus.groovy.grails.commons.ConfigurationHolder;
+
 import groovy.xml.MarkupBuilder;
 import groovyx.net.http.*
 class MilleniumService {
 
     static transactional = true
 
-    private static final transactionMap=['demographics':'ReadPersonsById']
-	
-	//TODO:put this in the config file
-	private final moURL = 'http://soatstweb2:8888/CHMObjectsToolkit/servlet/com.cerner.person.PersonServlet'
-	
 	/**
      * entry method into this service class. Makes calls using the MO xml/http API
      * @param payload
@@ -17,53 +14,48 @@ class MilleniumService {
      * @return
      */
 	def makeCall(transaction, recordId) {
-		//TODO:enable run time method selection based on incoming transaction.
-		//TODO:write an entry point method first, then think about refactoring using inheritence.
-		return personById(recordId)
-    }
-	
-	/**
-	 * makes the actual call to MO to obtain person details using there id
-	 * @param recordId
-	 * @return
-	 */
-	def personById(recordId){
-		//TODO:build request xml using xml binding
+		def moCallObj = createMOCall(transaction)
+		def requestXML = moCallObj.createRequest(recordId)
+		
 		//TODO:validate xml request against schema
-		def requestXML = generatePersonByIdRequest(recordId)
-		
-		
-		def restClient = new RESTClient(moURL)
+		def moURL = ConfigurationHolder.config.grails.moURL
+		def restClient = new RESTClient(moURL+moCallObj.targetServlet)
 		restClient.setContentType(ContentType.XML)
 		def resp=restClient.post(body:requestXML, requestContentType : ContentType.XML)
 		
-		//TODO: use constants to store transaction names
-		readData(resp)
+		moCallObj.readResponse(readData(resp))
+    }
+	
+	/**
+	 * Factory which instantiates the appropriate MilleniumObject using reflection
+	 * @param transaction
+	 * @return
+	 */
+	def createMOCall(transaction){
+		transaction = upperCaseFirstLetter(transaction)
+
+		Class moCallClass = this.class.classLoader.loadClass('org.chip.mo.'+transaction+'Call')
+		def moCallObj=moCallClass.newInstance()
+		moCallObj.init()
+		
+		return moCallObj
 	}
 	
 	/**
-	 * Generate appropriate MO request xml
-	 * @param recordId
+	 * Takes in a string and converts the first character to uppercase
+	 * @param string
 	 * @return
 	 */
-	def generatePersonByIdRequest(recordId){
-		def writer = new StringWriter()
-		def builder = new MarkupBuilder(writer)
-		
-		builder.RequestMessage(){
-			TransactionName('ReadPersonById')
-			Payload(){
-				PersonId(recordId)
-				AddressesIndicator('true')
-			}
-		}
-		
-		return writer.toString()
+	def upperCaseFirstLetter(string){
+		String firstLetter = string.substring(0,1)
+		String upperCaseFirstLetter = firstLetter.toUpperCase()
+		string = string.replaceFirst(firstLetter, upperCaseFirstLetter)
+		return string
 	}
-	
 	
 	def readData(resp){
 		def replyMessage = resp.getData()
 		return replyMessage.Payload
 	}
+	
 }
