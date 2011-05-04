@@ -10,14 +10,9 @@ class UrlMappings {
 		"/"(view:"/index")
 		"500"(view:'/error')
 		
-		"/records/$record_id/medications"{
+		"/records/$record_id/$transaction"{
 			controller = "records"
-			action = "medications"
-		}
-		
-		"/records/$record_id/demographics"{
-			controller = "records"
-			action = "demographics"
+			action = "makeCall"
 		}
 		
 	}
