@@ -53,14 +53,17 @@ environments {
     production {
         grails.serverURL = "http://www.changeme.com"
 		grails.moURL = 'changeme'
+		grails.smartURL = 'changeme'
     }
     development {
         grails.serverURL = "http://localhost:8080/${appName}"
 		grails.moURL = 'http://soatstweb2:8888/CHMObjectsToolkit/servlet/'
+		grails.smartURL = 'http://10.36.142.250:7001/proxy_index'
     }
     test {
         grails.serverURL = "http://localhost:8080/${appName}"
 		grails.moURL = 'http://soatstweb2:8888/CHMObjectsToolkit/servlet/'
+		grails.smartURL = 'http://10.36.142.250:7001/proxy_index'
     }
 
 }
