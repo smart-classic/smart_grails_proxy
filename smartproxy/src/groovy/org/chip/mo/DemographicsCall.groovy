@@ -30,7 +30,7 @@ class DemographicsCall extends MilleniumObjectCall{
 	  def birthDateTime=person.BirthDateTime.text().substring(0, 10)
 	  def givenName=person.FirstName.text()
 	  def familyName=person.LastName.text()
-	  def gender=person.Gender.Meaning.text()
+	  def gender=person.Gender.Meaning.text().toLowerCase()
 	  def zipcode=person.Addresses.Address.Zipcode.text().substring(0,5)
 	  return new Demographics(birthDateTime, givenName, familyName, gender, zipcode)
   }
