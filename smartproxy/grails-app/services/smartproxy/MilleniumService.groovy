@@ -6,6 +6,14 @@ import groovyx.net.http.*
 class MilleniumService {
 
     static transactional = true
+	
+	static Map requestMOMap = new HashMap()
+	
+	static {
+		requestMOMap.put 'demographics', 'Demographics'
+		requestMOMap.put 'problems', 'Problems'
+		requestMOMap.put 'vital_signs', 'Vitals'
+	}
 
 	/**
      * entry method into this service class. Makes calls using the MO xml/http API
@@ -32,7 +40,7 @@ class MilleniumService {
 	 * @return
 	 */
 	def createMOCall(transaction){
-		transaction = upperCaseFirstLetter(transaction)
+		transaction = mapRequest(transaction)
 
 		Class moCallClass = this.class.classLoader.loadClass('org.chip.mo.'+transaction+'Call')
 		def moCallObj=moCallClass.newInstance()
@@ -46,11 +54,8 @@ class MilleniumService {
 	 * @param string
 	 * @return
 	 */
-	def upperCaseFirstLetter(string){
-		String firstLetter = string.substring(0,1)
-		String upperCaseFirstLetter = firstLetter.toUpperCase()
-		string = string.replaceFirst(firstLetter, upperCaseFirstLetter)
-		return string
+	def mapRequest(transaction){
+		return requestMOMap.get(transaction)
 	}
 	
 	def readData(resp){

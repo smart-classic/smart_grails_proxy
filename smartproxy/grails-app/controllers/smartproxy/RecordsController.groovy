@@ -5,7 +5,6 @@ class RecordsController {
     def index = { }
 	
 	def milleniumService
-	def rdfService
 	
 	def makeCall={
 		def recordId=params['record_id']
