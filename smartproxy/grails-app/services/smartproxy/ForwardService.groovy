@@ -17,6 +17,7 @@ class ForwardService {
 	}
 	
     def createURL(personId, encounterId, userId, locationValue, application) {
+		personId = extractId(personId)
 		def baseURL = ConfigurationHolder.config.grails.smartURL
 		def forwardToURL = baseURL+'?record_id='+mapPersonId(personId)
 		return forwardToURL
@@ -24,5 +25,9 @@ class ForwardService {
 	
 	def mapPersonId(personId) {
 		personIdMap.get personId
+	}
+	
+	def extractId(String incomingId){
+		return incomingId.substring(0, incomingId.indexOf("."))
 	}
 }
