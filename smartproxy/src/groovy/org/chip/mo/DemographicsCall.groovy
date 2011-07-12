@@ -4,6 +4,10 @@ import org.chip.rdf.Demographics
 
 class DemographicsCall extends MilleniumObjectCall{
 	
+	def makeCall(recordId, moURL){
+		createRequest(recordId)
+	}
+	
 	def init(){
 		super.init()
 		transaction = 'ReadPersonById'
@@ -26,7 +30,11 @@ class DemographicsCall extends MilleniumObjectCall{
    * @return
    */
   def readResponse(moResponse){
-	  def person = moResponse.Person
+	  
+	  def replyMessage = moResponse.getData()
+	  def payload= replyMessage.Payload
+	  
+	  def person = payload.Person
 	  def birthDateTime=person.BirthDateTime.text().substring(0, 10)
 	  def givenName=person.FirstName.text()
 	  def familyName=person.LastName.text()

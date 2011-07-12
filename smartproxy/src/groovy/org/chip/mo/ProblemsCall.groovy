@@ -28,9 +28,13 @@ class ProblemsCall extends MilleniumObjectCall {
    * @return
    */
    def readResponse(moResponse){
+	   
+	   def replyMessage = moResponse.getData()
+	   def payload= replyMessage.Payload
+	   
 	   def problems = new ArrayList()
-	   def help = moResponse.Problems.Problem.Nomenclature.SourceVocabulary.Value.text()
-	   moResponse.Problems.Problem.each{
+	   def help = payload.Problems.Problem.Nomenclature.SourceVocabulary.Value.text()
+	   payload.Problems.Problem.each{
 		   def snomedConcept = it.Nomenclature.SourceVocabulary.Value.text()
 		   def title = it.Nomenclature.SourceString.text()
 		   def onsetDate = it.OnsetDateTime.text()
