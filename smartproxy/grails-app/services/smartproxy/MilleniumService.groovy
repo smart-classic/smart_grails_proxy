@@ -23,15 +23,12 @@ class MilleniumService {
      */
 	def makeCall(transaction, recordId) {
 		def moCallObj = createMOCall(transaction)
-		def requestXML = moCallObj.createRequest(recordId)
 		
 		//TODO:validate xml request against schema
-		def moURL = ConfigurationHolder.config.grails.moURL
-		def restClient = new RESTClient(moURL+moCallObj.targetServlet)
-		restClient.setContentType(ContentType.XML)
-		def resp=restClient.post(body:requestXML, requestContentType : ContentType.XML)
 		
-		moCallObj.readResponse(readData(resp))
+		def moURL = ConfigurationHolder.config.grails.moURL
+		
+		moCallObj.makeCall(recordId, moURL)
     }
 	
 	/**
@@ -50,17 +47,12 @@ class MilleniumService {
 	}
 	
 	/**
-	 * Takes in a string and converts the first character to uppercase
+	 * Takes in the incoming request parameter and converts it into a transaction
 	 * @param string
 	 * @return
 	 */
 	def mapRequest(transaction){
 		return requestMOMap.get(transaction)
-	}
-	
-	def readData(resp){
-		def replyMessage = resp.getData()
-		return replyMessage.Payload
 	}
 	
 }

@@ -14,6 +14,14 @@ abstract class MilleniumObjectCall {
 		builder = new MarkupBuilder(writer)
 	}
 	
+	def makeCall(recordId, moURL){
+		def requestXML = createRequest(recordId)
+		
+		def resp = makeRestCall(requestXML, moURL)
+		
+		readResponse(resp)
+	}
+	
 	def createRequest(recordId){
 		builder.RequestMessage(){
 			TransactionName(transaction)
@@ -25,5 +33,13 @@ abstract class MilleniumObjectCall {
 	}
 	
 	def abstract generatePayload(recordId)
-	def abstract readResponse(moResponse)
+	
+	def makeRestCall(requestXML, moURL){
+		def restClient = new RESTClient(moURL+targetServlet)
+		restClient.setContentType(ContentType.XML)
+		def resp=restClient.post(body:requestXML, requestContentType : ContentType.XML)
+		return resp
+	}
+
+	def abstract readResponse(resp)
 }
