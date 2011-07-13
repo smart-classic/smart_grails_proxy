@@ -14,6 +14,8 @@ class VitalsCall extends MilleniumObjectCall{
 	static final Map vitalTitleMap
 	static final Map vitalResourceMap
 	static final Map vitalUnitMap
+	static final Set vitalEventCodesSet
+	static final Set bpEventCodesSet
 	
 	static{
 		encounterResourceMap = new HashMap()
@@ -79,16 +81,41 @@ class VitalsCall extends MilleniumObjectCall{
 		vitalUnitMap.put("703501", "mm[Hg]")
 		vitalUnitMap.put("703516", "mm[Hg]")
 		
+		vitalEventCodesSet = new HashSet()
+		vitalEventCodesSet.add("15612799")
+		vitalEventCodesSet.add("3777472")
+		//vitalEventCodesSet.add("")
+		vitalEventCodesSet.add("703540")
+		vitalEventCodesSet.add("7935038")
+		vitalEventCodesSet.add("8238766")
+		vitalEventCodesSet.add("8713424")
+		vitalEventCodesSet.add("703501")
+		vitalEventCodesSet.add("703516")
+		//vitalEventCodesSet.add("")
+		vitalEventCodesSet.add("4099993")
+		vitalEventCodesSet.add("4100005")
+		
+		bpEventCodesSet = new HashSet()
+		bpEventCodesSet.add("703501")
+		bpEventCodesSet.add("703516")
+		//bpEventCodesSet.add("")
+		bpEventCodesSet.add("4099993")
+		bpEventCodesSet.add("4100005")
+		
 		
 	}
 	
 	def makeCall(recordId, moURL){
 		
 		transaction = 'ReadEncountersByFilters'
-		targetServlet = 'com.cerner.encounters.EncountersServlet'
+		targetServlet = 'com.cerner.encounter.EncounterServlet'
 		def requestXML = createRequest(recordId)
 		def resp = makeRestCall(requestXML, moURL)
 		readResponse(resp)
+		
+		//refresh the writer and builder objects
+		writer = new StringWriter()
+		builder = new MarkupBuilder(writer)
 		
 		transaction = 'ReadResultsMatrix'
 		targetServlet = 'com.cerner.results.ResultsServlet'
@@ -120,36 +147,60 @@ class VitalsCall extends MilleniumObjectCall{
 					def currentValue = currentCell.ClinicalEvents.NumericResult.Value.text()
 					def currentEventTag = currentCell.ClinicalEvents.NumericResult.EventTag.text()
 					
-					VitalSign vitalSign = new VitalSign()
-					vitalSign.setValue(currentValue)
-					vitalSign.setCode(currentEventCode)
-					vitalSign.setType(vitalTypeMap.get(currentEventCode))
-					vitalSign.setTitle(vitalTitleMap.get(currentEventCode))
-					vitalSign.setResource(vitalResourceMap.get(currentEventCode))
-					vitalSign.setUnit(vitalUnitMap.get(currentEventCode))
+					currentValue=convertValue(currentValue, currentEventCode)
 					
-					vitalSignsMap.get(currentEncounterId).vitalSignList.add(vitalSign)
+					if((currentEventCode!=null) && (vitalEventCodesSet.contains(currentEventCode)) && valueIsValid(currentValue)){					
+						VitalSign vitalSign = new VitalSign()
+						vitalSign.setValue(currentValue)
+						vitalSign.setCode(currentEventCode)
+						vitalSign.setType(vitalTypeMap.get(currentEventCode))
+						vitalSign.setTitle(vitalTitleMap.get(currentEventCode))
+						vitalSign.setResource(vitalResourceMap.get(currentEventCode))
+						vitalSign.setUnit(vitalUnitMap.get(currentEventCode))
+						(bpEventCodesSet.contains(currentEventCode))?vitalSign.setIsBPField(true):vitalSign.setIsBPField(false)
+						
+						vitalSignsMap.get(currentEncounterId).vitalSignList.add(vitalSign)
+					}
 				}
 			}	
 		}
+		return new Vitals(vitalSignsMap)
 	}
 	
 	def generatePayload(recordId){
 		if (transaction.equals("ReadEncountersByFilters")){
-			PersonId(recordId)
-			BypassOrganizationSecurityIndicator('true')
+			builder.PersonId(recordId)
+			builder.BypassOrganizationSecurityIndicator('true')
 		}else{
-			ResultsMatrixProperties(){
+			builder.ResultsMatrixProperties(){
 				Structure('Table')
 				TimeGrouping('Actual')
 				TimeSort('Chronological')
 			}
-			ResultsSearchCriteria(){
+			builder.ResultsSearchCriteria(){
 				CountSearch(){
 					PersonId(recordId)
 					EventCount('999')
 				}
 			}
 		}
+	}
+	
+	def convertValue(currentValue, currentEventCode){
+		if (currentEventCode.equals("15612799")){
+			double height = Double.parseDouble(currentValue)
+			height = height/100
+			currentValue = Double.toString(height)
+		}
+		return currentValue
+	}
+	
+	def valueIsValid(currentValue){
+		if (currentValue==null) return false
+		if (currentValue.equals("")) return false
+		if (currentValue.equals("0")) return false
+		if (currentValue.equals("0.0")) return false
+		
+		return true
 	}
 }

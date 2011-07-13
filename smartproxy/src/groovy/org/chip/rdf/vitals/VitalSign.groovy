@@ -7,4 +7,5 @@ class VitalSign {
 	String resource
 	String unit
 	String code
+	boolean isBPField
 }
