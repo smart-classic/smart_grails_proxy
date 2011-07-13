@@ -8,4 +8,8 @@ class VitalSigns {
 	public VitalSigns(){
 		vitalSignList = new ArrayList()
 	}
+	
+	public Encounter getEncounter(){
+		return encounter
+	}
 }

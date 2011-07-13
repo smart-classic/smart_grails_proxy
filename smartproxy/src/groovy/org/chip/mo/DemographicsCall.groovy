@@ -4,10 +4,6 @@ import org.chip.rdf.Demographics
 
 class DemographicsCall extends MilleniumObjectCall{
 	
-	def makeCall(recordId, moURL){
-		createRequest(recordId)
-	}
-	
 	def init(){
 		super.init()
 		transaction = 'ReadPersonById'
