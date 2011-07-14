@@ -10,8 +10,10 @@ class SmartController {
 		def userId=params['user_id']
 		def locationValue=params['location_value']
 		def application=params['application']	
+		def domain=params['domain']
 		
-		def forwardToURL = forwardService.createURL(personId, encounterId, userId, locationValue, application)
+		
+		def forwardToURL = forwardService.createURL(personId, encounterId, userId, locationValue, application, domain)
 		redirect(url:forwardToURL)
 	}
 }

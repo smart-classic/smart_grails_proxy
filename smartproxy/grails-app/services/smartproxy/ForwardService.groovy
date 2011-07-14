@@ -16,10 +16,13 @@ class ForwardService {
 		personIdMap.put ('14109748','15649511')
 	}
 	
-    def createURL(personId, encounterId, userId, locationValue, application) {
+    def createURL(personId, encounterId, userId, locationValue, application, domain) {
 		personId = extractId(personId)
 		def baseURL = ConfigurationHolder.config.grails.smartURL
-		def forwardToURL = baseURL+'?record_id='+mapPersonId(personId)
+		if(domain=='demo' || domain==null){
+			personId=mapPersonId(personId)
+		}
+		def forwardToURL = baseURL+'?record_id='+personId
 		return forwardToURL
     }
 	
@@ -28,6 +31,10 @@ class ForwardService {
 	}
 	
 	def extractId(String incomingId){
-		return incomingId.substring(0, incomingId.indexOf("."))
+		def index = incomingId.indexOf(".")
+		if (index >-1){
+			return incomingId.substring(0, index)
+		}
+		return incomingId
 	}
 }
