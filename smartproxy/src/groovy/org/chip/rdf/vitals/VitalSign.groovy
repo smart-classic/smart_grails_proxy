@@ -8,4 +8,7 @@ class VitalSign {
 	String unit
 	String code
 	boolean isBPField
+	String eventId
+	String parentEventId
+	boolean isCodedField
 }

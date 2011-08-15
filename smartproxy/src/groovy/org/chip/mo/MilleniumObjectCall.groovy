@@ -9,35 +9,40 @@ abstract class MilleniumObjectCall {
 	def transaction
 	def targetServlet
 	
+	protected static final String RECORDIDPARAM = "RECORDIDPARAM"
+	
 	def init(){
 		writer = new StringWriter()
 		builder = new MarkupBuilder(writer)
 	}
 	
 	def makeCall(recordId, moURL){
-		def requestXML = createRequest(recordId)
+		Map<String,Object> requestParams = new HashMap()
+		requestParams.put(RECORDIDPARAM, recordId)
+		def requestXML = createRequest(requestParams)
 		
 		def resp = makeRestCall(requestXML, moURL)
 		
 		readResponse(resp)
 	}
 	
-	def createRequest(recordId){
+	def createRequest(requestParams){
 		builder.RequestMessage(){
 			TransactionName(transaction)
 			Payload(){
-				generatePayload(recordId)
+				generatePayload(requestParams)
 			}
 		}
 		return writer.toString()
 	}
 	
-	def abstract generatePayload(recordId)
+	def abstract generatePayload(requestParams)
 	
 	def makeRestCall(requestXML, moURL){
 		def restClient = new RESTClient(moURL+targetServlet)
 		restClient.setContentType(ContentType.XML)
 		def resp=restClient.post(body:requestXML, requestContentType : ContentType.XML)
+		println(resp)
 		return resp
 	}
 

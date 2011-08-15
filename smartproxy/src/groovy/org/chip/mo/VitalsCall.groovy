@@ -6,7 +6,21 @@ import groovy.xml.MarkupBuilder;
 
 class VitalsCall extends MilleniumObjectCall{
 	
+	private static final String ENCOUNTERIDSPARAM = "ENCOUNTERIDSPARAM"
+	
 	Map vitalSignsMap = new HashMap()
+	
+	private static final String EVENTCODEHEIGHT="2700653"
+	private static final String EVENTCODEWEIGHT="2700654"
+	private static final String EVENTCODERRATE="703540"
+	private static final String EVENTCODEHEARTRATE="7935038"
+	private static final String EVENTCODEOSAT="8238766"
+	private static final String EVENTCODETEMP="8713424"
+	private static final String EVENTCODESYS="703501"
+	private static final String EVENTCODEDIA="703516"
+	private static final String EVENTCODELOCATION="4099993"
+	private static final String EVENTCODEPOSITION="13488852"
+	
 	
 	static final Map encounterResourceMap
 	static final Map encounterTitleMap
@@ -16,6 +30,8 @@ class VitalsCall extends MilleniumObjectCall{
 	static final Map vitalUnitMap
 	static final Set vitalEventCodesSet
 	static final Set bpEventCodesSet
+	static final Map bodyPositionCodeMap
+	static final Map bodyPositionTitleMap
 	
 	static{
 		encounterResourceMap = new HashMap()
@@ -35,73 +51,83 @@ class VitalsCall extends MilleniumObjectCall{
 		encounterTitleMap.put("Virtual", "Virtual encounter")
 		
 		vitalTypeMap = new HashMap()
-		vitalTypeMap.put("15612799", "height")
-		vitalTypeMap.put("3777472", "weight")
-		vitalTypeMap.put("", "bodyMassIndex")
-		vitalTypeMap.put("703540", "respiratoryRate")
-		vitalTypeMap.put("7935038", "heartRate")
-		vitalTypeMap.put("8238766", "oxygenSaturation")
-		vitalTypeMap.put("8713424", "temperature")
-		vitalTypeMap.put("703501", "systolic")
-		vitalTypeMap.put("703516", "diastolic")
-		vitalTypeMap.put("", "bodyPosition")
-		vitalTypeMap.put("4099993", "bodySite")
-		vitalTypeMap.put("4100005", "method")
+		vitalTypeMap.put(EVENTCODEHEIGHT, "height")
+		vitalTypeMap.put(EVENTCODEWEIGHT, "weight")
+		//vitalTypeMap.put("", "bodyMassIndex")
+		vitalTypeMap.put(EVENTCODERRATE, "respiratoryRate")
+		vitalTypeMap.put(EVENTCODEHEARTRATE, "heartRate")
+		vitalTypeMap.put(EVENTCODEOSAT, "oxygenSaturation")
+		vitalTypeMap.put(EVENTCODETEMP, "temperature")
+		vitalTypeMap.put(EVENTCODESYS, "systolic")
+		vitalTypeMap.put(EVENTCODEDIA, "diastolic")
+		vitalTypeMap.put(EVENTCODELOCATION, "bodySite")
+		vitalTypeMap.put(EVENTCODEPOSITION, "bodyPosition")
 		
 		vitalTitleMap = new HashMap()
-		vitalTitleMap.put("15612799", "Height (measured)")
-		vitalTitleMap.put("3777472", "Body weight (measured)")
-		vitalTitleMap.put("", "Body mass index")
-		vitalTitleMap.put("703540", "Respiration rate")
-		vitalTitleMap.put("7935038", "Heart Rate")
-		vitalTitleMap.put("8238766", "Oxygen saturation")
-		vitalTitleMap.put("8713424", "Body temperature")
-		vitalTitleMap.put("703501", "Systolic blood pressure")
-		vitalTitleMap.put("703516", "Diastolic blood pressure")
+		vitalTitleMap.put(EVENTCODEHEIGHT, "Height (measured)")
+		vitalTitleMap.put(EVENTCODEWEIGHT, "Body weight (measured)")
+		//vitalTitleMap.put("", "Body mass index")
+		vitalTitleMap.put(EVENTCODERRATE, "Respiration rate")
+		vitalTitleMap.put(EVENTCODEHEARTRATE, "Heart Rate")
+		vitalTitleMap.put(EVENTCODEOSAT, "Oxygen saturation")
+		vitalTitleMap.put(EVENTCODETEMP, "Body temperature")
+		vitalTitleMap.put(EVENTCODESYS, "Systolic blood pressure")
+		vitalTitleMap.put(EVENTCODEDIA, "Diastolic blood pressure")
+		vitalTitleMap.put("Sitting", "Sitting")
+		vitalTitleMap.put("Standing", "Standing")
+		vitalTitleMap.put("Supine", "Supine")
+		vitalTitleMap.put("Left upper","Left arm")
+		vitalTitleMap.put("Right upper","Right arm")
+		vitalTitleMap.put("Left lower","Left thigh")
+		vitalTitleMap.put("Right lower","Right thigh")
 		
 		vitalResourceMap = new HashMap()
-		vitalResourceMap.put("15612799", "http://loinc.org/codes/8302-2")
-		vitalResourceMap.put("3777472", "http://loinc.org/codes/3141-9")
-		vitalResourceMap.put("", "http://loinc.org/codes/39156-5")
-		vitalResourceMap.put("703540", "http://loinc.org/codes/9279-1")
-		vitalResourceMap.put("7935038", "http://loinc.org/codes/8867-4")
-		vitalResourceMap.put("8238766", "http://loinc.org/codes/2710-2")
-		vitalResourceMap.put("8713424", "http://loinc.org/codes/8310-5")
-		vitalResourceMap.put("703501", "http://loinc.org/codes/8480-6")
-		vitalResourceMap.put("703516", "http://loinc.org/codes/8462-4")
+		vitalResourceMap.put(EVENTCODEHEIGHT, "http://loinc.org/codes/8302-2")
+		vitalResourceMap.put(EVENTCODEWEIGHT, "http://loinc.org/codes/3141-9")
+		//vitalResourceMap.put("", "http://loinc.org/codes/39156-5")
+		vitalResourceMap.put(EVENTCODERRATE, "http://loinc.org/codes/9279-1")
+		vitalResourceMap.put(EVENTCODEHEARTRATE, "http://loinc.org/codes/8867-4")
+		vitalResourceMap.put(EVENTCODEOSAT, "http://loinc.org/codes/2710-2")
+		vitalResourceMap.put(EVENTCODETEMP, "http://loinc.org/codes/8310-5")
+		vitalResourceMap.put(EVENTCODESYS, "http://loinc.org/codes/8480-6")
+		vitalResourceMap.put(EVENTCODEDIA, "http://loinc.org/codes/8462-4")
+		vitalResourceMap.put("Sitting", "http://www.ihtsdo.org/snomed-ct/concepts/33586001" )
+		vitalResourceMap.put("Standing", "http://www.ihtsdo.org/snomed-ct/concepts/10904000" )
+		vitalResourceMap.put("Supine", "http://www.ihtsdo.org/snomed-ct/concepts/40199007" )
+		vitalResourceMap.put("Left upper","http://www.ihtsdo.org/snomed-ct/concepts/368208006")
+		vitalResourceMap.put("Right upper","http://www.ihtsdo.org/snomed-ct/concepts/368209003")
+		vitalResourceMap.put("Left lower","http://www.ihtsdo.org/snomed-ct/concepts/61396006")
+		vitalResourceMap.put("Right lower","http://www.ihtsdo.org/snomed-ct/concepts/11207009")
 		
 		vitalUnitMap = new HashMap()
-		vitalUnitMap.put("15612799", "m")
-		vitalUnitMap.put("3777472", "kg")
-		vitalUnitMap.put("", "{BMI}")
-		vitalUnitMap.put("703540", "{breaths}")
-		vitalUnitMap.put("7935038", "{beats}/min")
-		vitalUnitMap.put("8238766", "%{HemoglobinSaturation}")
-		vitalUnitMap.put("8713424", "Cel")
-		vitalUnitMap.put("703501", "mm[Hg]")
-		vitalUnitMap.put("703516", "mm[Hg]")
+		vitalUnitMap.put(EVENTCODEHEIGHT, "m")
+		vitalUnitMap.put(EVENTCODEWEIGHT, "kg")
+		//vitalUnitMap.put("", "{BMI}")
+		vitalUnitMap.put(EVENTCODERRATE, "{breaths}")
+		vitalUnitMap.put(EVENTCODEHEARTRATE, "{beats}/min")
+		vitalUnitMap.put(EVENTCODEOSAT, "%{HemoglobinSaturation}")
+		vitalUnitMap.put(EVENTCODETEMP, "Cel")
+		vitalUnitMap.put(EVENTCODESYS, "mm[Hg]")
+		vitalUnitMap.put(EVENTCODEDIA, "mm[Hg]")
 		
 		vitalEventCodesSet = new HashSet()
-		vitalEventCodesSet.add("15612799")
-		vitalEventCodesSet.add("3777472")
+		vitalEventCodesSet.add(EVENTCODEHEIGHT)
+		vitalEventCodesSet.add(EVENTCODEWEIGHT)
 		//vitalEventCodesSet.add("")
-		vitalEventCodesSet.add("703540")
-		vitalEventCodesSet.add("7935038")
-		vitalEventCodesSet.add("8238766")
-		vitalEventCodesSet.add("8713424")
-		vitalEventCodesSet.add("703501")
-		vitalEventCodesSet.add("703516")
-		//vitalEventCodesSet.add("")
-		vitalEventCodesSet.add("4099993")
-		vitalEventCodesSet.add("4100005")
+		vitalEventCodesSet.add(EVENTCODERRATE)
+		vitalEventCodesSet.add(EVENTCODEHEARTRATE)
+		vitalEventCodesSet.add(EVENTCODEOSAT)
+		vitalEventCodesSet.add(EVENTCODETEMP)
+		vitalEventCodesSet.add(EVENTCODESYS)
+		vitalEventCodesSet.add(EVENTCODEDIA)
+		vitalEventCodesSet.add(EVENTCODELOCATION)
+		vitalEventCodesSet.add(EVENTCODEPOSITION)
 		
 		bpEventCodesSet = new HashSet()
-		bpEventCodesSet.add("703501")
-		bpEventCodesSet.add("703516")
-		//bpEventCodesSet.add("")
-		bpEventCodesSet.add("4099993")
-		bpEventCodesSet.add("4100005")
-		
+		bpEventCodesSet.add(EVENTCODESYS)
+		bpEventCodesSet.add(EVENTCODEDIA)
+		bpEventCodesSet.add(EVENTCODELOCATION)
+		bpEventCodesSet.add(EVENTCODEPOSITION)
 		
 	}
 	
@@ -109,7 +135,11 @@ class VitalsCall extends MilleniumObjectCall{
 		
 		transaction = 'ReadEncountersByFilters'
 		targetServlet = 'com.cerner.encounter.EncounterServlet'
-		def requestXML = createRequest(recordId)
+		
+		Map<String,Object> requestParams = new HashMap()
+		requestParams.put(RECORDIDPARAM, recordId)
+		
+		def requestXML = createRequest(requestParams)
 		def resp = makeRestCall(requestXML, moURL)
 		readResponse(resp)
 		
@@ -117,9 +147,11 @@ class VitalsCall extends MilleniumObjectCall{
 		writer = new StringWriter()
 		builder = new MarkupBuilder(writer)
 		
-		transaction = 'ReadResultsMatrix'
+		transaction = 'ReadResultsByCount'
 		targetServlet = 'com.cerner.results.ResultsServlet'
-		requestXML = createRequest(recordId)
+		
+		requestParams.put(ENCOUNTERIDSPARAM, vitalSignsMap.keySet())
+		requestXML = createRequest(requestParams)
 		resp=makeRestCall(requestXML, moURL)
 		readResponse(resp)
 	}
@@ -140,17 +172,20 @@ class VitalsCall extends MilleniumObjectCall{
 				vitalSignsMap.put(it.EncounterId.text(), vitalSigns)
 			}
 		}else{
-			payload.ResultsMatrix.Row.each{ currentRow->
-				currentRow.Cell.each{ currentCell ->
-					def currentEncounterId = currentCell.ClinicalEvents.NumericResult.EncounterId.text()
-					def currentEventCode = currentCell.ClinicalEvents.NumericResult.EventCode.Value.text()
-					def currentValue = currentCell.ClinicalEvents.NumericResult.Value.text()
-					def currentEventTag = currentCell.ClinicalEvents.NumericResult.EventTag.text()
+			payload.Results.ClinicalEvents.NumericResult.each{ currentNumericResult->
+					def currentEncounterId = currentNumericResult.EncounterId.text()
+					def currentEventCode = currentNumericResult.EventCode.Value.text()
+					def currentValue = currentNumericResult.Value.text()
+					def currentEventId = currentNumericResult.EventId.text()
+					def currentParentEventId = currentNumericResult.ParentEventId.text()
+					
 					
 					currentValue=convertValue(currentValue, currentEventCode)
 					
 					if((currentEventCode!=null) && (vitalEventCodesSet.contains(currentEventCode)) && valueIsValid(currentValue)){					
 						VitalSign vitalSign = new VitalSign()
+						vitalSign.setEventId(currentEventId)
+						vitalSign.setParentEventId(currentParentEventId)
 						vitalSign.setValue(currentValue)
 						vitalSign.setCode(currentEventCode)
 						vitalSign.setType(vitalTypeMap.get(currentEventCode))
@@ -159,28 +194,67 @@ class VitalsCall extends MilleniumObjectCall{
 						vitalSign.setUnit(vitalUnitMap.get(currentEventCode))
 						(bpEventCodesSet.contains(currentEventCode))?vitalSign.setIsBPField(true):vitalSign.setIsBPField(false)
 						
-						vitalSignsMap.get(currentEncounterId).vitalSignList.add(vitalSign)
+						if(vitalSignsMap.get(currentEncounterId).vitalSignMap.keySet().contains(currentParentEventId)){
+							vitalSignsMap.get(currentEncounterId).vitalSignMap.get(currentParentEventId).add(vitalSign)
+						}else{
+							List<VitalSign> newVitalSignList = new ArrayList()
+							newVitalSignList.add(vitalSign)
+							vitalSignsMap.get(currentEncounterId).vitalSignMap.put(currentParentEventId, newVitalSignList)
+							
+						}
+						
 					}
-				}
 			}	
+			payload.Results.ClinicalEvents.CodedResult.each{ currentCodedResult->
+					def currentEncounterId = currentCodedResult.EncounterId.text()
+					def currentEventCode = currentCodedResult.EventCode.Value.text()
+					def currentEventTag = currentCodedResult.EventTag.text()
+					def currentEventId = currentCodedResult.EventId.text()
+					def currentParentEventId = currentCodedResult.ParentEventId.text()
+					
+					
+					if((currentEventCode!=null) && (vitalEventCodesSet.contains(currentEventCode)) && valueIsValid(currentEventTag)){
+						VitalSign vitalSign = new VitalSign()
+						vitalSign.setEventId(currentEventId)
+						vitalSign.setParentEventId(currentParentEventId)
+						vitalSign.setValue(currentEventTag)
+						vitalSign.setCode(currentEventCode)
+						vitalSign.setType(vitalTypeMap.get(currentEventCode))
+						vitalSign.setTitle(vitalTitleMap.get(currentEventTag))
+						vitalSign.setResource(vitalResourceMap.get(currentEventTag))
+						(bpEventCodesSet.contains(currentEventCode))?vitalSign.setIsBPField(true):vitalSign.setIsBPField(false)
+						vitalSign.setIsCodedField(true)
+						
+						if(vitalSignsMap.get(currentEncounterId).vitalSignMap.keySet().contains(currentParentEventId)){
+							vitalSignsMap.get(currentEncounterId).vitalSignMap.get(currentParentEventId).add(vitalSign)
+						}else{
+							List<VitalSign> newVitalSignList = new ArrayList()
+							newVitalSignList.add(vitalSign)
+							vitalSignsMap.get(currentEncounterId).vitalSignMap.put(currentParentEventId, newVitalSignList)
+							
+						}
+					}
+			}
 		}
 		return new Vitals(vitalSignsMap)
 	}
 	
-	def generatePayload(recordId){
+	def generatePayload(requestParams){
+		def recordId = (String)requestParams.get(RECORDIDPARAM)
 		if (transaction.equals("ReadEncountersByFilters")){
 			builder.PersonId(recordId)
 			builder.BypassOrganizationSecurityIndicator('true')
 		}else{
-			builder.ResultsMatrixProperties(){
-				Structure('Table')
-				TimeGrouping('Actual')
-				TimeSort('Chronological')
+			builder.PersonId(recordId)
+			builder.EventCount('999')
+			builder.EventSet(){
+				Name('CLINICAL INFORMATION')
 			}
-			builder.ResultsSearchCriteria(){
-				CountSearch(){
-					PersonId(recordId)
-					EventCount('999')
+			
+			Set encounterIdSet = (Set)requestParams.get(ENCOUNTERIDSPARAM)
+			builder.EncounterIds(){
+				encounterIdSet.each{encounterId->
+					EncounterId(encounterId)
 				}
 			}
 		}

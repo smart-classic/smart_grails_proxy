@@ -27,49 +27,34 @@ class Vitals extends Record {
 				Set vitalSignsKeySet = vitalSignsMap.keySet()
 				vitalSignsKeySet.each{ vitalSignsKey ->
 					VitalSigns vitalSigns = vitalSignsMap.get(vitalSignsKey)
-					'sp:VitalSigns'(){
-						Encounter encounter = vitalSigns.getEncounter()
-						'dc:date'(encounter.getStartDate())
-						//createEncounter(encounter.getStartDate(), encounter.getEndDate(), encounter.getResource(), encounter.getTitle())
-						'sp:encounter'(){
-							'sp:Encounter'(){
-								'sp:startDate'(encounter.getStartDate())
-								'sp:endDate'(encounter.getEndDate())
-								'sp:encounterType'(){
-									'sp:CodedValue'(){
-										'sp:code'('rdf:resource':encounter.getResource())
-										'dcterms:title'(encounter.getTitle())
-									}
-								}
-							}
-						}
-						
-						List<VitalSign> vitalSignList = vitalSigns.getVitalSignList()
-						vitalSignList.each { vitalSign-> 
-							if (!vitalSign.isBPField){
-								def type = vitalSign.getType()
-								//createVital(vitalSign.getType(), vitalSign.getTitle(), vitalSign.getValue(), vitalSign.getResource(), vitalSign.getUnit())
-								"sp:${type}"(){
-									'sp:VitalSign'(){
-										'sp:vitalName'(){
-											'sp:CodedValue'(){
-												'sp:code'('rdf:resource':vitalSign.getResource())
-												'dcterms:title'(vitalSign.getTitle())
-											}
+					Map<String, VitalSign> vitalSignMap = vitalSigns.getVitalSignMap()
+					Set parentEventIdSet=vitalSignMap.keySet()
+					parentEventIdSet.each{parentEventId->
+						//'sp:VitalSigns'(parentEventId:parentEventId){
+						'sp:VitalSigns'(){
+							Encounter encounter = vitalSigns.getEncounter()
+							'dc:date'(encounter.getStartDate())
+							//createEncounter(encounter.getStartDate(), encounter.getEndDate(), encounter.getResource(), encounter.getTitle())
+							'sp:encounter'(){
+								//'sp:Encounter'(id:encounter.getId()){
+								'sp:Encounter'(){
+									'sp:startDate'(encounter.getStartDate())
+									'sp:endDate'(encounter.getEndDate())
+									'sp:encounterType'(){
+										'sp:CodedValue'(){
+											'sp:code'('rdf:resource':encounter.getResource())
+											'dcterms:title'(encounter.getTitle())
 										}
-										'sp:value'(vitalSign.getValue())
-									'sp:unit'(vitalSign.getUnit())
 									}
 								}
 							}
-						}
-
-						'sp:bloodPressure'(){
-						'sp:BloodPressure'(){
-							vitalSignList.each { vitalSign->
-								if (vitalSign.isBPField){
-									//createVital(vitalSign.getType(), vitalSign.getTitle(), vitalSign.getValue(), vitalSign.getResource(), vitalSign.getValue())
+							
+							boolean hasBPFields = false
+							List<VitalSign> vitalSignList = vitalSigns.getVitalSignMap().get(parentEventId)
+							vitalSignList.each { vitalSign-> 
+								if (!vitalSign.isBPField){
 									def type = vitalSign.getType()
+									//createVital(vitalSign.getType(), vitalSign.getTitle(), vitalSign.getValue(), vitalSign.getResource(), vitalSign.getUnit())
 									"sp:${type}"(){
 										'sp:VitalSign'(){
 											'sp:vitalName'(){
@@ -82,9 +67,42 @@ class Vitals extends Record {
 										'sp:unit'(vitalSign.getUnit())
 										}
 									}
+								}else{
+									hasBPFields = true
 								}
 							}
-						}
+	
+							if(hasBPFields){
+								'sp:bloodPressure'(){
+								'sp:BloodPressure'(){
+									vitalSignList.each { vitalSign->
+										if (vitalSign.isBPField){
+											//createVital(vitalSign.getType(), vitalSign.getTitle(), vitalSign.getValue(), vitalSign.getResource(), vitalSign.getValue())
+											def type = vitalSign.getType()
+											"sp:${type}"(){
+												if(vitalSign.isCodedField){
+													'sp:CodedValue'(){
+														'sp:code'('rdf:resource':vitalSign.getResource())
+														'dcterms:title'(vitalSign.getTitle())
+													}
+												}else{
+													'sp:VitalSign'(){
+														'sp:vitalName'(){
+															'sp:CodedValue'(){
+																'sp:code'('rdf:resource':vitalSign.getResource())
+																'dcterms:title'(vitalSign.getTitle())
+															}
+														}
+														'sp:value'(vitalSign.getValue())
+													'sp:unit'(vitalSign.getUnit())
+													}
+												}
+											}
+										}
+									}
+								}
+								}
+							}
 						}
 					}
 				}
