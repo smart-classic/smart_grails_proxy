@@ -2,11 +2,11 @@ package org.chip.rdf.vitals
 
 class VitalSigns {
 	String date
-	List<VitalSign> vitalSignList
+	Map<String, List<VitalSign>> vitalSignMap
 	Encounter encounter
 	
 	public VitalSigns(){
-		vitalSignList = new ArrayList()
+		vitalSignMap = new HashMap()
 	}
 	
 	public Encounter getEncounter(){
