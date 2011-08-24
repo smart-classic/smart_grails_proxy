@@ -12,6 +12,7 @@ class Vitals extends Record {
 	Map vitalSignsMap;
 
 	def toRDF(){
+		//long l1 = new Date().getTime()
 		//return rdfOut
 		def builder = new StreamingMarkupBuilder()
 		builder.encoding="UTF-8"
@@ -109,6 +110,9 @@ class Vitals extends Record {
 			}
 		}
 					
+		//long l2 = new Date().getTime()
+		//println("creating rdf took : "+(l2-l1)/1000)
+		
 		def writer = new StringWriter()
 		writer<<builder.bind(rdfBuilder)
 		writer.toString()

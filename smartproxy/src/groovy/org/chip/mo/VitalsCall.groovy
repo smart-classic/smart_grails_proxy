@@ -140,8 +140,12 @@ class VitalsCall extends MilleniumObjectCall{
 		requestParams.put(RECORDIDPARAM, recordId)
 		
 		def requestXML = createRequest(requestParams)
+		//long l1 = new Date().getTime()
 		def resp = makeRestCall(requestXML, moURL)
+		//long l2 = new Date().getTime()
+		//println("encounter mo call took : "+(l2-l1)/1000)
 		readResponse(resp)
+		//println("no of encounters: "+vitalSignsMap.size())
 		
 		//refresh the writer and builder objects
 		writer = new StringWriter()
@@ -152,14 +156,20 @@ class VitalsCall extends MilleniumObjectCall{
 		
 		requestParams.put(ENCOUNTERIDSPARAM, vitalSignsMap.keySet())
 		requestXML = createRequest(requestParams)
+		//l1 = new Date().getTime()
 		resp=makeRestCall(requestXML, moURL)
+		//l2 = new Date().getTime()
+		//println("vitals mo call took : "+(l2-l1)/1000)
+
 		readResponse(resp)
 	}
 	
 	def readResponse(moResponse){
+		
 		def replyMessage = moResponse.getData()
 		def payload= replyMessage.Payload
 		if (transaction.equals("ReadEncountersByFilters")){
+			//long l1 = new Date().getTime()
 			payload.Encounters.Encounter.each{
 				Encounter encounter = new Encounter()
 				encounter.setId(it.EncounterId.text())
@@ -171,8 +181,13 @@ class VitalsCall extends MilleniumObjectCall{
 				vitalSigns.setEncounter(encounter)
 				vitalSignsMap.put(it.EncounterId.text(), vitalSigns)
 			}
+			//long l2 = new Date().getTime()
+			//println("encounter reading moresponse took: "+(l2-l1)/1000)
 		}else{
+			//int i = 0
+			//long l1 = new Date().getTime()
 			payload.Results.ClinicalEvents.NumericResult.each{ currentNumericResult->
+					//i++
 					def currentEncounterId = currentNumericResult.EncounterId.text()
 					def currentEventCode = currentNumericResult.EventCode.Value.text()
 					def currentValue = currentNumericResult.Value.text()
@@ -206,6 +221,7 @@ class VitalsCall extends MilleniumObjectCall{
 					}
 			}	
 			payload.Results.ClinicalEvents.CodedResult.each{ currentCodedResult->
+					//i++
 					def currentEncounterId = currentCodedResult.EncounterId.text()
 					def currentEventCode = currentCodedResult.EventCode.Value.text()
 					def currentEventTag = currentCodedResult.EventTag.text()
@@ -235,6 +251,9 @@ class VitalsCall extends MilleniumObjectCall{
 						}
 					}
 			}
+			//println("number of results returned : " + i)
+			//long l2 = new Date().getTime()
+			//println("vitals reading moresponse took: "+(l2-l1)/1000)
 		}
 		return new Vitals(vitalSignsMap)
 	}
