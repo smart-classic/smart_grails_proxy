@@ -42,7 +42,6 @@ abstract class MilleniumObjectCall {
 		def restClient = new RESTClient(moURL+targetServlet)
 		restClient.setContentType(ContentType.XML)
 		def resp=restClient.post(body:requestXML, requestContentType : ContentType.XML)
-		println(resp)
 		return resp
 	}
 
