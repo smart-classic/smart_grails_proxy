@@ -6,6 +6,10 @@ class RecordsController {
 	
 	def milleniumService
 	
+	/**
+	 * Reads the incoming record id and transaction.
+	 * Calls the milleniumService to make the appropriate call.
+	 */
 	def makeCall={
 		def recordId=params['record_id']
 		def transaction = params['transaction']
