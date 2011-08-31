@@ -20,7 +20,12 @@ class VitalsCall extends MilleniumObjectCall{
 	private static final String EVENTCODEDIA="703516"
 	private static final String EVENTCODELOCATION="4099993"
 	private static final String EVENTCODEPOSITION="13488852"
-	
+	private static final String EVENTCODESYSSUPINE="1164536"
+	private static final String EVENTCODESYSSITTING="1164545"
+	private static final String EVENTCODESYSSTANDING="1164548"
+	private static final String EVENTCODEDIASUPINE="1164539"
+	private static final String EVENTCODEDIASITTING="1164542"
+	private static final String EVENTCODEDIASTANDING="1164551"	
 	
 	static final Map encounterResourceMap
 	static final Map encounterTitleMap
@@ -280,7 +285,7 @@ class VitalsCall extends MilleniumObjectCall{
 	}
 	
 	def convertValue(currentValue, currentEventCode){
-		if (currentEventCode.equals("15612799")){
+		if (currentEventCode.equals(EVENTCODEHEIGHT)){
 			double height = Double.parseDouble(currentValue)
 			height = height/100
 			currentValue = Double.toString(height)

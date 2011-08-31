@@ -9,7 +9,14 @@ class Vitals extends Record {
 		vitalSignsMap=vitalSignsMapIn
 	}
 	
-	Map vitalSignsMap;
+	/**
+	 * Maps each Encounter Id to an instance of the VitalSigns Object.
+	 * VitalSigns contains 
+	 * 	- An Encounter Object which stores details about a particular Encounter.
+	 * 	- A vitalSignMap which maps each Parent Event Id to a list of VitalSign Objects.
+	 * VitalSign contains details about a particular Vital measure (e.g. diastolic bp)
+	 */
+	Map<String, VitalSigns> vitalSignsMap;
 
 	def toRDF(){
 		//long l1 = new Date().getTime()
@@ -147,24 +154,4 @@ class Vitals extends Record {
 			}
 		}
 	}
-	
-	/*'dc:date'('2006-07-31T07:14:14.429965')
-	createEncounter('2006-07-31T07:14:14.429965', '2006-07-31T07:14:14.429965',
-		'http://smartplatforms.org/terms/code/encounterType#ambulatory', 'Ambulatory Encounter')
-	createVital('height', 'Height (measured)', '1.80', 'http://loinc.org/codes/8302-2', 'm')
-	createVital('weight', 'Body weight (measured)', '70.8', 'http://loinc.org/codes/3141-9', 'kg' )
-	createVital('bodyMassIndex', 'Body mass index', '21.8', 'http://loinc.org/codes/39156-5', '{BMI}')
-	createVital('respiratoryRate', 'Respiration rate', '16', 'http://loinc.org/codes/9279-1', '{breaths}')
-	createVital('heartRate', 'Heart Rate', '70', 'http://loinc.org/codes/8867-4', '{beats}/min')
-	createVital('oxygenSaturation', 'Oxygen saturation', '99', 'http://loinc.org/codes/2710-2', '%{HemoglobinSaturation}')
-	createVital('temperature', 'Body temperature', '37', 'http://loinc.org/codes/8310-5', 'Cel')
-	'sp:bloodPressure'(){
-		'sp:BloodPressure'(){
-			createVital('systolic', 'Systolic blood pressure', '90.4221588376', 'http://loinc.org/codes/8480-6', 'mm[Hg]')
-			createVital('diastolic', 'Diastolic blood pressure', '43.2299834277', 'http://loinc.org/codes/8462-4', 'mm[Hg]')
-			createVital('bodyPosition', 'Sitting', null, 'http://www.ihtsdo.org/snomed-ct/concepts/33586001', null)
-			createVital('bodySite', 'Left thigh', null, 'http://www.ihtsdo.org/snomed-ct/concepts/61396006', null)
-			createVital('method', 'Auscultation', null, 'http://smartplatforms.org/terms/code/bloodPressureMethod#auscultation', null)
-		}
-	}*/
 }

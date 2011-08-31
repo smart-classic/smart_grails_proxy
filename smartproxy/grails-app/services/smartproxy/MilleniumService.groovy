@@ -7,6 +7,9 @@ class MilleniumService {
 
     static transactional = true
 	
+	/**
+	 * Maps the incoming transaction to a MilleniumObjectCall object.
+	 */
 	static Map requestMOMap = new HashMap()
 	
 	static {
@@ -16,7 +19,9 @@ class MilleniumService {
 	}
 
 	/**
-     * entry method into this service class. Makes calls using the MO xml/http API
+     * Entry method into this service class.
+     * Gets and transaction specific instance of the MilleniumObject Call object
+     * Invokes makeCall on the MO Call object
      * @param payload
      * @param 
      * @return

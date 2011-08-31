@@ -16,6 +16,15 @@ abstract class MilleniumObjectCall {
 		builder = new MarkupBuilder(writer)
 	}
 	
+	/**
+	 * The Workhorse method.
+	 * -Creates the outgoing MO request.
+	 * -calls makeRestCall to make the actual MO call.
+	 * -calls readResponse to create an RDF Model from the MO response.
+	 * @param recordId
+	 * @param moURL
+	 * @return
+	 */
 	def makeCall(recordId, moURL){
 		Map<String,Object> requestParams = new HashMap()
 		requestParams.put(RECORDIDPARAM, recordId)
@@ -36,6 +45,11 @@ abstract class MilleniumObjectCall {
 		return writer.toString()
 	}
 	
+	/**
+	 * Overriden by the extending class to provide transaction specific functionality
+	 * @param requestParams
+	 * @return
+	 */
 	def abstract generatePayload(requestParams)
 	
 	def makeRestCall(requestXML, moURL){
@@ -45,5 +59,10 @@ abstract class MilleniumObjectCall {
 		return resp
 	}
 
+	/**
+	 * Overriden by the extending class to provide transaction specific functionality
+	 * @param resp
+	 * @return
+	 */
 	def abstract readResponse(resp)
 }
