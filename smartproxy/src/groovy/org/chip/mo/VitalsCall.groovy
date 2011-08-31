@@ -169,6 +169,39 @@ class VitalsCall extends MilleniumObjectCall{
 		readResponse(resp)
 	}
 	
+	/**
+	* Generates MO requests to 
+	* - Get Encounters for a given patient ID
+	* - Get Vitals for a list of Encounters and a given patient id
+	* @param recordId
+	* @return
+	*/
+	def generatePayload(requestParams){
+		def recordId = (String)requestParams.get(RECORDIDPARAM)
+		if (transaction.equals("ReadEncountersByFilters")){
+			builder.PersonId(recordId)
+			builder.BypassOrganizationSecurityIndicator('true')
+		}else{
+			builder.PersonId(recordId)
+			builder.EventCount('999')
+			builder.EventSet(){
+				Name('CLINICAL INFORMATION')
+			}
+			
+			Set encounterIdSet = (Set)requestParams.get(ENCOUNTERIDSPARAM)
+			builder.EncounterIds(){
+				encounterIdSet.each{encounterId->
+					EncounterId(encounterId)
+				}
+			}
+		}
+	}
+	
+	/**
+	*Reads in the MO response and converts it to a Vitals object
+	* @param moResponse
+	* @return
+	*/
 	def readResponse(moResponse){
 		
 		def replyMessage = moResponse.getData()
@@ -261,27 +294,6 @@ class VitalsCall extends MilleniumObjectCall{
 			//println("vitals reading moresponse took: "+(l2-l1)/1000)
 		}
 		return new Vitals(vitalSignsMap)
-	}
-	
-	def generatePayload(requestParams){
-		def recordId = (String)requestParams.get(RECORDIDPARAM)
-		if (transaction.equals("ReadEncountersByFilters")){
-			builder.PersonId(recordId)
-			builder.BypassOrganizationSecurityIndicator('true')
-		}else{
-			builder.PersonId(recordId)
-			builder.EventCount('999')
-			builder.EventSet(){
-				Name('CLINICAL INFORMATION')
-			}
-			
-			Set encounterIdSet = (Set)requestParams.get(ENCOUNTERIDSPARAM)
-			builder.EncounterIds(){
-				encounterIdSet.each{encounterId->
-					EncounterId(encounterId)
-				}
-			}
-		}
 	}
 	
 	def convertValue(currentValue, currentEventCode){
