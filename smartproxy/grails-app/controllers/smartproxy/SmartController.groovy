@@ -17,7 +17,7 @@ class SmartController {
 
         assert casVerificationService.verifyCasToken(cas_token)
 
-        def forwardToURL = forwardService.createURL(personId, domain)
+        def forwardToURL = forwardService.createURL(personId, domain, initial_app)
 		redirect(url:forwardToURL)
 	}
 }
