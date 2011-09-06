@@ -100,3 +100,10 @@ oauth {
         api_base = 'http://localhost:7000'
     }
 }
+
+cas{
+    chb {
+        validation_url = 'http://chssotest.tch.harvard.edu/cas/serviceValidate'
+        service_url = 'http://10.36.142.250'
+    }
+}
