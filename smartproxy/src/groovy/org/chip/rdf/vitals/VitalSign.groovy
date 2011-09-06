@@ -11,4 +11,6 @@ class VitalSign {
 	String eventId
 	String parentEventId
 	boolean isCodedField
+	String eventEndDateTime
+	String updateDateTime
 }
