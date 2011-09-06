@@ -48,8 +48,34 @@ grails.logging.jul.usebridge = true
 // packages to include in Spring bean scanning
 grails.spring.bean.packages = []
 
-grails.config.locations = ["file:/home/smart/grails-config/${appName}-config.groovy",
-                           "file:/home/smart/grails-config/${appName}-${grails.util.Environment.current.name}-config.groovy" ]
+grails.config.locations = [ ]
+
+// External config settings derived from Mick Knutson's blog: http://www.baselogic.com/blog/
+def PROPERTY_ENV_NAME = "${appName}.config.location"
+def SYSTEM_ENV_NAME = "${appName}_config_location"
+println "--------------------------------------------------------"
+
+// 1: A command line option overrides everything
+// Test by running:
+// grails -Dsmartproxy.config.location=C:\temp\divr-config.groovy run-app
+if (System.getProperty(PROPERTY_ENV_NAME) && new File(System.getProperty(PROPERTY_ENV_NAME)).exists()) {
+    println "Including configuration file specified on command line: " + System.getProperty(PROPERTY_ENV_NAME)
+    grails.config.locations << "file:" + System.getProperty(PROPERTY_ENV_NAME)
+}
+// 2: If no command line optins, check in ~/.grails
+else if (new File("${userHome}/.grails/${appName}-config.groovy").exists()) {
+    println "*** User defined config: file:${userHome}/.grails/${appName}-config.groovy. ***"
+    grails.config.locations = ["file:${userHome}/.grails/${appName}-config.groovy"]
+}
+// 3: Finally, check for a System Environment variable
+//    that will define where we should look.
+else if (System.getenv(SYSTEM_ENV_NAME) && new File(System.getenv(SYSTEM_ENV_NAME)).exists()) {
+    println("Including System Environment configuration file: " + System.getenv(SYSTEM_ENV_NAME))
+    grails.config.locations << "file:" + System.getenv(SYSTEM_ENV_NAME)
+}
+println "(*) grails.config.locations = ${grails.config.locations}"
+println "--------------------------------------------------------"
+
 
 println grails.config.locations
 
