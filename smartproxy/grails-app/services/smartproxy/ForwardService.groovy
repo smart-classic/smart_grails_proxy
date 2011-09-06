@@ -2,6 +2,7 @@ package smartproxy
 
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import groovyx.net.http.RESTClient;
+import static groovyx.net.http.ContentType.URLENC
 
 class ForwardService {
 
@@ -22,7 +23,9 @@ class ForwardService {
         initialApp = initialApp ? ("?initial_app="+initialApp) : ""
 
 		if(domain=='demo' || domain==null){
-			personId=mapPersonId(personId)
+            if (mapPersonId(personId)) {
+			    personId=mapPersonId(personId)
+            }
 		}
 
         def token = ConfigurationHolder.config.oauth.smart_emr.token
@@ -43,7 +46,7 @@ class ForwardService {
         def get_url = smart_client.get(path:"/records/"+personId+"/generate_direct_url")
         assert get_url.status == 200
 
-        def forwardToURL = get_url.data.readLine() + initial_app
+        def forwardToURL = get_url.data.readLine() + initialApp
 		return forwardToURL
     }
 	
