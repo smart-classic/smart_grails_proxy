@@ -1,6 +1,7 @@
 package smartproxy
 
-import org.codehaus.groovy.grails.commons.ConfigurationHolder;
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import groovyx.net.http.RESTClient;
 
 class ForwardService {
 
@@ -16,13 +17,33 @@ class ForwardService {
 		personIdMap.put ('14109748','15649511')
 	}
 	
-    def createURL(personId, encounterId, userId, locationValue, application, domain) {
+    def createURL(personId, domain, initialApp) {
 		personId = extractId(personId)
-		def baseURL = ConfigurationHolder.config.grails.smartURL
+        initialApp = initialApp ? ("?initial_app="+initialApp) : ""
+
 		if(domain=='demo' || domain==null){
 			personId=mapPersonId(personId)
 		}
-		def forwardToURL = baseURL+'?record_id='+personId
+
+        def token = ConfigurationHolder.config.oauth.smart_emr.token
+        def secret= ConfigurationHolder.config.oauth.smart_emr.secret
+        def api_base= ConfigurationHolder.config.oauth.smart_emr.api_base
+        def smart_client= new RESTClient(api_base)
+
+        // Instantiate as a consumer for 2-legged OAuth calls (no access tokens)
+        smart_client.auth.oauth(token, secret, "", "");
+
+
+        def created = smart_client.post(path: "/records/create/proxied",
+                                        body : [record_id:personId,
+                                        record_name:"Fake Name"], // TODO: obtain name
+                                        requestContentType : URLENC )
+        assert created.status == 200
+
+        def get_url = smart_client.get(path:"/records/"+personId+"/generate_direct_url")
+        assert get_url.status == 200
+
+        def forwardToURL = get_url.data.readLine() + initial_app
 		return forwardToURL
     }
 	
@@ -37,4 +58,7 @@ class ForwardService {
 		}
 		return incomingId
 	}
+
+
+
 }

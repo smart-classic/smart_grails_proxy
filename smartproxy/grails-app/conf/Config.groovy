@@ -91,3 +91,12 @@ log4j = {
 
     warn   'org.mortbay.log'
 }
+
+
+oauth {
+    smart_emr {
+        token = 'grails-proxy'
+        secret = 'grails-proxy'
+        api_base = 'http://localhost:7000'
+    }
+}
