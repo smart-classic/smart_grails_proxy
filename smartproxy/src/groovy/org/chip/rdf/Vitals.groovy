@@ -18,6 +18,16 @@ class Vitals extends Record {
 	 */
 	Map<String, VitalSigns> vitalSignsMap;
 
+	/**
+	 * iterate through the list of encounter ids (key set for vitalSignsMap)
+	 * for each vitalSignMap retrieved (belonging to current encounter id)
+	 * *iterate through the list of parent event ids (key set for vitalSignMap)
+	 * 	• for each vitalsign list retrieved (belonging to current parent id)
+	 * 		∘ go through all non bp fields and create vitalsign elements
+	 *  	∘ go through all bp fields and
+	 *	 		‣ if coded field then generate appropriate rdf
+	 *	 		‣ if not coded field then generate appropriate rdf
+	 */
 	def toRDF(){
 		//long l1 = new Date().getTime()
 		//return rdfOut
