@@ -8,6 +8,7 @@ class DemographicsCall extends MilleniumObjectCall{
 		super.init()
 		transaction = 'ReadPersonById'
 		targetServlet = 'com.cerner.person.PersonServlet'
+
 	}
 	
 	/**
