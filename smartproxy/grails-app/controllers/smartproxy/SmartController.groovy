@@ -12,12 +12,12 @@ class SmartController {
 		def locationValue=params['location_value']
 		def application=params['application']	
         def domain=params['domain']
-        def cas_token=params['cas_token']
-        def initial_app=params['initial_app']
+        def casToken=params['cas_oken']
+        def initialApp=params['initial_pp']
 
-        assert casVerificationService.verifyCasToken(cas_token)
+        assert casVerificationService.verifyCasToken(casToken)
 
-        def forwardToURL = forwardService.createURL(personId, domain, initial_app)
+        def forwardToURL = forwardService.createURL(personId, domain, initialApp)
 		redirect(url:forwardToURL)
 	}
 }

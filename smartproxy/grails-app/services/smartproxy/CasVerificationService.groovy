@@ -10,21 +10,22 @@ class CasVerificationService {
 
     def verifyCasToken(casToken) {
 
-        return true //TODO: remove this line to provide token verification via CHB server
+        if (ConfigurationHolder.config.cas.chb.skipValidation)
+            return true;
 
-        def cas_validation_url = ConfigurationHolder.config.cas.chb.validation_url
-        def cas_service_url = ConfigurationHolder.config.cas.chb.service_url
+        def casValidationUrl = ConfigurationHolder.config.cas.chb.validationUrl
+        def casServiceUrl = ConfigurationHolder.config.cas.chb.serviceUrl
 
-        def cas_client= new RESTClient(cas_validation_url)
-        cas_client.setContentType(XML)
+        def casClient= new RESTClient(casValidationUrl)
+        casClient.setContentType(XML)
 
-        def authorized = cas_client.get( query:[ticket:casToken, service:cas_service_url])
+        def authorized = casClient.get( query:[ticket:casToken, service:casServiceUrl])
         assert authorized.status==200
 
-        def auth_msg = authorized.responseData
-        auth_msg.declareNamespace(cas:"http://www.yale.edu/tp/cas")
+        def authMsg = authorized.responseData
+        authMsg.declareNamespace(cas:"http://www.yale.edu/tp/cas")
 
-        def success = auth_msg.'cas:authenticationSuccessfail'.size() == 1
+        def success = authMsg.'cas:authenticationSuccess'.size() == 1
         return success
     }
 }
