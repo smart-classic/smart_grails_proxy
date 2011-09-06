@@ -28,25 +28,25 @@ class ForwardService {
             }
 		}
 
-        def token = ConfigurationHolder.config.oauth.smart_emr.token
-        def secret= ConfigurationHolder.config.oauth.smart_emr.secret
-        def api_base= ConfigurationHolder.config.oauth.smart_emr.api_base
-        def smart_client= new RESTClient(api_base)
+        def token = ConfigurationHolder.config.oauth.smartEmr.token
+        def secret= ConfigurationHolder.config.oauth.smartEmr.secret
+        def apiBase= ConfigurationHolder.config.oauth.smartEmr.apiBase
+        def smartClient= new RESTClient(apiBase)
 
         // Instantiate as a consumer for 2-legged OAuth calls (no access tokens)
-        smart_client.auth.oauth(token, secret, "", "");
+        smartClient.auth.oauth(token, secret, "", "");
 
 
-        def created = smart_client.post(path: "/records/create/proxied",
+        def created = smartClient.post(path: "/records/create/proxied",
                                         body : [record_id:personId,
                                         record_name:"Fake Name"], // TODO: obtain name
                                         requestContentType : URLENC )
         assert created.status == 200
 
-        def get_url = smart_client.get(path:"/records/"+personId+"/generate_direct_url")
-        assert get_url.status == 200
+        def getUrl = smartClient.get(path:"/records/"+personId+"/generate_direct_url")
+        assert getUrl.status == 200
 
-        def forwardToURL = get_url.data.readLine() + initialApp
+        def forwardToURL = getUrl.data.readLine() + initialApp
 		return forwardToURL
     }
 	

@@ -31,5 +31,6 @@ grails.project.dependency.resolution = {
                 excludes "commons-logging", "xml-apis", "groovy"
         }
 
+        compile 'oauth.signpost:signpost-commonshttp4:1.2.1.1'
     }
 }

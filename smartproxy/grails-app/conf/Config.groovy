@@ -48,6 +48,11 @@ grails.logging.jul.usebridge = true
 // packages to include in Spring bean scanning
 grails.spring.bean.packages = []
 
+grails.config.locations = ["file:/home/smart/grails-config/${appName}-config.groovy",
+                           "file:/home/smart/grails-config/${appName}-${grails.util.Environment.current.name}-config.groovy" ]
+
+println grails.config.locations
+
 // set per-environment serverURL stem for creating absolute links
 environments {
     production {
@@ -94,16 +99,17 @@ log4j = {
 
 
 oauth {
-    smart_emr {
+    smartEmr {
         token = 'grails-proxy'
         secret = 'grails-proxy'
-        api_base = 'http://localhost:7000'
+        apiBase = 'http://localhost:7000'
     }
 }
 
 cas{
     chb {
-        validation_url = 'http://chssotest.tch.harvard.edu/cas/serviceValidate'
-        service_url = 'http://10.36.142.250'
+        skipValidation = false
+        validationUrl = 'http://chssotest.tch.harvard.edu/cas/serviceValidate'
+        serviceUrl = 'http://10.36.142.250'
     }
 }

@@ -2,8 +2,6 @@ package org.chip.mo
 
 import groovy.xml.MarkupBuilder;
 import groovyx.net.http.*
-import oauth.signpost.*
-
 abstract class MilleniumObjectCall {
 
 	def writer
@@ -53,9 +51,8 @@ abstract class MilleniumObjectCall {
 	 * @return
 	 */
 	def abstract generatePayload(requestParams)
-
+	
 	def makeRestCall(requestXML, moURL){
-
 		def restClient = new RESTClient(moURL+targetServlet)
 		restClient.setContentType(ContentType.XML)
 		def resp=restClient.post(body:requestXML, requestContentType : ContentType.XML)
