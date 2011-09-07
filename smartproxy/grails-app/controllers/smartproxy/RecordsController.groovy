@@ -17,6 +17,12 @@ class RecordsController {
 		def record = milleniumService.makeCall(transaction, recordId)
 		
 		response.setContentType ('application/xml')
-		response.outputStream << record.toRDF()
+		
+		if(record=="Error"){
+			response.setStatus(404)
+			response.outputStream << "<Response>Error</Response>"
+		}else{
+			response.outputStream << record.toRDF()
+		}
 	}
 }

@@ -32,7 +32,19 @@ abstract class MilleniumObjectCall {
 		
 		def resp = makeRestCall(requestXML, moURL)
 		
+		if (isResponseError(resp)){
+			return "Error"
+		}
 		readResponse(resp)
+	}
+	
+	def isResponseError(resp){
+		def replyMessage = resp.getData()
+		def status= replyMessage.Status.text()
+		//This is ugly but I've notice MO returning both Error or No Data for invalid patient ids.
+		//Assuming all non success response status as not found and returning 404
+		if(status!="Success") return true
+		return false
 	}
 	
 	def createRequest(requestParams){
