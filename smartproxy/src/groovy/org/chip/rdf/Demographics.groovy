@@ -68,7 +68,9 @@ public class Demographics extends Record {
 					'foaf:familyName'(this.getFamilyName())
 					'foaf:gender'(this.getGender())
 					'sp:zipcode'(this.getZipcode())
+					if(this.getBirthDateTime().length()>0){
 					'sp:birthday'(this.getBirthDateTime())
+					}
 				}
 			}
 		}
