@@ -12,8 +12,8 @@ class SmartController {
 		def locationValue=params['location_value']
 		def application=params['application']	
         def domain=params['domain']
-        def casToken=params['cas_oken']
-        def initialApp=params['initial_pp']
+        def casToken=params['cas_token']
+        def initialApp=params['initial_app']
 
         assert casVerificationService.verifyCasToken(casToken)
 
