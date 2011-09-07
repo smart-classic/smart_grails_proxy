@@ -1,5 +1,6 @@
 package smartproxy
 
+import org.chip.rdf.Demographics;
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import groovyx.net.http.RESTClient;
 import static groovyx.net.http.ContentType.URLENC
@@ -9,7 +10,9 @@ class ForwardService {
     static transactional = true
 
 	final static Map personIdMap
-	
+
+	def milleniumService
+		
 	static{
 		personIdMap = new HashMap()
 		personIdMap.put ('14109736','15649502')
@@ -39,7 +42,7 @@ class ForwardService {
 
         def created = smartClient.post(path: "/records/create/proxied",
                                         body : [record_id:personId,
-                                        record_name:"Fake Name"], // TODO: obtain name
+                                        record_name:getNameForPersonId(personId)], // TODO: obtain name
                                         requestContentType : URLENC )
         assert created.status == 200
 
@@ -62,6 +65,9 @@ class ForwardService {
 		return incomingId
 	}
 
-
+	def getNameForPersonId(personId){
+		Demographics  demographics = milleniumService.makeCall('demographics', personId)
+		return demographics.getGivenName()+" "+demographics.getFamilyName()
+	}
 
 }
