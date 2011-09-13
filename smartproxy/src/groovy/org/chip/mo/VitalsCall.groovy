@@ -20,6 +20,7 @@ class VitalsCall extends MilleniumObjectCall{
 	private static final String EVENTCODEDIA="703516"
 	private static final String EVENTCODELOCATION="4099993"
 	private static final String EVENTCODEPOSITION="13488852"
+	private static final String EVENTCODEBPMETHOD="4100005"
 	private static final String EVENTCODESYSSUPINE="1164536"
 	private static final String EVENTCODESYSSITTING="1164545"
 	private static final String EVENTCODESYSSTANDING="1164548"
@@ -64,6 +65,7 @@ class VitalsCall extends MilleniumObjectCall{
 		vitalTypeMap.put(EVENTCODETEMP, "temperature")
 		vitalTypeMap.put(EVENTCODESYS, "systolic")
 		vitalTypeMap.put(EVENTCODEDIA, "diastolic")
+		vitalTypeMap.put(EVENTCODEBPMETHOD, "method")
 		vitalTypeMap.put(EVENTCODELOCATION, "bodySite")
 		vitalTypeMap.put(EVENTCODEPOSITION, "bodyPosition")
 		
@@ -77,6 +79,10 @@ class VitalsCall extends MilleniumObjectCall{
 		vitalTitleMap.put(EVENTCODETEMP, "Body temperature")
 		vitalTitleMap.put(EVENTCODESYS, "Systolic blood pressure")
 		vitalTitleMap.put(EVENTCODEDIA, "Diastolic blood pressure")
+		vitalTitleMap.put("Auscultation", "Auscultation")
+		vitalTitleMap.put("Palpation", "Palpation")
+		vitalTitleMap.put("Automated", "Machine")
+		vitalTitleMap.put("", "Invasive")
 		vitalTitleMap.put("Sitting", "Sitting")
 		vitalTitleMap.put("Standing", "Standing")
 		vitalTitleMap.put("Supine", "Supine")
@@ -95,6 +101,10 @@ class VitalsCall extends MilleniumObjectCall{
 		vitalResourceMap.put(EVENTCODETEMP, "http://loinc.org/codes/8310-5")
 		vitalResourceMap.put(EVENTCODESYS, "http://loinc.org/codes/8480-6")
 		vitalResourceMap.put(EVENTCODEDIA, "http://loinc.org/codes/8462-4")
+		vitalResourceMap.put("Auscultation", "http://smartplatforms.org/terms/code/bloodPressureMethod#auscultation")
+		vitalResourceMap.put("Palpation", "http://smartplatforms.org/terms/code/bloodPressureMethod#palpation")
+		vitalResourceMap.put("Automated", "http://smartplatforms.org/terms/code/bloodPressureMethod#machine")
+		vitalResourceMap.put("", "http://smartplatforms.org/terms/code/bloodPressureMethod#invasive")
 		vitalResourceMap.put("Sitting", "http://www.ihtsdo.org/snomed-ct/concepts/33586001" )
 		vitalResourceMap.put("Standing", "http://www.ihtsdo.org/snomed-ct/concepts/10904000" )
 		vitalResourceMap.put("Supine", "http://www.ihtsdo.org/snomed-ct/concepts/40199007" )
@@ -124,6 +134,7 @@ class VitalsCall extends MilleniumObjectCall{
 		vitalEventCodesSet.add(EVENTCODETEMP)
 		vitalEventCodesSet.add(EVENTCODESYS)
 		vitalEventCodesSet.add(EVENTCODEDIA)
+		vitalEventCodesSet.add(EVENTCODEBPMETHOD)
 		vitalEventCodesSet.add(EVENTCODELOCATION)
 		vitalEventCodesSet.add(EVENTCODEPOSITION)
 		vitalEventCodesSet.add(EVENTCODESYSSUPINE)
@@ -138,6 +149,7 @@ class VitalsCall extends MilleniumObjectCall{
 		bpEventCodesSet.add(EVENTCODEDIA)
 		bpEventCodesSet.add(EVENTCODELOCATION)
 		bpEventCodesSet.add(EVENTCODEPOSITION)
+		bpEventCodesSet.add(EVENTCODEBPMETHOD)
 		
 		complexBPEventCodesSet = new HashSet()
 		complexBPEventCodesSet.add(EVENTCODESYSSUPINE)
@@ -241,8 +253,8 @@ class VitalsCall extends MilleniumObjectCall{
 				encounter.setId(it.EncounterId.text())
 				encounter.setStartDate(it.RegistrationDateTime.text())
 				encounter.setEndDate(it.DischargeDateTime.text())
-				encounter.setResource(encounterResourceMap.get(it.EncounterType.Display.text()))
-				encounter.setTitle(encounterTitleMap.get(it.EncounterType.Display.text()))
+				encounter.setResource(encounterResourceMap.get(it.EncounterTypeClass.Display.text()))
+				encounter.setTitle(encounterTitleMap.get(it.EncounterTypeClass.Display.text()))
 				VitalSigns vitalSigns = new VitalSigns()
 				vitalSigns.setEncounter(encounter)
 				vitalSignsMap.put(it.EncounterId.text(), vitalSigns)
@@ -361,8 +373,8 @@ class VitalsCall extends MilleniumObjectCall{
 	/**
 	 * Iterate through all encounters
 	 * ->Iterate through all parent event ids for a given encounter
-	 * -->Get the event list for the current parent event id
-	 * -->if the first event is a complex bp event, assume all are and proceed to process them.
+	 * -->Get the vitals list for the current parent event id
+	 * -->if the first vitals corresponds to a complex bp event, assume all are and proceed to process them.
 	 * -->Split the list of complex events into seperate lists based on body position
 	 * -->Add the new lists into the vitalSignsMap
 	 * -->Remove the original list of complex events from the vitalSignsMap
@@ -426,25 +438,25 @@ class VitalsCall extends MilleniumObjectCall{
 						}
 						if(standingBPVitalsList.size()>0){
 							standingBPVitalsList.add(
-								createVitalSignFromCodedResult(supineBPVitalsList.get(0).getEventId(),
-									supineBPVitalsList.get(0).getParentEventId(),
-									'Supine',
+								createVitalSignFromCodedResult(standingBPVitalsList.get(0).getEventId(),
+									standingBPVitalsList.get(0).getParentEventId(),
+									'Standing',
 									EVENTCODEPOSITION,
-									supineBPVitalsList.get(0).getEventEndDateTime(),
-									supineBPVitalsList.get(0).getUpdateDateTime()))
+									standingBPVitalsList.get(0).getEventEndDateTime(),
+									standingBPVitalsList.get(0).getUpdateDateTime()))
 							
-							atomicVitalSignsMap.get(encounterId).vitalSignMap.put(supineBPVitalsList.get(0).getEventId(), standingBPVitalsList)
+							atomicVitalSignsMap.get(encounterId).vitalSignMap.put(standingBPVitalsList.get(0).getEventId(), standingBPVitalsList)
 						}
 						if(sittingBPVitalsList.size()>0){
 							sittingBPVitalsList.add(
-								createVitalSignFromCodedResult(supineBPVitalsList.get(0).getEventId(),
-									supineBPVitalsList.get(0).getParentEventId(),
-									'Supine',
+								createVitalSignFromCodedResult(sittingBPVitalsList.get(0).getEventId(),
+									sittingBPVitalsList.get(0).getParentEventId(),
+									'Sitting',
 									EVENTCODEPOSITION,
-									supineBPVitalsList.get(0).getEventEndDateTime(),
-									supineBPVitalsList.get(0).getUpdateDateTime()))
+									sittingBPVitalsList.get(0).getEventEndDateTime(),
+									sittingBPVitalsList.get(0).getUpdateDateTime()))
 							
-							atomicVitalSignsMap.get(encounterId).vitalSignMap.put(supineBPVitalsList.get(0).getEventId(), sittingBPVitalsList)
+							atomicVitalSignsMap.get(encounterId).vitalSignMap.put(sittingBPVitalsList.get(0).getEventId(), sittingBPVitalsList)
 						}
 						
 						encounterComplexParentIdsMap.get(encounterId).add(parentEventId)
