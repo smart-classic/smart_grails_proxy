@@ -44,6 +44,8 @@ class Vitals extends Record {
 			'rdf:RDF'(){
 				Set vitalSignsKeySet = vitalSignsMap.keySet()
 				vitalSignsKeySet.each{ vitalSignsKey ->
+					def encounterElementCount =0
+					
 					VitalSigns vitalSigns = vitalSignsMap.get(vitalSignsKey)
 					Map<String, VitalSign> vitalSignMap = vitalSigns.getVitalSignMap()
 					Set parentEventIdSet=vitalSignMap.keySet()
@@ -53,18 +55,25 @@ class Vitals extends Record {
 							Encounter encounter = vitalSigns.getEncounter()
 							'dc:date'(encounter.getStartDate())
 							//createEncounter(encounter.getStartDate(), encounter.getEndDate(), encounter.getResource(), encounter.getTitle())
+							encounterElementCount++
+							if(encounterElementCount==1){
 							'sp:encounter'(){
-								//'sp:Encounter'(id:encounter.getId()){
-								'sp:Encounter'(){
+								'sp:Encounter'('rdf:nodeID':encounter.getId()){
+								//'sp:Encounter'(){
 									'sp:startDate'(encounter.getStartDate())
 									'sp:endDate'(encounter.getEndDate())
+									if(encounter.getResource()!=null && encounter.getResource()!=""){
 									'sp:encounterType'(){
 										'sp:CodedValue'(){
 											'sp:code'('rdf:resource':encounter.getResource())
 											'dcterms:title'(encounter.getTitle())
 										}
 									}
+									}
 								}
+								}
+							}else{
+							'sp:encounter'('rdf:nodeID':encounter.getId())
 							}
 							
 							boolean hasBPFields = false
