@@ -64,8 +64,8 @@ if (System.getProperty(PROPERTY_ENV_NAME) && new File(System.getProperty(PROPERT
 }
 // 2: If no command line optins, check in ~/grails-config
 else if (new File("${userHome}/grails-config/${appName}-config.groovy").exists()) {
-    println "*** User defined config: file:${userHome}/.grails/${appName}-config.groovy. ***"
-    grails.config.locations = ["file:${userHome}/.grails/${appName}-config.groovy"]
+    println "*** User defined config: file:${userHome}/grails-config/${appName}-config.groovy. ***"
+    grails.config.locations = ["file:${userHome}/grails-config/${appName}-config.groovy"]
 }
 // 3: Finally, check for a System Environment variable
 //    that will define where we should look.
@@ -122,6 +122,10 @@ log4j = {
 
     warn   'org.mortbay.log'
 }
+
+tomcat.deploy.username="manager"
+tomcat.deploy.password="secret"
+tomcat.deploy.url="http://10.36.142.250:8980/manager"
 
 
 oauth {
