@@ -62,8 +62,8 @@ if (System.getProperty(PROPERTY_ENV_NAME) && new File(System.getProperty(PROPERT
     println "Including configuration file specified on command line: " + System.getProperty(PROPERTY_ENV_NAME)
     grails.config.locations << "file:" + System.getProperty(PROPERTY_ENV_NAME)
 }
-// 2: If no command line optins, check in ~/.grails
-else if (new File("${userHome}/.grails/${appName}-config.groovy").exists()) {
+// 2: If no command line optins, check in ~/grails-config
+else if (new File("${userHome}/grails-config/${appName}-config.groovy").exists()) {
     println "*** User defined config: file:${userHome}/.grails/${appName}-config.groovy. ***"
     grails.config.locations = ["file:${userHome}/.grails/${appName}-config.groovy"]
 }
