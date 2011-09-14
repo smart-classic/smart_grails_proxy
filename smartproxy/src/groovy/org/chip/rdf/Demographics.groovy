@@ -48,7 +48,6 @@ public class Demographics extends Record {
 	private String gender;
 	private String zipcode;
 	
-	//TODO: user rdf binding here
 	/**
 	 * Performs the actual RDF generation from a demographics object
 	 * @param demographics

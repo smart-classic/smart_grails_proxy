@@ -29,7 +29,6 @@ class MilleniumService {
 	def makeCall(transaction, recordId) {
 		def moCallObj = createMOCall(transaction)
 		
-		//TODO:validate xml request against schema
 		
 		def moURL = ConfigurationHolder.config.grails.moURL
 		
