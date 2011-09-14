@@ -42,7 +42,7 @@ class ForwardService {
 
         def created = smartClient.post(path: "/records/create/proxied",
                                         body : [record_id:personId,
-                                        record_name:getNameForPersonId(personId)], // TODO: obtain name
+                                        record_name:getNameForPersonId(personId)],
                                         requestContentType : URLENC )
         assert created.status == 200
 
