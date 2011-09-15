@@ -66,8 +66,12 @@ class ForwardService {
 	}
 
 	def getNameForPersonId(personId){
-		Demographics  demographics = milleniumService.makeCall('demographics', personId)
-		return demographics.getGivenName()+" "+demographics.getFamilyName()
+		def  record = milleniumService.makeCall('demographics', personId)
+		if(record=='Error'){
+			println("Unable to get Name for the patient")
+			return ""
+		}
+		return record.getGivenName()+" "+record.getFamilyName()
 	}
 
 }
