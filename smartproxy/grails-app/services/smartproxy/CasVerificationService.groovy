@@ -13,13 +13,15 @@ class CasVerificationService {
         if (ConfigurationHolder.config.cas.chb.skipValidation)
             return true;
 
-        def casValidationUrl = ConfigurationHolder.config.cas.chb.validationUrl
-        def casServiceUrl = ConfigurationHolder.config.cas.chb.serviceUrl
+        def casValidationUrl = ConfigurationHolder.config.cas.chb.casValidationUrl
+		def casClientId = ConfigurationHolder.config.cas.chb.casClientId
+		def casServiceId = ConfigurationHolder.config.cas.chb.casServiceId
 
+		
         def casClient= new RESTClient(casValidationUrl)
         casClient.setContentType(XML)
 
-        def authorized = casClient.get( query:[ticket:casToken, service:casServiceUrl])
+        def authorized = casClient.get( query:[ticket:casToken, clientId:casClientId, serviceId:casServiceId])
         assert authorized.status==200
 
         def authMsg = authorized.responseData
