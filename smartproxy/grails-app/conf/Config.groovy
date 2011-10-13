@@ -79,26 +79,6 @@ println "--------------------------------------------------------"
 
 println grails.config.locations
 
-// set per-environment serverURL stem for creating absolute links
-environments {
-    production {
-        grails.serverURL = "http://www.changeme.com"
-		grails.moURL = 'changeme'
-		grails.smartURL = 'changeme'
-    }
-    development {
-        grails.serverURL = "http://localhost:8080/${appName}"
-		grails.moURL = 'http://soatstweb2:8888/CHMObjectsToolkit/servlet/'
-		grails.smartURL = 'http://10.36.142.250:7001/proxy_index'
-    }
-    test {
-        grails.serverURL = "http://localhost:8080/${appName}"
-		grails.moURL = 'http://soatstweb2:8888/CHMObjectsToolkit/servlet/'
-		grails.smartURL = 'http://10.36.142.250:7001/proxy_index'
-    }
-
-}
-
 // log4j configuration
 log4j = {
     // Example of changing the log pattern for the default console
@@ -123,23 +103,40 @@ log4j = {
     warn   'org.mortbay.log'
 }
 
+
 tomcat.deploy.username="manager"
 tomcat.deploy.password="secret"
 tomcat.deploy.url="http://10.36.142.250:8980/manager"
 
-
+/* Use this as a template for `~/grails-config/smartproxy-config.groovy` */ 
+/*
 oauth {
     smartEmr {
-        token = 'grails-proxy'
-        secret = 'grails-proxy'
-        apiBase = 'http://localhost:7000'
+        token = 'setme'
+        secret = 'setme'
+        apiBase = 'setme'
     }
 }
 
 cas{
     chb {
         skipValidation = false
-        validationUrl = 'http://chssotest.tch.harvard.edu/cas/serviceValidate'
-        serviceUrl = 'http://10.36.142.250'
+        casValidationUrl = 'setme'
+        casClientId = 'smartmpage'
+        casServiceId = 'SmartWebApp'
     }
 }
+
+environments {
+
+    production {       
+        grails.moURL = 'setme'
+    }
+
+    development {
+        grails.moURL = 'setme'
+    }
+
+}
+
+*/

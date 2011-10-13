@@ -58,17 +58,27 @@ public class Demographics extends Record {
 		builder.encoding="UTF-8"
 		def rdfBuilder = {
 			mkp.xmlDeclaration()
-			mkp.declareNamespace(rdf:'http://www.w3.org/1999/02/22-rdf-syntax-ns#')
+			mkp.declareNamespace('rdf':'http://www.w3.org/1999/02/22-rdf-syntax-ns#')
 			mkp.declareNamespace('sp':'http://smartplatforms.org/terms#')
 			mkp.declareNamespace('foaf':'http://xmlns.com/foaf/0.1/')
+			mkp.declareNamespace('v':'http://www.w3.org/2006/vcard/ns#')
 			'rdf:RDF'(){
-				'foaf:Person'(){
-					'foaf:givenName'(this.getGivenName())
-					'foaf:familyName'(this.getFamilyName())
+				'sp:Demographics'(){
+					'v:n'() {
+						'v:Name'() {
+							'v:given-name'(this.getGivenName())
+							'v:family-name'(this.getFamilyName())
+						}
+					}
+
+					'v:adr'() {
+						'v:Address'() {
+							'v:postal-code'(this.getZipcode())
+						}
+					}
 					'foaf:gender'(this.getGender())
-					'sp:zipcode'(this.getZipcode())
 					if(this.getBirthDateTime().length()>0){
-					'sp:birthday'(this.getBirthDateTime())
+					'v:bday'(this.getBirthDateTime())
 					}
 				}
 			}
@@ -79,5 +89,4 @@ public class Demographics extends Record {
 		writer.toString()
 	}
 	
-	def rdfOut='<?xml version="1.0" encoding="utf-8"?><rdf:RDF  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"  xmlns:sp="http://smartplatforms.org/terms#"  xmlns:foaf="http://xmlns.com/foaf/0.1/">   <foaf:Person>     <foaf:givenName>Bob</foaf:givenName>     <foaf:familyName>Odenkirk</foaf:familyName>     <foaf:gender>male</foaf:gender>     <sp:zipcode>90001</sp:zipcode>     <sp:birthday>1959-12-25</sp:birthday>   </foaf:Person></rdf:RDF>'
 }
