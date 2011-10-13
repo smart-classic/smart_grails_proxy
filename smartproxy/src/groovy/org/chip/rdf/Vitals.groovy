@@ -53,7 +53,7 @@ class Vitals extends Record {
 						//'sp:VitalSigns'(parentEventId:parentEventId){
 						'sp:VitalSigns'(){
 							Encounter encounter = vitalSigns.getEncounter()
-							'dc:date'(encounter.getStartDate())
+							'dcterms:date'(encounter.getStartDate())
 							//createEncounter(encounter.getStartDate(), encounter.getEndDate(), encounter.getResource(), encounter.getTitle())
 							encounterElementCount++
 							if(encounterElementCount==1){
