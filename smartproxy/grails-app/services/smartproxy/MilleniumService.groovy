@@ -5,7 +5,7 @@ import groovy.xml.MarkupBuilder;
 import groovyx.net.http.*
 class MilleniumService {
 
-    static transactional = true
+    static transactional = false
 	
 	/**
 	 * Maps the incoming transaction to a MilleniumObjectCall object.

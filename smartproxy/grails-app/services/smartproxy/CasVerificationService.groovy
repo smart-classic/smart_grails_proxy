@@ -6,7 +6,7 @@ import static groovyx.net.http.ContentType.XML
 
 class CasVerificationService {
 
-    static transactional = true
+    static transactional = false
 
     def verifyCasToken(casToken) {
 
