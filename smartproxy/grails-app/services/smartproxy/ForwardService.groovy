@@ -7,7 +7,7 @@ import static groovyx.net.http.ContentType.URLENC
 
 class ForwardService {
 
-    static transactional = true
+    static transactional = false
 
 	final static Map personIdMap
 
