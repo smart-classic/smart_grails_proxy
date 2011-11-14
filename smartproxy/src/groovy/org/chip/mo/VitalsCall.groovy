@@ -208,7 +208,7 @@ class VitalsCall extends MilleniumObjectCall{
 			builder.BypassOrganizationSecurityIndicator('true')
 		}else{
 			builder.PersonId(recordId)
-			builder.EventCount('999')
+			builder.EventCount('99999')
 			builder.EventSet(){
 				Name('CLINICAL INFORMATION')
 			}
