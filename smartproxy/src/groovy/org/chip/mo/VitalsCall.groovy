@@ -2,6 +2,8 @@ package org.chip.mo;
 
 import org.chip.rdf.Vitals;
 import org.chip.rdf.vitals.*;
+import org.codehaus.groovy.grails.commons.ConfigurationHolder;
+
 import groovy.xml.MarkupBuilder;
 
 class VitalsCall extends MilleniumObjectCall{
@@ -10,23 +12,23 @@ class VitalsCall extends MilleniumObjectCall{
 	
 	Map vitalSignsMap = new HashMap()
 	
-	private static final String EVENTCODEHEIGHT="2700653"
-	private static final String EVENTCODEWEIGHT="2700654"
-	private static final String EVENTCODERRATE="703540"
-	private static final String EVENTCODEHEARTRATE="7935038"
-	private static final String EVENTCODEOSAT="8238766"
-	private static final String EVENTCODETEMP="8713424"
-	private static final String EVENTCODESYS="703501"
-	private static final String EVENTCODEDIA="703516"
-	private static final String EVENTCODELOCATION="4099993"
-	private static final String EVENTCODEPOSITION="13488852"
-	private static final String EVENTCODEBPMETHOD="4100005"
-	private static final String EVENTCODESYSSUPINE="1164536"
-	private static final String EVENTCODESYSSITTING="1164545"
-	private static final String EVENTCODESYSSTANDING="1164548"
-	private static final String EVENTCODEDIASUPINE="1164539"
-	private static final String EVENTCODEDIASITTING="1164542"
-	private static final String EVENTCODEDIASTANDING="1164551"	
+	private static final String EVENTCODEHEIGHT
+	private static final String EVENTCODEWEIGHT
+	private static final String EVENTCODERRATE
+	private static final String EVENTCODEHEARTRATE
+	private static final String EVENTCODEOSAT
+	private static final String EVENTCODETEMP
+	private static final String EVENTCODESYS
+	private static final String EVENTCODEDIA
+	private static final String EVENTCODELOCATION
+	private static final String EVENTCODEPOSITION
+	private static final String EVENTCODEBPMETHOD
+	private static final String EVENTCODESYSSUPINE
+	private static final String EVENTCODESYSSITTING
+	private static final String EVENTCODESYSSTANDING
+	private static final String EVENTCODEDIASUPINE
+	private static final String EVENTCODEDIASITTING
+	private static final String EVENTCODEDIASTANDING
 	
 	static final Map encounterResourceMap
 	static final Map encounterTitleMap
@@ -39,95 +41,44 @@ class VitalsCall extends MilleniumObjectCall{
 	static final Set complexBPEventCodesSet
 	
 	static{
-		encounterResourceMap = new HashMap()
-		encounterResourceMap.put("Outpatient","http://smartplatforms.org/terms/codes/EncounterType#ambulatory")
-		encounterResourceMap.put("Emergency","http://smartplatforms.org/terms/codes/EncounterType#emergency")
-		encounterResourceMap.put("Field","http://smartplatforms.org/terms/codes/EncounterType#field")
-		encounterResourceMap.put("Home","http://smartplatforms.org/terms/codes/EncounterType#home")
-		encounterResourceMap.put("Inpatient","http://smartplatforms.org/terms/codes/EncounterType#inpatient")
-		encounterResourceMap.put("Virtual","http://smartplatforms.org/terms/codes/EncounterType#virtual")
 		
-		encounterTitleMap = new HashMap()
-		encounterTitleMap.put("Outpatient","Ambulatory encounter")
-		encounterTitleMap.put("Emergency", "Emergency encounter")
-		encounterTitleMap.put("Field", "Field encounter")
-		encounterTitleMap.put("Home", "Home encounter")
-		encounterTitleMap.put("Inpatient", "Inpatient encounter")
-		encounterTitleMap.put("Virtual", "Virtual encounter")
+		def config = ConfigurationHolder.config
 		
-		vitalTypeMap = new HashMap()
-		vitalTypeMap.put(EVENTCODEHEIGHT, "height")
-		vitalTypeMap.put(EVENTCODEWEIGHT, "weight")
-		//vitalTypeMap.put("", "bodyMassIndex")
-		vitalTypeMap.put(EVENTCODERRATE, "respiratoryRate")
-		vitalTypeMap.put(EVENTCODEHEARTRATE, "heartRate")
-		vitalTypeMap.put(EVENTCODEOSAT, "oxygenSaturation")
-		vitalTypeMap.put(EVENTCODETEMP, "temperature")
-		vitalTypeMap.put(EVENTCODESYS, "systolic")
-		vitalTypeMap.put(EVENTCODEDIA, "diastolic")
-		vitalTypeMap.put(EVENTCODEBPMETHOD, "method")
-		vitalTypeMap.put(EVENTCODELOCATION, "bodySite")
-		vitalTypeMap.put(EVENTCODEPOSITION, "bodyPosition")
+		EVENTCODEHEIGHT=config.cerner.mo.eventCode.EVENTCODEHEIGHT
+		EVENTCODEWEIGHT=config.cerner.mo.eventCode.EVENTCODEWEIGHT
+		EVENTCODERRATE=config.cerner.mo.eventCode.EVENTCODERRATE
+		EVENTCODEHEARTRATE=config.cerner.mo.eventCode.EVENTCODEHEARTRATE
+		EVENTCODEOSAT=config.cerner.mo.eventCode.EVENTCODEOSAT
+		EVENTCODETEMP=config.cerner.mo.eventCode.EVENTCODETEMP
+		EVENTCODESYS=config.cerner.mo.eventCode.EVENTCODESYS
+		EVENTCODEDIA=config.cerner.mo.eventCode.EVENTCODEDIA
+		EVENTCODELOCATION=config.cerner.mo.eventCode.EVENTCODELOCATION
+		EVENTCODEPOSITION=config.cerner.mo.eventCode.EVENTCODEPOSITION
+		EVENTCODEBPMETHOD=config.cerner.mo.eventCode.EVENTCODEBPMETHOD
+		EVENTCODESYSSUPINE=config.cerner.mo.eventCode.EVENTCODESYSSUPINE
+		EVENTCODESYSSITTING=config.cerner.mo.eventCode.EVENTCODESYSSITTING
+		EVENTCODESYSSTANDING=config.cerner.mo.eventCode.EVENTCODESYSSTANDING
+		EVENTCODEDIASUPINE=config.cerner.mo.eventCode.EVENTCODEDIASUPINE
+		EVENTCODEDIASITTING=config.cerner.mo.eventCode.EVENTCODEDIASITTING
+		EVENTCODEDIASTANDING=config.cerner.mo.eventCode.EVENTCODEDIASTANDING
 		
-		vitalTitleMap = new HashMap()
-		vitalTitleMap.put(EVENTCODEHEIGHT, "Height (measured)")
-		vitalTitleMap.put(EVENTCODEWEIGHT, "Body weight (measured)")
-		//vitalTitleMap.put("", "Body mass index")
-		vitalTitleMap.put(EVENTCODERRATE, "Respiration rate")
-		vitalTitleMap.put(EVENTCODEHEARTRATE, "Heart Rate")
-		vitalTitleMap.put(EVENTCODEOSAT, "Oxygen saturation")
-		vitalTitleMap.put(EVENTCODETEMP, "Body temperature")
-		vitalTitleMap.put(EVENTCODESYS, "Systolic blood pressure")
-		vitalTitleMap.put(EVENTCODEDIA, "Diastolic blood pressure")
-		vitalTitleMap.put("Auscultation", "Auscultation")
-		vitalTitleMap.put("Palpation", "Palpation")
-		vitalTitleMap.put("Automated", "Machine")
-		vitalTitleMap.put("", "Invasive")
-		vitalTitleMap.put("Sitting", "Sitting")
-		vitalTitleMap.put("Standing", "Standing")
-		vitalTitleMap.put("Supine", "Supine")
-		vitalTitleMap.put("Left upper","Left arm")
-		vitalTitleMap.put("Right upper","Right arm")
-		vitalTitleMap.put("Left lower","Left thigh")
-		vitalTitleMap.put("Right lower","Right thigh")
+		encounterResourceMap = config.cerner.mo.encounterResource
 		
-		vitalResourceMap = new HashMap()
-		vitalResourceMap.put(EVENTCODEHEIGHT, "http://loinc.org/codes/8302-2")
-		vitalResourceMap.put(EVENTCODEWEIGHT, "http://loinc.org/codes/3141-9")
-		//vitalResourceMap.put("", "http://loinc.org/codes/39156-5")
-		vitalResourceMap.put(EVENTCODERRATE, "http://loinc.org/codes/9279-1")
-		vitalResourceMap.put(EVENTCODEHEARTRATE, "http://loinc.org/codes/8867-4")
-		vitalResourceMap.put(EVENTCODEOSAT, "http://loinc.org/codes/2710-2")
-		vitalResourceMap.put(EVENTCODETEMP, "http://loinc.org/codes/8310-5")
-		vitalResourceMap.put(EVENTCODESYS, "http://loinc.org/codes/8480-6")
-		vitalResourceMap.put(EVENTCODEDIA, "http://loinc.org/codes/8462-4")
-		vitalResourceMap.put("Auscultation", "http://smartplatforms.org/terms/codes/BloodPressureMethod#auscultation")
-		vitalResourceMap.put("Palpation", "http://smartplatforms.org/terms/codes/BloodPressureMethod#palpation")
-		vitalResourceMap.put("Automated", "http://smartplatforms.org/terms/codes/BloodPressureMethod#machine")
-		vitalResourceMap.put("", "http://smartplatforms.org/terms/codes/BloodPressureMethod#invasive")
-		vitalResourceMap.put("Sitting", "http://www.ihtsdo.org/snomed-ct/concepts/33586001" )
-		vitalResourceMap.put("Standing", "http://www.ihtsdo.org/snomed-ct/concepts/10904000" )
-		vitalResourceMap.put("Supine", "http://www.ihtsdo.org/snomed-ct/concepts/40199007" )
-		vitalResourceMap.put("Left upper","http://www.ihtsdo.org/snomed-ct/concepts/368208006")
-		vitalResourceMap.put("Right upper","http://www.ihtsdo.org/snomed-ct/concepts/368209003")
-		vitalResourceMap.put("Left lower","http://www.ihtsdo.org/snomed-ct/concepts/61396006")
-		vitalResourceMap.put("Right lower","http://www.ihtsdo.org/snomed-ct/concepts/11207009")
+		encounterTitleMap = config.cerner.mo.encounterTitle
 		
-		vitalUnitMap = new HashMap()
-		vitalUnitMap.put(EVENTCODEHEIGHT, "m")
-		vitalUnitMap.put(EVENTCODEWEIGHT, "kg")
-		//vitalUnitMap.put("", "{BMI}")
-		vitalUnitMap.put(EVENTCODERRATE, "{breaths}")
-		vitalUnitMap.put(EVENTCODEHEARTRATE, "{beats}/min")
-		vitalUnitMap.put(EVENTCODEOSAT, "%{HemoglobinSaturation}")
-		vitalUnitMap.put(EVENTCODETEMP, "Cel")
-		vitalUnitMap.put(EVENTCODESYS, "mm[Hg]")
-		vitalUnitMap.put(EVENTCODEDIA, "mm[Hg]")
+		vitalTypeMap = readEventCodesConfigMap(config.cerner.mo.eventCode, config.cerner.mo.vitalsType)
+		
+		vitalTitleMap = readEventCodesConfigMap(config.cerner.mo.eventCode, config.cerner.mo.vitalsTitle)
+		vitalTitleMap.putAll(readEventTagConfigMap(config.cerner.mo.vitalsTitleTagMap))
+		
+		vitalResourceMap = readEventCodesConfigMap(config.cerner.mo.eventCode, config.cerner.mo.vitalResource)
+		vitalResourceMap.putAll(readEventTagConfigMap(config.cerner.mo.vitalResourceTagMap))
+		
+		vitalUnitMap = readEventCodesConfigMap(config.cerner.mo.eventCode, config.cerner.mo.vitalUnits)
 		
 		vitalEventCodesSet = new HashSet()
 		vitalEventCodesSet.add(EVENTCODEHEIGHT)
 		vitalEventCodesSet.add(EVENTCODEWEIGHT)
-		//vitalEventCodesSet.add("")
 		vitalEventCodesSet.add(EVENTCODERRATE)
 		vitalEventCodesSet.add(EVENTCODEHEARTRATE)
 		vitalEventCodesSet.add(EVENTCODEOSAT)
@@ -159,6 +110,27 @@ class VitalsCall extends MilleniumObjectCall{
 		complexBPEventCodesSet.add(EVENTCODEDIASITTING)
 		complexBPEventCodesSet.add(EVENTCODEDIASTANDING)
 		
+	}
+	
+	static def readEventCodesConfigMap(eventCodesMap, propertiesMap){
+		def hashMap = new HashMap()
+		propertiesMap.each{propertiesMapEntry->
+			String key = eventCodesMap.get(propertiesMapEntry.getKey())
+			hashMap.put(key,  propertiesMapEntry.getValue())
+		}
+		return hashMap
+	}
+	
+	static def readEventTagConfigMap(propertiesMap){
+		def hashMap = new HashMap()
+		propertiesMap.each{propertiesMapEntry->
+			String key = propertiesMapEntry.getKey()
+			if (key.indexOf("_")>0){
+				key = key.replaceAll("_", " ") 
+			}
+			hashMap.put(key, propertiesMapEntry.getValue())
+		}
+			return hashMap
 	}
 	
 	def makeCall(recordId, moURL){
