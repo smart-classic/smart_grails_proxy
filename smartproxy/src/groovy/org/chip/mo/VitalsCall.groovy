@@ -176,6 +176,9 @@ class VitalsCall extends MilleniumObjectCall{
 	def generatePayload(requestParams){
 		def recordId = (String)requestParams.get(RECORDIDPARAM)
 		if (transaction.equals("ReadEncountersByFilters")){
+			builder.EncounterTypeClass(){
+				Meaning('INPATIENT')
+			}
 			builder.PersonId(recordId)
 			builder.BypassOrganizationSecurityIndicator('true')
 		}else{
