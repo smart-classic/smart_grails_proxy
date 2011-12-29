@@ -176,9 +176,6 @@ class VitalsCall extends MilleniumObjectCall{
 	def generatePayload(requestParams){
 		def recordId = (String)requestParams.get(RECORDIDPARAM)
 		if (transaction.equals("ReadEncountersByFilters")){
-			builder.EncounterTypeClass(){
-				Meaning('INPATIENT')
-			}
 			builder.PersonId(recordId)
 			builder.BypassOrganizationSecurityIndicator('true')
 		}else{
@@ -223,7 +220,10 @@ class VitalsCall extends MilleniumObjectCall{
 		def payload= replyMessage.Payload
 		if (transaction.equals("ReadEncountersByFilters")){
 			//long l1 = new Date().getTime()
-			payload.Encounters.Encounter.each{
+			// Filter out inpatient encounters, per 12/19/2011 decision.
+			payload.Encounters.Encounter.findAll {
+			  it.EncounterTypeClass.Display.text() != "Inpatient" 
+			}.each {
 				Encounter encounter = new Encounter()
 				encounter.setId(it.EncounterId.text())
 				encounter.setStartDate(it.RegistrationDateTime.text())
