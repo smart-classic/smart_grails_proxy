@@ -1,0 +1,105 @@
+                                                                     
+                                                                     
+                                                                     
+                                             
+drop program SMART_LAUNCH_BPCENTILES go
+create program SMART_LAUNCH_BPCENTILES
+ 
+prompt
+	"Output to File/Printer/MINE" = "MINE"
+	, "Person ID" = ""
+	, "Encounter ID" = ""
+	, "User ID" = ""
+	, "Location" = ""
+	, "APP" = ""
+ 
+with OUTDEV, PID, EID, UID, LOC, APP
+ 
+declare url= vc with constant("http://recombinant-pgd.chip.org:8980/smartproxy/smart/readContext?record_id=")
+ 
+SELECT into $OUTDEV
+     P.person_id
+     , P.NAME_FULL_FORMATTED
+ 
+FROM
+     PERSON   P
+where p.person_id = cnvtint($PID)
+ 
+head report
+     row +1 "<html>"
+     row +1 "<head>"
+     row +1 "<title>Patient List</title>"
+     row +1 "<META content='APPLINK' name='discern'>"
+ 
+     row +1 "<script>"
+     row +1 "getCasToken = function(){"
+     row +1 "var url = 'http://chssotest.tch.harvard.edu/cas/wsProxy?clientId=smartmpage&sharedSecret=REPLACE_WITH_SECRET';"
+     row +1 "if (window.XMLHttpRequest) {"
+     row +1 "httpRequest = new XMLHttpRequest();"
+     row +1 "} else if (window.ActiveXObject) { // IE"
+     row +1 "try {"
+     row +1 "httpRequest = new ActiveXObject('Msxml2.XMLHTTP');"
+     row +1 "}"
+     row +1 "catch (e) {"
+     row +1 "try {"
+     row +1 "httpRequest = new ActiveXObject('Microsoft.XMLHTTP');"
+     row +1 "}"
+     row +1 "catch (e) {}"
+     row +1 "}"
+     row +1 "}"
+     row +1 "if (!httpRequest) {"
+     row +1 "return false;"
+     row +1 "}"
+     row +1 "httpRequest.onreadystatechange = function() {"
+     	row +1 "if (httpRequest.readyState==4 && httpRequest.status==200)"
+     	row +1 "{"
+     		row +1 "var responseText = httpRequest.responseText; "
+		 	row +1 "var xmlDoc "
+		 	row +1 "if (window.DOMParser) "
+	 	 	row +1 "{ "
+		  	 	row +1 "parser=new DOMParser(); "
+		   	 	row +1 "xmlDoc=parser.parseFromString(responseText ,'text/xml'); "
+	  	 	row +1 "} "
+		 	row +1 "else // Internet Explorer "
+	  	 	row +1 "{ "
+		  	 	row +1 "xmlDoc=new ActiveXObject('Microsoft.XMLDOM'); "
+		  	 	row +1 "xmlDoc.async='false'; "
+		  	 	row +1 "xmlDoc.loadXML(responseText); "
+	  	 	row +1 "}  "
+		 	row +1 "token = xmlDoc.getElementsByTagName('cas:proxyTicket')[0].childNodes[0].nodeValue; "
+		 	row +1 "var link = document.getElementById('ielink');"
+			row +1 "if(link){"
+				row +1 "var actionName = 'readContext?' "
+				row +1 "link.href = link.href.replace(actionName, "
+				row +1 "actionName+'cas_token='+token+'&initial_app=pedi_bpc@apps.smartplatforms.org&'); "
+				row +1 "link.click();"
+			row +1 "}"
+	     row +1 "}"
+     row +1 "}"
+     row +1 "httpRequest.open('GET', url);"
+     row +1 "httpRequest.send();"
+     row +1 "}"
+     row +1 "</script>"
+ 
+     row +1 "</head>"
+detail
+    row +1 "<body>"
+    row +1 "<table border='0' width='100%'>"
+	row +1 call print("<tr>")
+	call print(concat("<td>", p.name_full_formatted, "</td>"))
+	call print("</tr>")
+	row +1 "</table>"
+foot report
+	qurl=  build (url,$PID, '&encounterId=',$EID,'&domain=test')
+	row +1 ^<a id="ielink" href="javascript:APPLINK(100,'^
+	call print(qurl)
+	call print(^','')"></a>^)
+	row +1 "<script>"
+	row +1 "getCasToken();"
+	row +1 "</script>"
+	row +1 "</body>"
+	row +1 "</html>"
+WITH NOCOUNTER, FORMAT, maxrec = 200, maxcol=200
+ 
+end
+go
