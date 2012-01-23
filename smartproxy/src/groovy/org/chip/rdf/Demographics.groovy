@@ -4,12 +4,15 @@ import groovy.xml.StreamingMarkupBuilder
 
 public class Demographics extends Record {
 	
-	public Demographics(String birthDateTime, String givenName, String familyName, String gender, String zipcode){
+	public static final String MRN_SYSTEM='CHB'
+	
+	public Demographics(String birthDateTime, String givenName, String familyName, String gender, String zipcode, String mrn){
 		this.birthDateTime=birthDateTime;
 		this.givenName=givenName;
 		this.familyName=familyName;
 		this.gender=gender;
 		this.zipcode=zipcode;
+		this.mrn=mrn;
 	}
 	
 	public String getBirthDateTime() {
@@ -47,6 +50,7 @@ public class Demographics extends Record {
 	private String familyName;
 	private String gender;
 	private String zipcode;
+	private String mrn;
 	
 	/**
 	 * Performs the actual RDF generation from a demographics object
@@ -62,6 +66,7 @@ public class Demographics extends Record {
 			mkp.declareNamespace('sp':'http://smartplatforms.org/terms#')
 			mkp.declareNamespace('foaf':'http://xmlns.com/foaf/0.1/')
 			mkp.declareNamespace('v':'http://www.w3.org/2006/vcard/ns#')
+			mkp.declareNamespace('dcterms':'http://purl.org/dc/terms/')
 			'rdf:RDF'(){
 				'sp:Demographics'(){
 					'v:n'() {
@@ -79,6 +84,13 @@ public class Demographics extends Record {
 					'foaf:gender'(this.getGender())
 					if(this.getBirthDateTime().length()>0){
 					'v:bday'(this.getBirthDateTime())
+					}
+					'sp:medicalRecordNumber'(){
+						'sp:Code'(){
+							'dcterms:title'(MRN_SYSTEM+' '+this.mrn)
+							'dcterms:identifier'(this.mrn)
+							'sp:system'(MRN_SYSTEM)
+						}
 					}
 				}
 			}

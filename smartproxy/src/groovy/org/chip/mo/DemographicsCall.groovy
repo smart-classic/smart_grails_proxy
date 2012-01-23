@@ -4,6 +4,8 @@ import org.chip.rdf.Demographics
 
 class DemographicsCall extends MilleniumObjectCall{
 	
+	public static final String PERSON_ALIAS_TYPE_MEANING_MRN="MRN"
+	
 	def init(){
 		super.init()
 		transaction = 'ReadPersonById'
@@ -19,6 +21,7 @@ class DemographicsCall extends MilleniumObjectCall{
 	   def recordId = (String)requestParams.get(RECORDIDPARAM)
 	   builder.PersonId(recordId)
 	   builder.AddressesIndicator('true')
+	   builder.PersonAliasesIndicator('true') 
    }
    
    /**
@@ -43,6 +46,13 @@ class DemographicsCall extends MilleniumObjectCall{
 	  if(person.Addresses.Address.Zipcode.text().length()>=5){
 		  zipcode=person.Addresses.Address.Zipcode.text().substring(0,5)
 	  }
-	  return new Demographics(birthDateTime, givenName, familyName, gender, zipcode)
+	  def mrn=""
+	  def personalAliases = person.PersonAliases
+	  person.PersonAliases.PersonAlias.each{ personAlias->
+		  if(personAlias.PersonAliasType.Meaning.text()==PERSON_ALIAS_TYPE_MEANING_MRN){
+			  mrn = personAlias.Alias.text()
+		  }
+	  }
+	  return new Demographics(birthDateTime, givenName, familyName, gender, zipcode, mrn)
   }
 }
