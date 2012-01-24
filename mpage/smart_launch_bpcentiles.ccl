@@ -1,105 +1,119 @@
-                                                                     
-                                                                     
-                                                                     
-                                             
-drop program SMART_LAUNCH_BPCENTILES go
-create program SMART_LAUNCH_BPCENTILES
- 
+/*
+==============================================================================================
+                                        Copyright to Children's Hospital Boston
+==============================================================================================
+-| Object Name          :       smart_launch_bpcentiles
+-| Source File Name     :       chb_smart_launch_bpcentiles.prg
+-| Program Purpose      :       Launch BP Centiles app, setting cas token and Power Chart context variables.
+-| Author               :       Manish Kapoor, Josh Mandel
+-| SME/Sponsor          :       Josh Mandel, SMART Platforms
+-| Usage                :       Automatically launuches the BP Centiles App in an external window.
+-| Notes                :       Relies on CHB CAS Server + SMART Stack (both hosted externally)
+
+-| Version History      :       See Below
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-|      Version Initial Date            Description of Change
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        v1             12/20/2011      + Initial Program with variable names, identation and layout
+                                         	updated as per CHIP CCL Guidelines
+                                           	Change Control: mpage-v1@
+                                                            https://github.com/chb/smart_grails_proxy/tags
+
+==============================================================================================
+-| Curent Version       : v1
+==============================================================================================
+*/
+drop program smart_launch_bpcentiles:dba go
+create program smart_launch_bpcentiles:dba
+
+
 prompt
-	"Output to File/Printer/MINE" = "MINE"
-	, "Person ID" = ""
-	, "Encounter ID" = ""
-	, "User ID" = ""
-	, "Location" = ""
-	, "APP" = ""
- 
+        "Output to File/Printer/MINE"   = "MINE"
+        , "Person ID"                                   = ""
+        , "Encounter ID"                                = ""
+        , "User ID"                                     = ""
+        , "Location"                                    = ""
+        , "APP"                                         = ""
+
 with OUTDEV, PID, EID, UID, LOC, APP
- 
-declare url= vc with constant("http://recombinant-pgd.chip.org:8980/smartproxy/smart/readContext?record_id=")
- 
-SELECT into $OUTDEV
-     P.person_id
-     , P.NAME_FULL_FORMATTED
- 
-FROM
-     PERSON   P
-where p.person_id = cnvtint($PID)
- 
+
+select into $OUTDEV
+     p.person_id
+     , p.name_full_formatted
+
+ FROM
+     person   p
+
+where p.person_id = cnvtreal($PID)
+
 head report
-     row +1 "<html>"
-     row +1 "<head>"
-     row +1 "<title>Patient List</title>"
-     row +1 "<META content='APPLINK' name='discern'>"
- 
-     row +1 "<script>"
-     row +1 "getCasToken = function(){"
-     row +1 "var url = 'http://chssotest.tch.harvard.edu/cas/wsProxy?clientId=smartmpage&sharedSecret=REPLACE_WITH_SECRET';"
-     row +1 "if (window.XMLHttpRequest) {"
-     row +1 "httpRequest = new XMLHttpRequest();"
-     row +1 "} else if (window.ActiveXObject) { // IE"
-     row +1 "try {"
-     row +1 "httpRequest = new ActiveXObject('Msxml2.XMLHTTP');"
-     row +1 "}"
-     row +1 "catch (e) {"
-     row +1 "try {"
-     row +1 "httpRequest = new ActiveXObject('Microsoft.XMLHTTP');"
-     row +1 "}"
-     row +1 "catch (e) {}"
-     row +1 "}"
-     row +1 "}"
-     row +1 "if (!httpRequest) {"
-     row +1 "return false;"
-     row +1 "}"
-     row +1 "httpRequest.onreadystatechange = function() {"
-     	row +1 "if (httpRequest.readyState==4 && httpRequest.status==200)"
-     	row +1 "{"
-     		row +1 "var responseText = httpRequest.responseText; "
-		 	row +1 "var xmlDoc "
-		 	row +1 "if (window.DOMParser) "
-	 	 	row +1 "{ "
-		  	 	row +1 "parser=new DOMParser(); "
-		   	 	row +1 "xmlDoc=parser.parseFromString(responseText ,'text/xml'); "
-	  	 	row +1 "} "
-		 	row +1 "else // Internet Explorer "
-	  	 	row +1 "{ "
-		  	 	row +1 "xmlDoc=new ActiveXObject('Microsoft.XMLDOM'); "
-		  	 	row +1 "xmlDoc.async='false'; "
-		  	 	row +1 "xmlDoc.loadXML(responseText); "
-	  	 	row +1 "}  "
-		 	row +1 "token = xmlDoc.getElementsByTagName('cas:proxyTicket')[0].childNodes[0].nodeValue; "
-		 	row +1 "var link = document.getElementById('ielink');"
-			row +1 "if(link){"
-				row +1 "var actionName = 'readContext?' "
-				row +1 "link.href = link.href.replace(actionName, "
-				row +1 "actionName+'cas_token='+token+'&initial_app=pedi_bpc@apps.smartplatforms.org&'); "
-				row +1 "link.click();"
-			row +1 "}"
-	     row +1 "}"
-     row +1 "}"
-     row +1 "httpRequest.open('GET', url);"
-     row +1 "httpRequest.send();"
-     row +1 "}"
-     row +1 "</script>"
- 
-     row +1 "</head>"
+        row +1 "<html>"
+        row +1 "<head>"
+        row +1 "    <title>BP Centiles Fronting MPage</title>"
+        row +1 "    <META content='APPLINK' name='discern'>"
+        row +1 "</head>"
+        
+        row +1 "<body>"
+        row +1 "<script>"        
+
+        row +1 "    var grails_proxy_base = 'http://10.36.142.250:8980/smartproxy/smart/readContext?',"
+        row +1 "        initial_app = 'pedi_bpc@apps.smartplatforms.org',"
+        row +1 "        cas_url = 'http://chssotest.tch.harvard.edu/cas/wsProxy?clientId=smartmpage&sharedSecret=SECRET_HERE',"
+        row +1 "        httpRequest = new XMLHttpRequest(),"
+        row +1 "        cas_token;"
+
+        row +1 "    var record_id ='", $PID, "';"
+        row +1 "    var encounter_id ='", $EID, "';"
+		
+        row +1 "</script>"
+
 detail
-    row +1 "<body>"
-    row +1 "<table border='0' width='100%'>"
-	row +1 call print("<tr>")
-	call print(concat("<td>", p.name_full_formatted, "</td>"))
-	call print("</tr>")
-	row +1 "</table>"
+        row +1 "Launching BP Centiles in external window for: ", p.name_full_formatted
+
 foot report
-	qurl=  build (url,$PID, '&encounterId=',$EID,'&domain=test')
-	row +1 ^<a id="ielink" href="javascript:APPLINK(100,'^
-	call print(qurl)
-	call print(^','')"></a>^)
-	row +1 "<script>"
-	row +1 "getCasToken();"
-	row +1 "</script>"
-	row +1 "</body>"
-	row +1 "</html>"
+        row +1 "<script>"
+        
+        row +1 "httpRequest.onreadystatechange = function() {"
+        row +1 "    if (httpRequest.readyState==4 && httpRequest.status==200) {"
+        row +1 "        cas_token = parseXml(httpRequest) "     
+        row +1 "                    .getElementsByTagName('cas:proxyTicket')[0] "
+        row +1 "                    .childNodes[0] "
+        row +1 "                    .nodeValue; "
+        row +1 "        launchApp();"
+        row +1 "    }"
+        row +1 "}"
+
+        row +1 "httpRequest.open('GET', cas_url);"
+        row +1 "httpRequest.send();"
+
+        row +1 "function parseXml(req) {"
+        row +1 "    var responseText = httpRequest.responseText;"
+        row +1 "    if (window.DOMParser){ "
+        row +1 "        xmlDoc=new DOMParser().parseFromString(responseText ,'text/xml');"
+        row +1 "    } else { "
+        row +1 "      xmlDoc=new ActiveXObject('Microsoft.XMLDOM');"
+        row +1 "      xmlDoc.async=false;"
+        row +1 "      xmlDoc.loadXML(responseText);"
+        row +1 "    }"        
+        row +1 "    return xmlDoc;"        
+        row +1 "};"
+
+        row +1 "function launchApp() {"
+        row +1 "    APPLINK(100, "
+        row +1 "            grails_proxy_base + "
+        row +1 "            'initial_app='+initial_app + "
+        row +1 "            '&record_id=' + record_id + "
+        row +1 "            '&encounter_id=' + encounter_id + "
+        row +1 "            '&cas_token=' + cas_token,"
+        row +1 "            ''"
+        row +1 "    );"
+        row +1 "};"
+
+        row +1 "</script>"
+        row +1 "</body>"
+        row +1 "</html>"
+
 WITH NOCOUNTER, FORMAT, maxrec = 200, maxcol=200
- 
+
 end
 go
