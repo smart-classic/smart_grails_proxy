@@ -79,7 +79,7 @@ foot report
 
         row +1 "httpRequest.onreadystatechange = function() {"
         row +1 "    if (httpRequest.readyState==4 && httpRequest.status==200) {"
-        row +1 "        cas_token = parseXml(httpRequest) "
+        row +1 "        cas_token = parseXml() "
         row +1 "                    .getElementsByTagName('cas:proxyTicket')[0] "
         row +1 "                    .childNodes[0] "
         row +1 "                    .nodeValue; "
@@ -90,7 +90,7 @@ foot report
         row +1 "httpRequest.open('GET', cas_url);"
         row +1 "httpRequest.send();"
 
-        row +1 "function parseXml(req) {"
+        row +1 "function parseXml() {"
         row +1 "    var responseText = httpRequest.responseText;"
         row +1 "    if (window.DOMParser){ "
         row +1 "        xmlDoc=new DOMParser().parseFromString(responseText ,'text/xml');"
