@@ -14,18 +14,18 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 -|      Version Initial Date            Description of Change
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        v1             12/20/2011      + Initial Program with variable names, identation and layout
+        v1             01/23/2012      + Initial Program with variable names, identation and layout
                                          	updated as per CHIP CCL Guidelines
                                            	Change Control: mpage-v1@
-                                                            https://github.com/chb/smart_grails_proxy/tags
+								https://github.com/chb/smart_grails_proxy/tags
 
 ==============================================================================================
 -| Curent Version       : v1
 ==============================================================================================
 */
+
 drop program smart_launch_bpcentiles:dba go
 create program smart_launch_bpcentiles:dba
-
 
 prompt
         "Output to File/Printer/MINE"   = "MINE"
@@ -46,36 +46,40 @@ select into $OUTDEV
 
 where p.person_id = cnvtreal($PID)
 
+
 head report
         row +1 "<html>"
         row +1 "<head>"
         row +1 "    <title>BP Centiles Fronting MPage</title>"
         row +1 "    <META content='APPLINK' name='discern'>"
         row +1 "</head>"
-        
+
         row +1 "<body>"
-        row +1 "<script>"        
+        row +1 "<script>"
 
         row +1 "    var grails_proxy_base = 'http://10.36.142.250:8980/smartproxy/smart/readContext?',"
         row +1 "        initial_app = 'pedi_bpc@apps.smartplatforms.org',"
-        row +1 "        cas_url = 'http://chssotest.tch.harvard.edu/cas/wsProxy?clientId=smartmpage&sharedSecret=SECRET_HERE',"
+        row +1 "        cas_secret = 'SECRET_HERE',"
+        row +1 "        cas_url = 'http://chssotest.tch.harvard.edu/cas/wsProxy?clientId=smartmpage&sharedSecret='+cas_secret,"
         row +1 "        httpRequest = new XMLHttpRequest(),"
         row +1 "        cas_token;"
 
-        row +1 "    var record_id ='", $PID, "';"
-        row +1 "    var encounter_id ='", $EID, "';"
-		
+        call print( build("var record_id = '", $PID, "';" ))
+        call print( build("var encounter_id = '", $EID, "';" ))
+
         row +1 "</script>"
+
 
 detail
         row +1 "Launching BP Centiles in external window for: ", p.name_full_formatted
 
+
 foot report
         row +1 "<script>"
-        
+
         row +1 "httpRequest.onreadystatechange = function() {"
         row +1 "    if (httpRequest.readyState==4 && httpRequest.status==200) {"
-        row +1 "        cas_token = parseXml(httpRequest) "     
+        row +1 "        cas_token = parseXml(httpRequest) "
         row +1 "                    .getElementsByTagName('cas:proxyTicket')[0] "
         row +1 "                    .childNodes[0] "
         row +1 "                    .nodeValue; "
@@ -94,8 +98,8 @@ foot report
         row +1 "      xmlDoc=new ActiveXObject('Microsoft.XMLDOM');"
         row +1 "      xmlDoc.async=false;"
         row +1 "      xmlDoc.loadXML(responseText);"
-        row +1 "    }"        
-        row +1 "    return xmlDoc;"        
+        row +1 "    }"
+        row +1 "    return xmlDoc;"
         row +1 "};"
 
         row +1 "function launchApp() {"
@@ -117,3 +121,4 @@ WITH NOCOUNTER, FORMAT, maxrec = 200, maxcol=200
 
 end
 go
+
