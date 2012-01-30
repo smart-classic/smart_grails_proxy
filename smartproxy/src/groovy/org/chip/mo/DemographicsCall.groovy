@@ -5,6 +5,7 @@ import org.chip.rdf.Demographics
 class DemographicsCall extends MilleniumObjectCall{
 	
 	public static final String PERSON_ALIAS_TYPE_MEANING_MRN="MRN"
+	public static final String PERSON_ALIAS_POOL_VALUE_CHB_MRN="3110551"
 	
 	def init(){
 		super.init()
@@ -49,7 +50,8 @@ class DemographicsCall extends MilleniumObjectCall{
 	  def mrn=""
 	  def personalAliases = person.PersonAliases
 	  person.PersonAliases.PersonAlias.each{ personAlias->
-		  if(personAlias.PersonAliasType.Meaning.text()==PERSON_ALIAS_TYPE_MEANING_MRN){
+		   if((personAlias.AliasPool.Value.text()==PERSON_ALIAS_POOL_VALUE_CHB_MRN)
+			   &&(personAlias.PersonAliasType.Meaning.text()==PERSON_ALIAS_TYPE_MEANING_MRN)){
 			  mrn = personAlias.Alias.text()
 		  }
 	  }
