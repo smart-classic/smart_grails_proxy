@@ -1,5 +1,6 @@
 package org.chip.mo;
 
+import org.chip.mo.exceptions.MOCallException;
 import org.chip.rdf.Vitals;
 import org.chip.rdf.vitals.*;
 import org.codehaus.groovy.grails.commons.ConfigurationHolder;
@@ -133,7 +134,7 @@ class VitalsCall extends MilleniumObjectCall{
 			return hashMap
 	}
 	
-	def makeCall(recordId, moURL){
+	def makeCall(recordId, moURL)throws MOCallException{
 		
 		transaction = 'ReadEncountersByFilters'
 		targetServlet = 'com.cerner.encounter.EncounterServlet'
@@ -144,6 +145,7 @@ class VitalsCall extends MilleniumObjectCall{
 		def requestXML = createRequest(requestParams)
 		//long l1 = new Date().getTime()
 		def resp = makeRestCall(requestXML, moURL)
+		handleExceptions(resp, recordId)
 		//long l2 = new Date().getTime()
 		//println("encounter mo call took : "+(l2-l1)/1000)
 		readResponse(resp)
@@ -160,6 +162,7 @@ class VitalsCall extends MilleniumObjectCall{
 		requestXML = createRequest(requestParams)
 		//l1 = new Date().getTime()
 		resp=makeRestCall(requestXML, moURL)
+		handleExceptions(resp, recordId)
 		//l2 = new Date().getTime()
 		//println("vitals mo call took : "+(l2-l1)/1000)
 
@@ -214,95 +217,98 @@ class VitalsCall extends MilleniumObjectCall{
 	* @param moResponse
 	* @return
 	*/
-	def readResponse(moResponse){
-		
-		def replyMessage = moResponse.getData()
-		def payload= replyMessage.Payload
-		if (transaction.equals("ReadEncountersByFilters")){
-			//long l1 = new Date().getTime()
-			// Filter out inpatient encounters, per 12/19/2011 decision.
-			payload.Encounters.Encounter.findAll {
-			  it.EncounterTypeClass.Display.text() != "Inpatient" 
-			}.each {
-				Encounter encounter = new Encounter()
-				encounter.setId(it.EncounterId.text())
-				encounter.setStartDate(it.RegistrationDateTime.text())
-				encounter.setEndDate(it.DischargeDateTime.text())
-				encounter.setResource(encounterResourceMap.get(it.EncounterTypeClass.Display.text()))
-				encounter.setTitle(encounterTitleMap.get(it.EncounterTypeClass.Display.text()))
-				VitalSigns vitalSigns = new VitalSigns()
-				vitalSigns.setEncounter(encounter)
-				vitalSignsMap.put(it.EncounterId.text(), vitalSigns)
+	def readResponse(moResponse)throws MOCallException{
+		try{
+			def replyMessage = moResponse.getData()
+			def payload= replyMessage.Payload
+			if (transaction.equals("ReadEncountersByFilters")){
+				//long l1 = new Date().getTime()
+				// Filter out inpatient encounters, per 12/19/2011 decision.
+				payload.Encounters.Encounter.findAll {
+				  it.EncounterTypeClass.Display.text() != "Inpatient" 
+				}.each {
+					Encounter encounter = new Encounter()
+					encounter.setId(it.EncounterId.text())
+					encounter.setStartDate(it.RegistrationDateTime.text())
+					encounter.setEndDate(it.DischargeDateTime.text())
+					encounter.setResource(encounterResourceMap.get(it.EncounterTypeClass.Display.text()))
+					encounter.setTitle(encounterTitleMap.get(it.EncounterTypeClass.Display.text()))
+					VitalSigns vitalSigns = new VitalSigns()
+					vitalSigns.setEncounter(encounter)
+					vitalSignsMap.put(it.EncounterId.text(), vitalSigns)
+				}
+				//long l2 = new Date().getTime()
+				//println("encounter reading moresponse took: "+(l2-l1)/1000)
+			}else{
+				//int i = 0
+				//long l1 = new Date().getTime()
+				payload.Results.ClinicalEvents.NumericResult.each{ currentNumericResult->
+						//i++
+						def currentEncounterId = currentNumericResult.EncounterId.text()
+						def currentEventCode = currentNumericResult.EventCode.Value.text()
+						def currentValue = currentNumericResult.Value.text()
+						def currentEventId = currentNumericResult.EventId.text()
+						def currentParentEventId = currentNumericResult.ParentEventId.text()
+						def currentEventEndDateTime = currentNumericResult.EventEndDateTime.text()
+						def currentUpdateDateTime = currentNumericResult.UpdateDateTime.text()
+						
+						
+						currentValue=convertValue(currentValue, currentEventCode)
+						
+						if((currentEventCode!=null) && (vitalEventCodesSet.contains(currentEventCode)) && valueIsValid(currentValue)){
+							VitalSign vitalSign = new VitalSign()
+							vitalSign.setEventId(currentEventId)
+							vitalSign.setParentEventId(currentParentEventId)
+							vitalSign.setValue(currentValue)
+							vitalSign.setCode(currentEventCode)
+							vitalSign.setType(vitalTypeMap.get(currentEventCode))
+							vitalSign.setTitle(vitalTitleMap.get(currentEventCode))
+							vitalSign.setResource(vitalResourceMap.get(currentEventCode))
+							vitalSign.setUnit(vitalUnitMap.get(currentEventCode))
+							vitalSign.setEventEndDateTime(currentEventEndDateTime)
+							vitalSign.setUpdateDateTime(currentUpdateDateTime)
+							(bpEventCodesSet.contains(currentEventCode))?vitalSign.setIsBPField(true):vitalSign.setIsBPField(false)
+							
+							addVitalSignToVitalSignsMap(vitalSign, currentEncounterId)
+							
+						}
+				}	
+				payload.Results.ClinicalEvents.CodedResult.each{ currentCodedResult->
+						//i++
+						def currentEncounterId = currentCodedResult.EncounterId.text()
+						def currentEventCode = currentCodedResult.EventCode.Value.text()
+						def currentEventTag = currentCodedResult.EventTag.text()
+						def currentEventId = currentCodedResult.EventId.text()
+						def currentParentEventId = currentCodedResult.ParentEventId.text()
+						def currentEventEndDateTime = currentCodedResult.EventEndDateTime.text()
+						def currentUpdateDateTime = currentCodedResult.UpdateDateTime.text()
+						
+						
+						if((currentEventCode!=null) && (vitalEventCodesSet.contains(currentEventCode)) && valueIsValid(currentEventTag)){
+							VitalSign vitalSign = new VitalSign()
+							vitalSign.setEventId(currentEventId)
+							vitalSign.setParentEventId(currentParentEventId)
+							vitalSign.setValue(currentEventTag)
+							vitalSign.setCode(currentEventCode)
+							vitalSign.setType(vitalTypeMap.get(currentEventCode))
+							vitalSign.setTitle(vitalTitleMap.get(currentEventTag))
+							vitalSign.setResource(vitalResourceMap.get(currentEventTag))
+							vitalSign.setEventEndDateTime(currentEventEndDateTime)
+							vitalSign.setUpdateDateTime(currentUpdateDateTime)
+							(bpEventCodesSet.contains(currentEventCode))?vitalSign.setIsBPField(true):vitalSign.setIsBPField(false)
+							vitalSign.setIsCodedField(true)
+							
+							addVitalSignToVitalSignsMap(vitalSign, currentEncounterId)
+						}
+				}
+				
+				postProcessVitalSignsMap()
+				//println("number of results returned : " + i)
+				//long l2 = new Date().getTime()
+				//println("vitals reading moresponse took: "+(l2-l1)/1000)
 			}
-			//long l2 = new Date().getTime()
-			//println("encounter reading moresponse took: "+(l2-l1)/1000)
-		}else{
-			//int i = 0
-			//long l1 = new Date().getTime()
-			payload.Results.ClinicalEvents.NumericResult.each{ currentNumericResult->
-					//i++
-					def currentEncounterId = currentNumericResult.EncounterId.text()
-					def currentEventCode = currentNumericResult.EventCode.Value.text()
-					def currentValue = currentNumericResult.Value.text()
-					def currentEventId = currentNumericResult.EventId.text()
-					def currentParentEventId = currentNumericResult.ParentEventId.text()
-					def currentEventEndDateTime = currentNumericResult.EventEndDateTime.text()
-					def currentUpdateDateTime = currentNumericResult.UpdateDateTime.text()
-					
-					
-					currentValue=convertValue(currentValue, currentEventCode)
-					
-					if((currentEventCode!=null) && (vitalEventCodesSet.contains(currentEventCode)) && valueIsValid(currentValue)){
-						VitalSign vitalSign = new VitalSign()
-						vitalSign.setEventId(currentEventId)
-						vitalSign.setParentEventId(currentParentEventId)
-						vitalSign.setValue(currentValue)
-						vitalSign.setCode(currentEventCode)
-						vitalSign.setType(vitalTypeMap.get(currentEventCode))
-						vitalSign.setTitle(vitalTitleMap.get(currentEventCode))
-						vitalSign.setResource(vitalResourceMap.get(currentEventCode))
-						vitalSign.setUnit(vitalUnitMap.get(currentEventCode))
-						vitalSign.setEventEndDateTime(currentEventEndDateTime)
-						vitalSign.setUpdateDateTime(currentUpdateDateTime)
-						(bpEventCodesSet.contains(currentEventCode))?vitalSign.setIsBPField(true):vitalSign.setIsBPField(false)
-						
-						addVitalSignToVitalSignsMap(vitalSign, currentEncounterId)
-						
-					}
-			}	
-			payload.Results.ClinicalEvents.CodedResult.each{ currentCodedResult->
-					//i++
-					def currentEncounterId = currentCodedResult.EncounterId.text()
-					def currentEventCode = currentCodedResult.EventCode.Value.text()
-					def currentEventTag = currentCodedResult.EventTag.text()
-					def currentEventId = currentCodedResult.EventId.text()
-					def currentParentEventId = currentCodedResult.ParentEventId.text()
-					def currentEventEndDateTime = currentCodedResult.EventEndDateTime.text()
-					def currentUpdateDateTime = currentCodedResult.UpdateDateTime.text()
-					
-					
-					if((currentEventCode!=null) && (vitalEventCodesSet.contains(currentEventCode)) && valueIsValid(currentEventTag)){
-						VitalSign vitalSign = new VitalSign()
-						vitalSign.setEventId(currentEventId)
-						vitalSign.setParentEventId(currentParentEventId)
-						vitalSign.setValue(currentEventTag)
-						vitalSign.setCode(currentEventCode)
-						vitalSign.setType(vitalTypeMap.get(currentEventCode))
-						vitalSign.setTitle(vitalTitleMap.get(currentEventTag))
-						vitalSign.setResource(vitalResourceMap.get(currentEventTag))
-						vitalSign.setEventEndDateTime(currentEventEndDateTime)
-						vitalSign.setUpdateDateTime(currentUpdateDateTime)
-						(bpEventCodesSet.contains(currentEventCode))?vitalSign.setIsBPField(true):vitalSign.setIsBPField(false)
-						vitalSign.setIsCodedField(true)
-						
-						addVitalSignToVitalSignsMap(vitalSign, currentEncounterId)
-					}
-			}
-			
-			postProcessVitalSignsMap()
-			//println("number of results returned : " + i)
-			//long l2 = new Date().getTime()
-			//println("vitals reading moresponse took: "+(l2-l1)/1000)
+		}catch(Exception e){
+			throw new MOCallException("Error reading MO response", 500, e.getMessage())
 		}
 		return new Vitals(vitalSignsMap)
 	}

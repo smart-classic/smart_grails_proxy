@@ -1,5 +1,6 @@
 package smartproxy
 import org.codehaus.groovy.grails.commons.ConfigurationHolder;
+import org.chip.mo.exceptions.MOCallException
 
 import groovy.xml.MarkupBuilder;
 import groovyx.net.http.*
@@ -26,12 +27,12 @@ class MilleniumService {
      * @param 
      * @return
      */
-	def makeCall(transaction, recordId) {
+	def makeCall(transaction, recordId) throws MOCallException {
+		if((recordId==null)||(recordId.trim().length()==0)){
+			throw new MOCallException("Record ID not specified", 400, "")
+		}
 		def moCallObj = createMOCall(transaction)
-		
-		
 		def moURL = ConfigurationHolder.config.grails.moURL
-		
 		moCallObj.makeCall(recordId, moURL)
     }
 	
@@ -40,13 +41,17 @@ class MilleniumService {
 	 * @param transaction
 	 * @return
 	 */
-	def createMOCall(transaction){
-		transaction = mapRequest(transaction)
+	def createMOCall(transaction) throws MOCallException{
+		def moCallObj
+		try{
+			def mappedTransaction = mapRequest(transaction)
 
-		Class moCallClass = this.class.classLoader.loadClass('org.chip.mo.'+transaction+'Call')
-		def moCallObj=moCallClass.newInstance()
-		moCallObj.init()
-		
+			Class moCallClass = this.class.classLoader.loadClass('org.chip.mo.'+mappedTransaction+'Call')
+			moCallObj=moCallClass.newInstance()
+			moCallObj.init()
+		}catch(Exception e){
+			throw new MOCallException("Transaction \""+transaction+"\" not implemented", 501, e.getMessage())
+		}
 		return moCallObj
 	}
 	
