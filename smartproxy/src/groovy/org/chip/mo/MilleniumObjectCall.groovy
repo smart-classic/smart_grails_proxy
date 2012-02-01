@@ -2,6 +2,7 @@ package org.chip.mo
 
 import groovy.xml.MarkupBuilder;
 import groovyx.net.http.*
+import org.chip.mo.exceptions.MOCallException
 abstract class MilleniumObjectCall {
 
 	def writer
@@ -10,6 +11,23 @@ abstract class MilleniumObjectCall {
 	def targetServlet
 	
 	protected static final String RECORDIDPARAM = "RECORDIDPARAM"
+	
+	private static final String MO_RESP_STATUS_NODATA="NoData"
+	private static final String MO_RESP_STATUS_ERROR="Error"
+	private static final String MO_RESP_STATUS_SUCCESS="Success"
+	
+	private static Map responseErrorMessageMap
+	private static Map responseErrorStatusCodeMap
+	
+	static{
+		responseErrorMessageMap = new HashMap<String, String>()
+		responseErrorMessageMap.put(MO_RESP_STATUS_NODATA, "No Information found for Record ID: ")
+		responseErrorMessageMap.put(MO_RESP_STATUS_ERROR, "MO Server returned Error for Record ID: ")
+		
+		responseErrorStatusCodeMap = new HashMap<String, Integer>()
+		responseErrorStatusCodeMap.put(MO_RESP_STATUS_ERROR, 500)
+		responseErrorStatusCodeMap.put(MO_RESP_STATUS_NODATA, 404)
+	}
 	
 	def init(){
 		writer = new StringWriter()
@@ -25,26 +43,35 @@ abstract class MilleniumObjectCall {
 	 * @param moURL
 	 * @return
 	 */
-	def makeCall(recordId, moURL){
+	def makeCall(recordId, moURL) throws MOCallException{
 		Map<String,Object> requestParams = new HashMap()
 		requestParams.put(RECORDIDPARAM, recordId)
+		
 		def requestXML = createRequest(requestParams)
 		
 		def resp = makeRestCall(requestXML, moURL)
-		
-		if (isResponseError(resp)){
-			return "Error"
-		}
+
+		handleExceptions(resp, recordId)
+
 		readResponse(resp)
 	}
 	
-	def isResponseError(resp){
+	def handleExceptions(resp, recordId)throws MOCallException{
 		def replyMessage = resp.getData()
 		def status= replyMessage.Status.text()
-		//This is ugly but I've notice MO returning both Error or No Data for invalid patient ids.
-		//Assuming all non success response status as not found and returning 404
-		if(status!="Success") return true
-		return false
+		def isResponseError = false
+		if(status!=MO_RESP_STATUS_SUCCESS){
+			 isResponseError =  true
+		}
+		if(isResponseError){
+			def errorMessage = responseErrorMessageMap.get(status)
+			def statusCode = responseErrorStatusCodeMap.get(status)
+			if(errorMessage==null){
+				errorMessage = "Unexpected response from MO"
+				statusCode = 500
+			}
+			throw new MOCallException(errorMessage+ recordId, statusCode, "MO Response returned status of "+status)
+		}
 	}
 	
 	def createRequest(requestParams){
@@ -64,10 +91,15 @@ abstract class MilleniumObjectCall {
 	 */
 	def abstract generatePayload(requestParams)
 	
-	def makeRestCall(requestXML, moURL){
-		def restClient = new RESTClient(moURL+targetServlet)
-		restClient.setContentType(ContentType.XML)
-		def resp=restClient.post(body:requestXML, requestContentType : ContentType.XML)
+	def makeRestCall(requestXML, moURL)throws MOCallException{
+		def resp
+		try{
+			def restClient = new RESTClient(moURL+targetServlet)
+			restClient.setContentType(ContentType.XML)
+			resp=restClient.post(body:requestXML, requestContentType : ContentType.XML)
+		}catch(Exception e){
+			throw new MOCallException("Request failed: <!--"+requestXML+"-->",500, e.getMessage())
+		}
 		return resp
 	}
 
@@ -76,5 +108,5 @@ abstract class MilleniumObjectCall {
 	 * @param resp
 	 * @return
 	 */
-	def abstract readResponse(resp)
+	def abstract readResponse(resp) throws MOCallException
 }

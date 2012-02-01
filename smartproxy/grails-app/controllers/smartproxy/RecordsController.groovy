@@ -1,5 +1,5 @@
 package smartproxy
-
+import org.chip.mo.exceptions.MOCallException;
 class RecordsController {
 
     def index = { }
@@ -13,16 +13,24 @@ class RecordsController {
 	def makeCall={
 		def recordId=params['record_id']
 		def transaction = params['transaction']
-		
-		def record = milleniumService.makeCall(transaction, recordId)
-		
+		def record
+		def rdf
 		response.setContentType ('application/xml')
-		
-		if(record=="Error"){
-			response.setStatus(404)
-			response.outputStream << "<Response>Error</Response>"
-		}else{
-			response.outputStream << record.toRDF()
+		try{
+			record = milleniumService.makeCall(transaction, recordId)
+		}catch(MOCallException moce){
+			response.setStatus(moce.getStatusCode())
+			response.outputStream << "<Error><Message>"+moce.getExceptionMessage()+"</Message><RootCause>"+moce.getRootCause()+"</RootCause></Error>"
+			return;
 		}
+		
+		try{
+			rdf = record.toRDF()
+		}catch(Exception e){
+			response.setStatus(500)
+			response.outputStream << "<Error><Message>Error creating RDF</Message><RootCause>"+e.getMessage()+"</RootCause></Error>"
+			return;
+		}
+		response.outputStream << rdf
 	}
 }

@@ -1,5 +1,6 @@
 package org.chip.mo
 
+import org.chip.mo.exceptions.MOCallException;
 import org.chip.rdf.Demographics
 
 class DemographicsCall extends MilleniumObjectCall{
@@ -30,31 +31,40 @@ class DemographicsCall extends MilleniumObjectCall{
    * @param moResponse
    * @return
    */
-  def readResponse(moResponse){
-	  
-	  def replyMessage = moResponse.getData()
-	  def payload= replyMessage.Payload
-	  
-	  def person = payload.Person
-	  def birthDateTime = person.BirthDateTime.text()
-	  if(birthDateTime.length()>0){
-		  birthDateTime=person.BirthDateTime.text().substring(0, 10)
-	  }
-	  def givenName=person.FirstName.text()
-	  def familyName=person.LastName.text()
-	  def gender=person.Gender.Meaning.text().toLowerCase()
+  def readResponse(moResponse)throws MOCallException{
+	  def birthDateTime=""
+	  def givenName=""
+	  def familyName=""
+	  def gender=""
 	  def zipcode=""
-	  if(person.Addresses.Address.Zipcode.text().length()>=5){
-		  zipcode=person.Addresses.Address.Zipcode.text().substring(0,5)
-	  }
 	  def mrn=""
-	  def personalAliases = person.PersonAliases
-	  person.PersonAliases.PersonAlias.each{ personAlias->
-		   if((personAlias.AliasPool.Value.text()==PERSON_ALIAS_POOL_VALUE_CHB_MRN)
-			   &&(personAlias.PersonAliasType.Meaning.text()==PERSON_ALIAS_TYPE_MEANING_MRN)){
-			  mrn = personAlias.Alias.text()
+	  try{
+		  def replyMessage = moResponse.getData()
+		  def payload= replyMessage.Payload
+		  
+		  def person = payload.Person
+		   birthDateTime = person.BirthDateTime.text()
+		  if(birthDateTime.length()>0){
+			  birthDateTime=person.BirthDateTime.text().substring(0, 10)
 		  }
-	  }
+		   givenName=person.FirstName.text()
+		   familyName=person.LastName.text()
+		   gender=person.Gender.Meaning.text().toLowerCase()
+		   zipcode=""
+		  if(person.Addresses.Address.Zipcode.text().length()>=5){
+			  zipcode=person.Addresses.Address.Zipcode.text().substring(0,5)
+		  }
+		   mrn=""
+		  def personalAliases = person.PersonAliases
+		  person.PersonAliases.PersonAlias.each{ personAlias->
+			   if((personAlias.AliasPool.Value.text()==PERSON_ALIAS_POOL_VALUE_CHB_MRN)
+				   &&(personAlias.PersonAliasType.Meaning.text()==PERSON_ALIAS_TYPE_MEANING_MRN)){
+				  mrn = personAlias.Alias.text()
+			  }
+		  }		
+		 }catch(Exception e){
+			throw new MOCallException("Error reading MO response", 500, e.getMessage())
+		}
 	  return new Demographics(birthDateTime, givenName, familyName, gender, zipcode, mrn)
   }
 }
