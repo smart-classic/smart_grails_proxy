@@ -19,6 +19,8 @@ class RecordsController {
 		try{
 			record = milleniumService.makeCall(transaction, recordId)
 		}catch(MOCallException moce){
+			log.error(moce.getExceptionMessage())
+			log.error(moce.getRootCause())
 			response.setStatus(moce.getStatusCode())
 			response.outputStream << "<Error><Message>"+moce.getExceptionMessage()+"</Message><RootCause>"+moce.getRootCause()+"</RootCause></Error>"
 			return;
@@ -27,6 +29,8 @@ class RecordsController {
 		try{
 			rdf = record.toRDF()
 		}catch(Exception e){
+			log.error("Error creating RDF")
+			log.error(e.getMessage())
 			response.setStatus(500)
 			response.outputStream << "<Error><Message>Error creating RDF</Message><RootCause>"+e.getMessage()+"</RootCause></Error>"
 			return;
