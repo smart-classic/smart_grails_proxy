@@ -157,5 +157,6 @@ log4j = {
         error 'file'
 	}
 	
+	//Comment the following line if you want to disable logging all MO requests and responses
 	debug 	"org.apache.http.wire"
 }
