@@ -147,3 +147,15 @@ cerner{
 		}
 	}
 }
+	
+	
+log4j = {
+    appenders {
+        file name:'file', file:'C:\\logs\\smartproxy.log'
+    }
+    root {
+        error 'file'
+	}
+	
+	debug 	"org.apache.http.wire"
+}
