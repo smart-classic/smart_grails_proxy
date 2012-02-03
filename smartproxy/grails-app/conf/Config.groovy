@@ -1,15 +1,3 @@
-// locations to search for config files that get merged into the main config
-// config files can either be Java properties files or ConfigSlurper scripts
-
-// grails.config.locations = [ "classpath:${appName}-config.properties",
-//                             "classpath:${appName}-config.groovy",
-//                             "file:${userHome}/.grails/${appName}-config.properties",
-//                             "file:${userHome}/.grails/${appName}-config.groovy"]
-
-// if(System.properties["${appName}.config.location"]) {
-//    grails.config.locations << "file:" + System.properties["${appName}.config.location"]
-// }
-
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
 grails.mime.file.extensions = true // enables the parsing of file extensions from URLs into the request format
 grails.mime.use.accept.header = false
@@ -48,6 +36,19 @@ grails.logging.jul.usebridge = true
 // packages to include in Spring bean scanning
 grails.spring.bean.packages = []
 
+def externalConfigFileLocation
+environment{
+	production{
+		externalConfigFileLocation="specify me"
+	}
+	development{
+		externalConfigFileLocation="C:\\grails-config\\smart\\"
+	}
+	test{
+		externalConfigFileLocation="${userHome}/grails-config/"
+	}
+}
+
 grails.config.locations = [ ]
 
 // External config settings derived from Mick Knutson's blog: http://www.baselogic.com/blog/
@@ -63,9 +64,9 @@ if (System.getProperty(PROPERTY_ENV_NAME) && new File(System.getProperty(PROPERT
     grails.config.locations << "file:" + System.getProperty(PROPERTY_ENV_NAME)
 }
 // 2: If no command line optins, check in ~/grails-config
-else if (new File("${userHome}/grails-config/${appName}-config.groovy").exists()) {
-    println "*** User defined config: file:${userHome}/grails-config/${appName}-config.groovy. ***"
-    grails.config.locations = ["file:${userHome}/grails-config/${appName}-config.groovy"]
+else if (new File(externalConfigFileLocation+"${appName}-config.groovy").exists()) {
+    println "*** User defined config: file:${externalConfigFileLocation}${appName}-config.groovy. ***"
+    grails.config.locations = ["file:${externalConfigFileLocation}${appName}-config.groovy"]
 }
 // 3: Finally, check for a System Environment variable
 //    that will define where we should look.
@@ -111,18 +112,6 @@ cas{
         casClientId = 'smartmpage'
         casServiceId = 'SmartWebApp'
     }
-}
-
-environments {
-
-    production {       
-        grails.moURL = 'setme'
-    }
-
-    development {
-        grails.moURL = 'setme'
-    }
-
 }
 
 */
