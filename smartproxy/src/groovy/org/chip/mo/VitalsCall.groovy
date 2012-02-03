@@ -11,7 +11,7 @@ class VitalsCall extends MilleniumObjectCall{
 	
 	private static final String ENCOUNTERIDSPARAM = "ENCOUNTERIDSPARAM"
 	
-	Map vitalSignsMap = new HashMap()
+	Map vitalSignsGroupByEncounter = new HashMap()
 	
 	private static final String EVENTCODEHEIGHT
 	private static final String EVENTCODEWEIGHT
@@ -149,7 +149,7 @@ class VitalsCall extends MilleniumObjectCall{
 		//long l2 = new Date().getTime()
 		//println("encounter mo call took : "+(l2-l1)/1000)
 		readResponse(resp)
-		//println("no of encounters: "+vitalSignsMap.size())
+		//println("no of encounters: "+vitalSignsGroupByEncounter.size())
 		
 		//refresh the writer and builder objects
 		writer = new StringWriter()
@@ -158,7 +158,7 @@ class VitalsCall extends MilleniumObjectCall{
 		transaction = 'ReadResultsByCount'
 		targetServlet = 'com.cerner.results.ResultsServlet'
 		
-		requestParams.put(ENCOUNTERIDSPARAM, vitalSignsMap.keySet())
+		requestParams.put(ENCOUNTERIDSPARAM, vitalSignsGroupByEncounter.keySet())
 		requestXML = createRequest(requestParams)
 		//l1 = new Date().getTime()
 		resp=makeRestCall(requestXML, moURL)
@@ -205,7 +205,7 @@ class VitalsCall extends MilleniumObjectCall{
 	* 		∘ specify if the added vital is a bpevent
 	* 		∘ Add the vital to a list. This list will be added to a map which has parent event id as the key. 
 	* 			So all vitals with the same parent event id are grouped together.
-	* 		∘ If can't match my parent event id, match by timestamps.
+	* 		∘ If can't match by parent event id, match by timestamps.
 	* 
 	* Iterate through all CodedResults	
 	* 	• if the event code is in the vitalEventCodesSet and value is valid
@@ -213,7 +213,7 @@ class VitalsCall extends MilleniumObjectCall{
 	* 		∘ specify if the added vital is a bpevent
 	* 		∘ specify that the vital is codedfield
 	* 		∘ Add the vital to a list. This list will be added to a map which has parent event id as the key. So all vitals with the same parent event id are grouped together.
-	* 		∘ If can't match my parent event id, match by timestamps.
+	* 		∘ If can't match by parent event id, match by timestamps.
 	* @param moResponse
 	* @return
 	*/
@@ -233,9 +233,9 @@ class VitalsCall extends MilleniumObjectCall{
 					encounter.setEndDate(it.DischargeDateTime.text())
 					encounter.setResource(encounterResourceMap.get(it.EncounterTypeClass.Display.text()))
 					encounter.setTitle(encounterTitleMap.get(it.EncounterTypeClass.Display.text()))
-					VitalSigns vitalSigns = new VitalSigns()
-					vitalSigns.setEncounter(encounter)
-					vitalSignsMap.put(it.EncounterId.text(), vitalSigns)
+					VitalSignsGroup vitalSignsGroup = new VitalSignsGroup()
+					vitalSignsGroup.setEncounter(encounter)
+					vitalSignsGroupByEncounter.put(it.EncounterId.text(), vitalSignsGroup)
 				}
 				//long l2 = new Date().getTime()
 				//println("encounter reading moresponse took: "+(l2-l1)/1000)
@@ -269,7 +269,7 @@ class VitalsCall extends MilleniumObjectCall{
 							vitalSign.setUpdateDateTime(currentUpdateDateTime)
 							(bpEventCodesSet.contains(currentEventCode))?vitalSign.setIsBPField(true):vitalSign.setIsBPField(false)
 							
-							addVitalSignToVitalSignsMap(vitalSign, currentEncounterId)
+							addVitalSignToVitalSignsGroupByEncounter(vitalSign, currentEncounterId)
 							
 						}
 				}	
@@ -298,11 +298,11 @@ class VitalsCall extends MilleniumObjectCall{
 							(bpEventCodesSet.contains(currentEventCode))?vitalSign.setIsBPField(true):vitalSign.setIsBPField(false)
 							vitalSign.setIsCodedField(true)
 							
-							addVitalSignToVitalSignsMap(vitalSign, currentEncounterId)
+							addVitalSignToVitalSignsGroupByEncounter(vitalSign, currentEncounterId)
 						}
 				}
 				
-				postProcessVitalSignsMap()
+				postProcessVitalSignsGroupByEncounter()
 				//println("number of results returned : " + i)
 				//long l2 = new Date().getTime()
 				//println("vitals reading moresponse took: "+(l2-l1)/1000)
@@ -310,22 +310,22 @@ class VitalsCall extends MilleniumObjectCall{
 		}catch(Exception e){
 			throw new MOCallException("Error reading MO response", 500, e.getMessage())
 		}
-		return new Vitals(vitalSignsMap)
+		return new Vitals(vitalSignsGroupByEncounter)
 	}
 	
-	def addVitalSignToVitalSignsMap(VitalSign vitalSign, String currentEncounterId){
-		if(vitalSignsMap.get(currentEncounterId).vitalSignMap.keySet().contains(vitalSign.getParentEventId())){
-			vitalSignsMap.get(currentEncounterId).vitalSignMap.get(vitalSign.getParentEventId()).add(vitalSign)
+	def addVitalSignToVitalSignsGroupByEncounter(VitalSign vitalSign, String currentEncounterId){
+		if(vitalSignsGroupByEncounter.get(currentEncounterId).vitalSignsByParentEvent.keySet().contains(vitalSign.getParentEventId())){
+			vitalSignsGroupByEncounter.get(currentEncounterId).vitalSignsByParentEvent.get(vitalSign.getParentEventId()).add(vitalSign)
 		}else{
 			//Unable to match on parentEventId
 			//Try and match on timestamp first
 			boolean matchFound = false
 			//Get the set of all parentEventIds for this encounter
-			Set vitalSignMapKeySet = vitalSignsMap.get(currentEncounterId).vitalSignMap.keySet()
+			Set parentEventIds = vitalSignsGroupByEncounter.get(currentEncounterId).vitalSignsByParentEvent.keySet()
 			//Iterate through each parentEventId
-			vitalSignMapKeySet.each{ parentEventId ->
+			parentEventIds.each{ parentEventId ->
 				//Get the vitalSignList attached to this parentEventId
-				List vitalSignList = vitalSignsMap.get(currentEncounterId).vitalSignMap.get(parentEventId)
+				List vitalSignList = vitalSignsGroupByEncounter.get(currentEncounterId).vitalSignsByParentEvent.get(parentEventId)
 				
 				//compare the timestamps from the first element in the list with the current event's timestamps.
 				String listEventEndDateTime = null
@@ -336,7 +336,7 @@ class VitalsCall extends MilleniumObjectCall{
 				}
 				if(vitalSign.getEventEndDateTime()==listEventEndDateTime && vitalSign.getUpdateDateTime()==listUpdateDateTime){
 					//timestamps match. Add the vital to this list.
-					vitalSignsMap.get(currentEncounterId).vitalSignMap.get(parentEventId).add(vitalSign)
+					vitalSignsGroupByEncounter.get(currentEncounterId).vitalSignsByParentEvent.get(parentEventId).add(vitalSign)
 					matchFound = true
 				}
 			}
@@ -345,7 +345,7 @@ class VitalsCall extends MilleniumObjectCall{
 			if(!matchFound){
 				List<VitalSign> newVitalSignList = new ArrayList()
 				newVitalSignList.add(vitalSign)
-				vitalSignsMap.get(currentEncounterId).vitalSignMap.put(vitalSign.getParentEventId(), newVitalSignList)
+				vitalSignsGroupByEncounter.get(currentEncounterId).vitalSignsByParentEvent.put(vitalSign.getParentEventId(), newVitalSignList)
 			}
 			
 		}
@@ -354,26 +354,26 @@ class VitalsCall extends MilleniumObjectCall{
 	/**
 	 * Iterate through all encounters
 	 * ->Iterate through all parent event ids for a given encounter
-	 * -->Get the vitals list for the current parent event id
-	 * -->if the first vitals corresponds to a complex bp event, assume all are and proceed to process them.
+	 * -->Get the vitalSigns list for the current parent event id
+	 * -->IMPORTANT ASSUMPTION: if the first vitals corresponds to a complex bp event, assume all are and proceed to process them.
 	 * -->Split the list of complex events into seperate lists based on body position
-	 * -->Add the new lists into the vitalSignsMap
-	 * -->Remove the original list of complex events from the vitalSignsMap
+	 * -->Add the new lists into the vitalSignsGroupByEncounter
+	 * -->Remove the original list of complex events from the vitalSignsGroupByEncounter
 	 * @return
 	 */
-	def postProcessVitalSignsMap(){
+	def postProcessVitalSignsGroupByEncounter(){
 		Map atomicVitalSignsMap = new HashMap()
-		Map encounterComplexParentIdsMap = new HashMap()
+		Map complexEncounterParentIdsMap = new HashMap()
 		
-		Set vitalSignsMapKeySet = vitalSignsMap.keySet()
-		vitalSignsMapKeySet.each{encounterId->
+		Set encounterIds = vitalSignsGroupByEncounter.keySet()
+		encounterIds.each{encounterId->
 			
-			atomicVitalSignsMap.put(encounterId, new VitalSigns())
-			encounterComplexParentIdsMap.put(encounterId, new ArrayList())
+			atomicVitalSignsMap.put(encounterId, new VitalSignsGroup())
+			complexEncounterParentIdsMap.put(encounterId, new ArrayList())
 			
-			Set parentEventIds = vitalSignsMap.get(encounterId).vitalSignMap.keySet()
+			Set parentEventIds = vitalSignsGroupByEncounter.get(encounterId).vitalSignsByParentEvent.keySet()
 			parentEventIds.each{parentEventId->
-				List vitalSignList = vitalSignsMap.get(encounterId).vitalSignMap.get(parentEventId)
+				List vitalSignList = vitalSignsGroupByEncounter.get(encounterId).vitalSignsByParentEvent.get(parentEventId)
 				if(vitalSignList.size()>0){
 					if (complexBPEventCodesSet.contains(((VitalSign)vitalSignList.get(0)).getCode())){
 						List supineBPVitalsList = new ArrayList()
@@ -415,7 +415,7 @@ class VitalsCall extends MilleniumObjectCall{
 									supineBPVitalsList.get(0).getEventEndDateTime(),
 									supineBPVitalsList.get(0).getUpdateDateTime()))
 							
-							atomicVitalSignsMap.get(encounterId).vitalSignMap.put(supineBPVitalsList.get(0).getEventId(), supineBPVitalsList)
+							atomicVitalSignsMap.get(encounterId).vitalSignsByParentEvent.put(supineBPVitalsList.get(0).getEventId(), supineBPVitalsList)
 						}
 						if(standingBPVitalsList.size()>0){
 							standingBPVitalsList.add(
@@ -426,7 +426,7 @@ class VitalsCall extends MilleniumObjectCall{
 									standingBPVitalsList.get(0).getEventEndDateTime(),
 									standingBPVitalsList.get(0).getUpdateDateTime()))
 							
-							atomicVitalSignsMap.get(encounterId).vitalSignMap.put(standingBPVitalsList.get(0).getEventId(), standingBPVitalsList)
+							atomicVitalSignsMap.get(encounterId).vitalSignsByParentEvent.put(standingBPVitalsList.get(0).getEventId(), standingBPVitalsList)
 						}
 						if(sittingBPVitalsList.size()>0){
 							sittingBPVitalsList.add(
@@ -437,10 +437,10 @@ class VitalsCall extends MilleniumObjectCall{
 									sittingBPVitalsList.get(0).getEventEndDateTime(),
 									sittingBPVitalsList.get(0).getUpdateDateTime()))
 							
-							atomicVitalSignsMap.get(encounterId).vitalSignMap.put(sittingBPVitalsList.get(0).getEventId(), sittingBPVitalsList)
+							atomicVitalSignsMap.get(encounterId).vitalSignsByParentEvent.put(sittingBPVitalsList.get(0).getEventId(), sittingBPVitalsList)
 						}
 						
-						encounterComplexParentIdsMap.get(encounterId).add(parentEventId)
+						complexEncounterParentIdsMap.get(encounterId).add(parentEventId)
 					}
 				}
 			}
@@ -448,17 +448,17 @@ class VitalsCall extends MilleniumObjectCall{
 		
 		Set atomicVitalSignsMapKeySet = atomicVitalSignsMap.keySet()
 		atomicVitalSignsMapKeySet.each { encounterId->
-			Set parentEventIdSet = atomicVitalSignsMap.get(encounterId).vitalSignMap.keySet()
+			Set parentEventIdSet = atomicVitalSignsMap.get(encounterId).vitalSignsByParentEvent.keySet()
 			parentEventIdSet.each{ parentEventId->
-				vitalSignsMap.get(encounterId).vitalSignMap.put(parentEventId, atomicVitalSignsMap.get(encounterId).vitalSignMap.get(parentEventId))
+				vitalSignsGroupByEncounter.get(encounterId).vitalSignsByParentEvent.put(parentEventId, atomicVitalSignsMap.get(encounterId).vitalSignsByParentEvent.get(parentEventId))
 			}
 		}
 		
-		Set encounterComplexParentIdsMapKeySet = encounterComplexParentIdsMap.keySet()
-		encounterComplexParentIdsMapKeySet.each{encounterId->
-			List complexParentIds = encounterComplexParentIdsMap.get(encounterId)
+		Set complexEncounterParentIdsMapKeySet = complexEncounterParentIdsMap.keySet()
+		complexEncounterParentIdsMapKeySet.each{encounterId->
+			List complexParentIds = complexEncounterParentIdsMap.get(encounterId)
 			complexParentIds.each{complexParentId->
-				vitalSignsMap.get(encounterId).vitalSignMap.remove(complexParentId)
+				vitalSignsGroupByEncounter.get(encounterId).vitalSignsByParentEvent.remove(complexParentId)
 			}
 		}
 	}

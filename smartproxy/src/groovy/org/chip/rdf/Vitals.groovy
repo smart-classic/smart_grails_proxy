@@ -5,28 +5,29 @@ import org.chip.rdf.vitals.*
 
 class Vitals extends Record {
 	
-	public Vitals(vitalSignsMapIn){
-		vitalSignsMap=vitalSignsMapIn
+	public Vitals(vitalSignsGroupByEncounterIn){
+		vitalSignsGroupByEncounter=vitalSignsGroupByEncounterIn
 	}
 	
 	/**
-	 * Maps each Encounter Id to an instance of the VitalSigns Object.
-	 * VitalSigns contains 
+	 * Maps each Encounter Id to an instance of the VitalSignsGroup Object.
+	 * VitalSignsGroup contains 
 	 * 	- An Encounter Object which stores details about a particular Encounter.
-	 * 	- A vitalSignMap which maps each Parent Event Id to a list of VitalSign Objects.
-	 * VitalSign contains details about a particular Vital measure (e.g. diastolic bp)
+	 * 	- A vitalSignsByParentEvent map which maps each Parent Event Id to a list of VitalSign Objects.
+	 * 	- VitalSign contains details about a particular Vital measure (e.g. diastolic bp)
 	 */
-	Map<String, VitalSigns> vitalSignsMap;
+	Map<String, VitalSignsGroup> vitalSignsGroupByEncounter;
 
 	/**
-	 * iterate through the list of encounter ids (key set for vitalSignsMap)
-	 * for each vitalSignMap retrieved (belonging to current encounter id)
-	 * *iterate through the list of parent event ids (key set for vitalSignMap)
-	 * 	• for each vitalsign list retrieved (belonging to current parent id)
-	 * 		∘ go through all non bp fields and create vitalsign elements
-	 *  	∘ go through all bp fields and
-	 *	 		‣ if coded field then generate appropriate rdf
-	 *	 		‣ if not coded field then generate appropriate rdf
+	 * iterate through the set of encounter ids (key set for vitalSignsGroupByEncounter map)
+	 * retrieve vitalSignsGroup. This contains an instance of vitalSignsByParentEvent
+	 * for each vitalSignsByParentEvent map retrieved (belonging to current encounter id)
+	 * * iterate through the list of parent event ids (key set for vitalSignsByParentEvent map)
+	 * * for each vitalsign list retrieved (belonging to current parent id)
+	 *   * * go through all non bp fields and create vitalsign elements
+	 *   * * go through all bp fields and
+	 *       * * if coded field then generate appropriate rdf
+	 * 		 * * if non coded field then generate appropriate rdf
 	 */
 	def toRDF(){
 		//long l1 = new Date().getTime()
@@ -42,17 +43,17 @@ class Vitals extends Record {
 			mkp.declareNamespace('dcterms':'http://purl.org/dc/terms/')
 			mkp.declareNamespace('v':'http://www.w3.org/2006/vcard/ns#')
 			'rdf:RDF'(){
-				Set vitalSignsKeySet = vitalSignsMap.keySet()
-				vitalSignsKeySet.each{ vitalSignsKey ->
+				Set encounterIDs = vitalSignsGroupByEncounter.keySet()
+				encounterIDs.each{ encounterId ->
 					def encounterElementCount =0
 					
-					VitalSigns vitalSigns = vitalSignsMap.get(vitalSignsKey)
-					Map<String, VitalSign> vitalSignMap = vitalSigns.getVitalSignMap()
-					Set parentEventIdSet=vitalSignMap.keySet()
-					parentEventIdSet.each{parentEventId->
+					VitalSignsGroup vitalSignsGroup = vitalSignsGroupByEncounter.get(encounterId)
+					Map<String, VitalSign> vitalSignsByParentEvent = vitalSignsGroup.vitalSignsByParentEvent
+					Set parentEventIds=vitalSignsByParentEvent.keySet()
+					parentEventIds.each{parentEventId->
 						//'sp:VitalSigns'(parentEventId:parentEventId){
 						'sp:VitalSigns'(){
-							Encounter encounter = vitalSigns.getEncounter()
+							Encounter encounter = vitalSignsGroup.getEncounter()
 							'dcterms:date'(encounter.getStartDate())
 							//createEncounter(encounter.getStartDate(), encounter.getEndDate(), encounter.getResource(), encounter.getTitle())
 							encounterElementCount++
@@ -77,8 +78,8 @@ class Vitals extends Record {
 							}
 							
 							boolean hasBPFields = false
-							List<VitalSign> vitalSignList = vitalSigns.getVitalSignMap().get(parentEventId)
-							vitalSignList.each { vitalSign-> 
+							List<VitalSign> vitalSigns = vitalSignsGroup.vitalSignsByParentEvent.get(parentEventId)
+							vitalSigns.each { vitalSign-> 
 								if (!vitalSign.isBPField){
 									def type = vitalSign.getType()
 									//createVital(vitalSign.getType(), vitalSign.getTitle(), vitalSign.getValue(), vitalSign.getResource(), vitalSign.getUnit())
@@ -102,7 +103,7 @@ class Vitals extends Record {
 							if(hasBPFields){
 								'sp:bloodPressure'(){
 								'sp:BloodPressure'(){
-									vitalSignList.each { vitalSign->
+									vitalSigns.each { vitalSign->
 										if (vitalSign.isBPField){
 											//createVital(vitalSign.getType(), vitalSign.getTitle(), vitalSign.getValue(), vitalSign.getResource(), vitalSign.getValue())
 											def type = vitalSign.getType()
