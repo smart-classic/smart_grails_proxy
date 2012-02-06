@@ -39,7 +39,8 @@ class VitalsCall extends MilleniumObjectCall{
 	static final Map vitalUnitMap
 	static final Set vitalEventCodesSet
 	static final Set bpEventCodesSet
-	static final Set complexBPEventCodesSet
+	static final Map bpEventCodeByComplexBPEventCode
+	static final Map bodyPositionByComplexBPEventCode
 	
 	static{
 		
@@ -103,13 +104,23 @@ class VitalsCall extends MilleniumObjectCall{
 		bpEventCodesSet.add(EVENTCODEPOSITION)
 		bpEventCodesSet.add(EVENTCODEBPMETHOD)
 		
-		complexBPEventCodesSet = new HashSet()
-		complexBPEventCodesSet.add(EVENTCODESYSSUPINE)
-		complexBPEventCodesSet.add(EVENTCODESYSSITTING)
-		complexBPEventCodesSet.add(EVENTCODESYSSTANDING)
-		complexBPEventCodesSet.add(EVENTCODEDIASUPINE)
-		complexBPEventCodesSet.add(EVENTCODEDIASITTING)
-		complexBPEventCodesSet.add(EVENTCODEDIASTANDING)
+		bpEventCodeByComplexBPEventCode = new HashMap()
+		bpEventCodeByComplexBPEventCode.put(EVENTCODESYSSUPINE, EVENTCODESYS)
+		bpEventCodeByComplexBPEventCode.put(EVENTCODESYSSITTING, EVENTCODESYS)
+		bpEventCodeByComplexBPEventCode.put(EVENTCODESYSSTANDING, EVENTCODESYS)
+		bpEventCodeByComplexBPEventCode.put(EVENTCODEDIASUPINE, EVENTCODEDIA)
+		bpEventCodeByComplexBPEventCode.put(EVENTCODEDIASITTING, EVENTCODEDIA)
+		bpEventCodeByComplexBPEventCode.put(EVENTCODEDIASTANDING, EVENTCODEDIA)
+		
+		bodyPositionByComplexBPEventCode = new HashMap()
+		bodyPositionByComplexBPEventCode.put(EVENTCODESYSSUPINE, 'Supine')
+		bodyPositionByComplexBPEventCode.put(EVENTCODESYSSITTING, 'Supine')
+		bodyPositionByComplexBPEventCode.put(EVENTCODESYSSTANDING, 'Sitting')
+		bodyPositionByComplexBPEventCode.put(EVENTCODEDIASUPINE, 'Sitting')
+		bodyPositionByComplexBPEventCode.put(EVENTCODEDIASITTING, 'Standing')
+		bodyPositionByComplexBPEventCode.put(EVENTCODEDIASTANDING, 'Standing')
+		
+		
 		
 	}
 	
@@ -396,77 +407,54 @@ class VitalsCall extends MilleniumObjectCall{
 			parentEventIds.each{parentEventId->
 				List vitalSignList = vitalSignsGroupByEncounter.get(encounterId).vitalSignsByParentEvent.get(parentEventId)
 				if(vitalSignList.size()>0){
-					if (complexBPEventCodesSet.contains(((VitalSign)vitalSignList.get(0)).getCode())){
+					if (bpEventCodeByComplexBPEventCode.keySet().contains(((VitalSign)vitalSignList.get(0)).getCode())){
 						List supineBPVitalsList = new ArrayList()
 						List standingBPVitalsList = new ArrayList()
 						List sittingBPVitalsList = new ArrayList()
+						
+						Map bodyPositionListMap = new HashMap()
+						bodyPositionListMap.put("Supine", supineBPVitalsList)
+						bodyPositionListMap.put("Sitting", sittingBPVitalsList)
+						bodyPositionListMap.put("Standing", standingBPVitalsList)
+						
 						vitalSignList.each{complexVitalSign->
-							if(complexVitalSign.getCode()==EVENTCODESYSSUPINE){
-								supineBPVitalsList.add(createVitalSignFromNumericResult(complexVitalSign.getEventId(), complexVitalSign.getParentEventId(),
-									 complexVitalSign.getValue(), EVENTCODESYS,
-									 complexVitalSign.getEventEndDateTime(), complexVitalSign.getUpdateDateTime()))
-							}else if(complexVitalSign.getCode()==EVENTCODEDIASUPINE){
-								supineBPVitalsList.add(createVitalSignFromNumericResult(complexVitalSign.getEventId(), complexVitalSign.getParentEventId(),
-									complexVitalSign.getValue(), EVENTCODEDIA,
+							
+							def bpEventCode = bpEventCodeByComplexBPEventCode.get(complexVitalSign.getCode())
+							def bodyPosition = bodyPositionByComplexBPEventCode.get(complexVitalSign.getCode())
+							
+							if(bodyPositionListMap.get(bodyPosition).size()>0){//list has already been initialized. Only add the bp value
+								bodyPositionListMap.get(bodyPosition).add(
+									createVitalSignFromNumericResult(complexVitalSign.getEventId(),
+									complexVitalSign.getParentEventId(),
+									complexVitalSign.getValue(),
+									bpEventCode,
 									complexVitalSign.getEventEndDateTime(), complexVitalSign.getUpdateDateTime()))
-							}else if(complexVitalSign.getCode()==EVENTCODESYSSTANDING){
-								standingBPVitalsList.add(createVitalSignFromNumericResult(complexVitalSign.getEventId(), complexVitalSign.getParentEventId(),
-									complexVitalSign.getValue(), EVENTCODESYS,
-									complexVitalSign.getEventEndDateTime(), complexVitalSign.getUpdateDateTime()))
-							}else if(complexVitalSign.getCode()==EVENTCODEDIASTANDING){
-								standingBPVitalsList.add(createVitalSignFromNumericResult(complexVitalSign.getEventId(), complexVitalSign.getParentEventId(),
-									complexVitalSign.getValue(), EVENTCODEDIA,
-									complexVitalSign.getEventEndDateTime(), complexVitalSign.getUpdateDateTime()))
-							}else if(complexVitalSign.getCode()==EVENTCODESYSSITTING){
-								sittingBPVitalsList.add(createVitalSignFromNumericResult(complexVitalSign.getEventId(), complexVitalSign.getParentEventId(),
-									complexVitalSign.getValue(), EVENTCODESYS,
-									complexVitalSign.getEventEndDateTime(), complexVitalSign.getUpdateDateTime()))
-							}else if(complexVitalSign.getCode()==EVENTCODEDIASITTING){
-								sittingBPVitalsList.add(createVitalSignFromNumericResult(complexVitalSign.getEventId(), complexVitalSign.getParentEventId(),
-									complexVitalSign.getValue(), EVENTCODEDIA,
+							}else{// new list. Add both the bp value and body position
+								bodyPositionListMap.get(bodyPosition).add(
+									createVitalSignFromCodedResult(complexVitalSign.getEventId(),
+										complexVitalSign.getParentEventId(),
+										bodyPosition,
+										EVENTCODEPOSITION,
+										complexVitalSign.getEventEndDateTime(),
+										complexVitalSign.getUpdateDateTime()))
+								bodyPositionListMap.get(bodyPosition).add(
+									createVitalSignFromNumericResult(complexVitalSign.getEventId(),
+									complexVitalSign.getParentEventId(),
+									complexVitalSign.getValue(),
+									bpEventCode,
 									complexVitalSign.getEventEndDateTime(), complexVitalSign.getUpdateDateTime()))
 							}
+
+							bodyPositionListMap.each{bodyPositionKey, bodyPositionList ->
+								atomicVitalSignsMap.get(encounterId).vitalSignsByParentEvent.put(bodyPositionList.get(0).getEventId(), bodyPositionList)
+							}
 						}
-						if(supineBPVitalsList.size()>0){
-							supineBPVitalsList.add(
-								createVitalSignFromCodedResult(supineBPVitalsList.get(0).getEventId(),
-									supineBPVitalsList.get(0).getParentEventId(),
-									'Supine',
-									EVENTCODEPOSITION,
-									supineBPVitalsList.get(0).getEventEndDateTime(),
-									supineBPVitalsList.get(0).getUpdateDateTime()))
-							
-							atomicVitalSignsMap.get(encounterId).vitalSignsByParentEvent.put(supineBPVitalsList.get(0).getEventId(), supineBPVitalsList)
-						}
-						if(standingBPVitalsList.size()>0){
-							standingBPVitalsList.add(
-								createVitalSignFromCodedResult(standingBPVitalsList.get(0).getEventId(),
-									standingBPVitalsList.get(0).getParentEventId(),
-									'Standing',
-									EVENTCODEPOSITION,
-									standingBPVitalsList.get(0).getEventEndDateTime(),
-									standingBPVitalsList.get(0).getUpdateDateTime()))
-							
-							atomicVitalSignsMap.get(encounterId).vitalSignsByParentEvent.put(standingBPVitalsList.get(0).getEventId(), standingBPVitalsList)
-						}
-						if(sittingBPVitalsList.size()>0){
-							sittingBPVitalsList.add(
-								createVitalSignFromCodedResult(sittingBPVitalsList.get(0).getEventId(),
-									sittingBPVitalsList.get(0).getParentEventId(),
-									'Sitting',
-									EVENTCODEPOSITION,
-									sittingBPVitalsList.get(0).getEventEndDateTime(),
-									sittingBPVitalsList.get(0).getUpdateDateTime()))
-							
-							atomicVitalSignsMap.get(encounterId).vitalSignsByParentEvent.put(sittingBPVitalsList.get(0).getEventId(), sittingBPVitalsList)
-						}
-						
 						complexEncounterParentIdsMap.get(encounterId).add(parentEventId)
 					}
 				}
 			}
 		} 
-		
+			
 		Set atomicVitalSignsMapKeySet = atomicVitalSignsMap.keySet()
 		atomicVitalSignsMapKeySet.each { encounterId->
 			Set parentEventIdSet = atomicVitalSignsMap.get(encounterId).vitalSignsByParentEvent.keySet()
@@ -474,7 +462,7 @@ class VitalsCall extends MilleniumObjectCall{
 				vitalSignsGroupByEncounter.get(encounterId).vitalSignsByParentEvent.put(parentEventId, atomicVitalSignsMap.get(encounterId).vitalSignsByParentEvent.get(parentEventId))
 			}
 		}
-		
+			
 		Set complexEncounterParentIdsMapKeySet = complexEncounterParentIdsMap.keySet()
 		complexEncounterParentIdsMapKeySet.each{encounterId->
 			List complexParentIds = complexEncounterParentIdsMap.get(encounterId)
