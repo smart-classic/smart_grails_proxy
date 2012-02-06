@@ -352,14 +352,35 @@ class VitalsCall extends MilleniumObjectCall{
 	}
 	
 	/**
-	 * Iterate through all encounters
-	 * ->Iterate through all parent event ids for a given encounter
-	 * -->Get the vitalSigns list for the current parent event id
-	 * -->IMPORTANT ASSUMPTION: if the first vitals corresponds to a complex bp event, assume all are and proceed to process them.
-	 * -->Split the list of complex events into seperate lists based on body position
-	 * -->Add the new lists into the vitalSignsGroupByEncounter
-	 * -->Remove the original list of complex events from the vitalSignsGroupByEncounter
-	 * @return
+	 * Overview:
+	 * This method extracts atomic vital sign results from complex vital sign results.
+	 * e.g. MO can return a vital sign result which contains a 'systolic bp' reading at 'supine' body position. (SYSTOLIC-98-SUPINE)
+	 * This method will break this into two vital signs: 'systolic bp'(SYSTOLIC-98) reading and 'supine'(SUPINE) body position
+	 * ****************************
+	 * Data Structures explanation:
+	 * 1. atomicVitalSignsMap holds the lists of newly created (atomic) vital sign objects, grouped by a parent event id and further by encounter id.
+	 * 	-Each of these lists are mapped to a new parent event id.
+	 * 	-This is done because:
+	 * 		-e.g. SYSTOLIC-98-SUPINE and SYSTOLIC-100-SITTING complex results both have the same parent event id (as returned by MO)
+	 * 		-After splitting these into atomic results:
+	 * 			-SYSTOLIC-98 and SUPINE are given a unique parent event id.
+	 * 			-SYSTOLIC-100 and SITTING are given a unique parent event id... and so on.
+	 * 			-The two systolic readings are now correctly associated with a body position using the new parent event id.
+	 * 
+	 * 2. complexEncounterParentIdsMap holds the parent event ids(grouped by encounter id) of the vital sign lists that contain complex results. 
+	 * ****************************
+	 * Algorithm:
+	 * -Iterate through all encounters
+	 * 	-Add an entry in the atomicVitalSignsMap to store lists of new atomic vital sign objects for the current encounterId
+	 * 		-Iterate through all parent event ids for the current encounter
+	 * 			-Get the vitalSigns list for the current parent event id
+	 * 			-IMPORTANT ASSUMPTION: if the first vital sign in the list is a complex bp result, assume all are and proceed to process them.
+	 * 			-Split the list of complex results into seperate lists based on body position
+	 * 			-Add the list to the atomicVitalSignsMap, grouped by parent event id and further by encounter id
+	 * 			-Add the parent event id of the complex results to complexEncounterParentIdsMap, grouped by encounter id
+	 * 	-Add the new lists from atomicVitalSignsMap to the vitalSignsGroupByEncounter
+	 * 	-Remove the original lists of complex results (referenced by parent event ids in complexEncounterParentIdsMap) from the vitalSignsGroupByEncounter
+	 * ****************************
 	 */
 	def postProcessVitalSignsGroupByEncounter(){
 		Map atomicVitalSignsMap = new HashMap()
