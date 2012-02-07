@@ -37,7 +37,7 @@ grails.logging.jul.usebridge = true
 grails.spring.bean.packages = []
 
 def externalConfigFileLocation
-environment{
+environments{
 	production{
 		externalConfigFileLocation="specify me"
 	}
@@ -48,7 +48,6 @@ environment{
 		externalConfigFileLocation="${userHome}/grails-config/"
 	}
 }
-
 grails.config.locations = [ ]
 
 // External config settings derived from Mick Knutson's blog: http://www.baselogic.com/blog/
