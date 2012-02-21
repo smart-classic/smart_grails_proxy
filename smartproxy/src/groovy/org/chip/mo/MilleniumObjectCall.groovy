@@ -61,13 +61,10 @@ abstract class MilleniumObjectCall {
 		def status= replyMessage.Status.text()
 		def isResponseError = false
 		if(status!=MO_RESP_STATUS_SUCCESS){
-			 isResponseError =  true
-		}
-		if(isResponseError){
 			def errorMessage = responseErrorMessageMap.get(status)
 			def statusCode = responseErrorStatusCodeMap.get(status)
 			if(errorMessage==null){
-				errorMessage = "Unexpected response from MO"
+				errorMessage = "Unexpected response from MO "
 				statusCode = 500
 			}
 			throw new MOCallException(errorMessage+ recordId, statusCode, "MO Response returned status of "+status)
