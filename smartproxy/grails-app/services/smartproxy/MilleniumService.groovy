@@ -9,20 +9,22 @@ class MilleniumService {
     static transactional = false
 	
 	/**
-	 * Maps the incoming transaction to a MilleniumObjectCall object.
+	 * Maps the incoming transaction to a list of resolving vital calls.
 	 */
-	static Map requestMOMap = new HashMap()
+	static Map transactionStepsMap = new HashMap()
 	
 	static {
-		requestMOMap.put 'demographics', 'Demographics'
-		requestMOMap.put 'problems', 'Problems'
-		requestMOMap.put 'vital_signs', 'Vitals'
+		transactionStepsMap.put 'demographics', ['Demographics']
+		transactionStepsMap.put 'problems', ['Problems']
+		transactionStepsMap.put 'vital_signs', ['Encounters','Results']
 	}
 
 	/**
      * Entry method into this service class.
-     * Gets and transaction specific instance of the MilleniumObject Call object
-     * Invokes makeCall on the MO Call object
+     * Gets transaction specific instances of the MilleniumObject Call class
+     * Invokes makeCall on the list of MO Call objects, one at a time.
+     * It also passes the response from a MO call to the makeCall method of the next call.
+     * The response returned by the last call is returned.
      * @param payload
      * @param 
      * @return
@@ -31,37 +33,40 @@ class MilleniumService {
 		if((recordId==null)||(recordId.trim().length()==0)){
 			throw new MOCallException("Record ID not specified", 400, "")
 		}
-		def moCallObj = createMOCall(transaction)
+		def moCalls = createMOCalls(transaction)
 		def moURL = ConfigurationHolder.config.grails.moURL
-		moCallObj.makeCall(recordId, moURL)
+		
+		def moResponse=null
+		moCalls.each{moCall->
+			if(moResponse){
+				moResponse = moCall.makeCall(recordId, moURL, moResponse)
+			}else{
+				moResponse = moCall.makeCall(recordId, moURL)
+			}
+		}
+		return moResponse
     }
 	
 	/**
-	 * Factory which instantiates the appropriate MilleniumObject using reflection
+	 * Factory which instantiates the list of appropriate MilleniumObject using reflection
 	 * @param transaction
 	 * @return
 	 */
-	def createMOCall(transaction) throws MOCallException{
-		def moCallObj
+	def createMOCalls(transaction) throws MOCallException{
+		def moCalls
 		try{
-			def mappedTransaction = mapRequest(transaction)
+			moCalls = new ArrayList()
+			transactionStepsMap.get(transaction).each{transactionStep ->
+				Class moCallClass = this.class.classLoader.loadClass('org.chip.mo.'+transactionStep+'Call')
+				def moCallObj=moCallClass.newInstance()
+				moCallObj.init()
+				moCalls.add(moCallObj)
+			}
+			
 
-			Class moCallClass = this.class.classLoader.loadClass('org.chip.mo.'+mappedTransaction+'Call')
-			moCallObj=moCallClass.newInstance()
-			moCallObj.init()
 		}catch(Exception e){
 			throw new MOCallException("Transaction \""+transaction+"\" not implemented", 501, e.getMessage())
 		}
-		return moCallObj
+		return moCalls
 	}
-	
-	/**
-	 * Takes in the incoming request parameter and converts it into a transaction
-	 * @param string
-	 * @return
-	 */
-	def mapRequest(transaction){
-		return requestMOMap.get(transaction)
-	}
-	
 }

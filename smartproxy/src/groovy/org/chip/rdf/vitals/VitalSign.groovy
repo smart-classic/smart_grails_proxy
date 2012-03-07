@@ -1,16 +1,12 @@
 package org.chip.rdf.vitals
 
 class VitalSign {
-	String type
-	String title
+	
+	public VitalSign(){
+		vitalName = new CodedValue()
+	}
+	
 	String value
-	String resource
 	String unit
-	String code
-	boolean isBPField
-	String eventId
-	String parentEventId
-	boolean isCodedField
-	String eventEndDateTime
-	String updateDateTime
+	CodedValue vitalName
 }

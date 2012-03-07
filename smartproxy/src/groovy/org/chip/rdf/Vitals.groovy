@@ -1,34 +1,18 @@
 package org.chip.rdf
 
+import org.chip.rdf.vitals.CodedValue;
+import org.chip.rdf.vitals.VitalSign;
 import groovy.xml.StreamingMarkupBuilder
 import org.chip.rdf.vitals.*
 
 class Vitals extends Record {
 	
-	public Vitals(vitalSignsGroupByEncounterIn){
-		vitalSignsGroupByEncounter=vitalSignsGroupByEncounterIn
+	public Vitals(vitalSignsSetIn){
+		vitalSignsSet=vitalSignsSetIn
 	}
 	
-	/**
-	 * Maps each Encounter Id to an instance of the VitalSignsGroup Object.
-	 * VitalSignsGroup contains 
-	 * 	- An Encounter Object which stores details about a particular Encounter.
-	 * 	- A vitalSignsByParentEvent map which maps each Parent Event Id to a list of VitalSign Objects.
-	 * 	- VitalSign contains details about a particular Vital measure (e.g. diastolic bp)
-	 */
-	Map<String, VitalSignsGroup> vitalSignsGroupByEncounter;
+	Set vitalSignsSet;
 
-	/**
-	 * iterate through the set of encounter ids (key set for vitalSignsGroupByEncounter map)
-	 * retrieve vitalSignsGroup. This contains an instance of vitalSignsByParentEvent
-	 * for each vitalSignsByParentEvent map retrieved (belonging to current encounter id)
-	 * * iterate through the list of parent event ids (key set for vitalSignsByParentEvent map)
-	 * * for each vitalsign list retrieved (belonging to current parent id)
-	 *   * * go through all non bp fields and create vitalsign elements
-	 *   * * go through all bp fields and
-	 *       * * if coded field then generate appropriate rdf
-	 * 		 * * if non coded field then generate appropriate rdf
-	 */
 	def toRDF(){
 		//long l1 = new Date().getTime()
 		//return rdfOut
@@ -43,96 +27,19 @@ class Vitals extends Record {
 			mkp.declareNamespace('dcterms':'http://purl.org/dc/terms/')
 			mkp.declareNamespace('v':'http://www.w3.org/2006/vcard/ns#')
 			'rdf:RDF'(){
-				Set encounterIDs = vitalSignsGroupByEncounter.keySet()
-				encounterIDs.each{ encounterId ->
-					def encounterElementCount =0
-					
-					VitalSignsGroup vitalSignsGroup = vitalSignsGroupByEncounter.get(encounterId)
-					Map<String, VitalSign> vitalSignsByParentEvent = vitalSignsGroup.vitalSignsByParentEvent
-					Set parentEventIds=vitalSignsByParentEvent.keySet()
-					parentEventIds.each{parentEventId->
-						//'sp:VitalSigns'(parentEventId:parentEventId){
+				vitalSignsSet.each{ vitalSigns ->
 						'sp:VitalSigns'(){
-							Encounter encounter = vitalSignsGroup.getEncounter()
-							'dcterms:date'(encounter.getStartDate())
-							//createEncounter(encounter.getStartDate(), encounter.getEndDate(), encounter.getResource(), encounter.getTitle())
-							encounterElementCount++
-							if(encounterElementCount==1){
-							'sp:encounter'(){
-								'sp:Encounter'('rdf:nodeID':encounter.getId()){
-								//'sp:Encounter'(){
-									'sp:startDate'(encounter.getStartDate())
-									'sp:endDate'(encounter.getEndDate())
-									if(encounter.getResource()!=null && encounter.getResource()!=""){
-									'sp:encounterType'(){
-										'sp:CodedValue'(){
-											'sp:code'('rdf:resource':encounter.getResource())
-											'dcterms:title'(encounter.getTitle())
-										}
-									}
-									}
-								}
-								}
-							}else{
-							'sp:encounter'('rdf:nodeID':encounter.getId())
-							}
-							
-							boolean hasBPFields = false
-							List<VitalSign> vitalSigns = vitalSignsGroup.vitalSignsByParentEvent.get(parentEventId)
-							vitalSigns.each { vitalSign-> 
-								if (!vitalSign.isBPField){
-									def type = vitalSign.getType()
-									//createVital(vitalSign.getType(), vitalSign.getTitle(), vitalSign.getValue(), vitalSign.getResource(), vitalSign.getUnit())
-									"sp:${type}"(){
-										'sp:VitalSign'(){
-											'sp:vitalName'(){
-												'sp:CodedValue'(){
-													'sp:code'('rdf:resource':vitalSign.getResource())
-													'dcterms:title'(vitalSign.getTitle())
-												}
-											}
-											'sp:value'(vitalSign.getValue())
-										'sp:unit'(vitalSign.getUnit())
-										}
-									}
-								}else{
-									hasBPFields = true
-								}
-							}
-	
-							if(hasBPFields){
-								'sp:bloodPressure'(){
-								'sp:BloodPressure'(){
-									vitalSigns.each { vitalSign->
-										if (vitalSign.isBPField){
-											//createVital(vitalSign.getType(), vitalSign.getTitle(), vitalSign.getValue(), vitalSign.getResource(), vitalSign.getValue())
-											def type = vitalSign.getType()
-											"sp:${type}"(){
-												if(vitalSign.isCodedField){
-													'sp:CodedValue'(){
-														'sp:code'('rdf:resource':vitalSign.getResource())
-														'dcterms:title'(vitalSign.getTitle())
-													}
-												}else{
-													'sp:VitalSign'(){
-														'sp:vitalName'(){
-															'sp:CodedValue'(){
-																'sp:code'('rdf:resource':vitalSign.getResource())
-																'dcterms:title'(vitalSign.getTitle())
-															}
-														}
-														'sp:value'(vitalSign.getValue())
-													'sp:unit'(vitalSign.getUnit())
-													}
-												}
-											}
-										}
-									}
-								}
-								}
-							}
+							'dcterms:date'(vitalSigns.getDate())
+							createEncounter(vitalSigns.getEncounter())
+							createVitalSign(vitalSigns.height, 'height')
+							createVitalSign(vitalSigns.weight, 'weight')
+							createVitalSign(vitalSigns.bodyMassIndex, 'bodyMassIndex')
+							createVitalSign(vitalSigns.respiratoryRate, 'respiratoryRate')
+							createVitalSign(vitalSigns.heartRate, 'heartRate')
+							createVitalSign(vitalSigns.oxygenSaturation, 'oxygenSaturation')
+							createVitalSign(vitalSigns.temperature, 'temperature')
+							createBloodPressure(vitalSigns.bloodPressure)
 						}
-					}
 				}
 			}
 		}
@@ -144,34 +51,61 @@ class Vitals extends Record {
 		writer<<builder.bind(rdfBuilder)
 		writer.toString()
 	}
-				  
-	def createVital(type, title, value, resource, unit){
+
+	def createBloodPressure(bloodPressure){
+		createVitalSign(bloodPressure.diastolic, 'diastolic')
+		createVitalSign(bloodPressure.systolic, 'systolic')
+		createCodedValue(bloodPressure.bodyPosition, 'bodyPosition')
+		createCodedValue(bloodPressure.bodySite, 'bodySite')
+		createCodedValue(bloodPressure.method, 'method')
+	}
+					  
+	def createVitalSign(VitalSign vitalSign, String type){
 	 'sp:${type}'(){
 	  'sp:VitalSign'(){
 		  'sp:vitalName'(){
 			  'sp:CodedValue'(){
-				  'sp:code'('rdf:resource':resource)
-				  'dcterms:title'(title)
+				  'sp:code'('rdf:resource':vitalSign.vitalName.code)
+				  'dcterms:title'(vitalSign.vitalName.title)
 			  }
 		  }
-		  'sp:value'(value)
-	  'sp:unit'(unit)
+		  'sp:value'(vitalSign.value)
+	  'sp:unit'(vitalSign.unit)
 	  }
 	 }
 	}
 	
-	def createEncounter(startDate, endDate, encounterResourceCode, encounterTitle){
-		'sp:encounter'(){
-			'sp:Encounter'(){
-				'sp:startDate'(startDate)
-				'sp:endDate'(endDate)
-				'sp:encounterType'(){
-					'sp:CodedValue'(){
-						'sp:code'('rdf:resource':encounterResourceCode)
-						'dcterms:title'(encounterTitle)
-					}
-				}
+	def createCodedValue(CodedValue codedValue, String type){
+		"sp:${type}"(){
+			'sp:CodedValue'(){
+				'sp:code'('rdf:resource':codedValue.code)
+				'dcterms:title'(codedValue.title)
 			}
 		}
+	}
+	
+	def createEncounter(Encounter encounter){
+		/*if(encounterElementCount==0){
+			encounterElementCount++
+		*/
+			'sp:encounter'(){
+					/*'sp:Encounter'('rdf:nodeID':encounter.getId()){*/
+					'sp:Encounter'(){
+						'sp:startDate'(encounter.getStartDate())
+						'sp:endDate'(encounter.getEndDate())
+						if(encounter.encounterType.code()!=null && encounter.encounterType.code!=""){
+							'sp:encounterType'(){
+								'sp:CodedValue'(){
+									'sp:code'('rdf:resource':encounter.encounterType.code)
+									'dcterms:title'(encounter.encounterType.title)
+								}
+							}
+						}
+					}
+				}
+		/*}
+		else{
+			'sp:encounter'('rdf:nodeID':encounter.getId())
+		}*/
 	}
 }
