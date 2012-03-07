@@ -1,9 +1,11 @@
 package org.chip.rdf.vitals
 
 class Encounter {
+	public Encounter(){
+		encounterType = new CodedValue()
+	}
+	
 	String startDate
 	String endDate
-	String resource
-	String title
-	String id
+	CodedValue encounterType
 }

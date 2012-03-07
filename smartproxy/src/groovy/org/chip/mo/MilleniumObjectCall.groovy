@@ -10,7 +10,10 @@ abstract class MilleniumObjectCall {
 	def transaction
 	def targetServlet
 	
+	protected Map<String,Object> requestParams = new HashMap()
+	
 	protected static final String RECORDIDPARAM = "RECORDIDPARAM"
+	protected static final String MORESPONSEPARAM = "MORESPONSE"
 	
 	private static final String MO_RESP_STATUS_NODATA="NoData"
 	private static final String MO_RESP_STATUS_ERROR="Error"
@@ -34,6 +37,11 @@ abstract class MilleniumObjectCall {
 		builder = new MarkupBuilder(writer)
 	}
 	
+	def makeCall(recordId, moUrl, moResponse){
+		requestParams.put(MORESPONSEPARAM, moResponse);
+		makeCall(recordId, moUrl)
+	}
+	
 	/**
 	 * The Workhorse method.
 	 * -Creates the outgoing MO request.
@@ -44,10 +52,9 @@ abstract class MilleniumObjectCall {
 	 * @return
 	 */
 	def makeCall(recordId, moURL) throws MOCallException{
-		Map<String,Object> requestParams = new HashMap()
 		requestParams.put(RECORDIDPARAM, recordId)
 		
-		def requestXML = createRequest(requestParams)
+		def requestXML = createRequest()
 		
 		def resp = makeRestCall(requestXML, moURL)
 
@@ -71,11 +78,11 @@ abstract class MilleniumObjectCall {
 		}
 	}
 	
-	def createRequest(requestParams){
+	def createRequest(){
 		builder.RequestMessage(){
 			TransactionName(transaction)
 			Payload(){
-				generatePayload(requestParams)
+				generatePayload()
 			}
 		}
 		return writer.toString()
@@ -86,7 +93,7 @@ abstract class MilleniumObjectCall {
 	 * @param requestParams
 	 * @return
 	 */
-	def abstract generatePayload(requestParams)
+	def abstract generatePayload()
 	
 	def makeRestCall(requestXML, moURL)throws MOCallException{
 		def resp

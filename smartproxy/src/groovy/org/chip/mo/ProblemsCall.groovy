@@ -15,7 +15,7 @@ class ProblemsCall extends MilleniumObjectCall {
    * @param recordId
    * @return
    */
-   def generatePayload(requestParams){
+   def generatePayload(){
 	   def recordId = (String)requestParams.get(RECORDIDPARAM)
 	   builder.CanceledIndicator('All')
 	   builder.PersonIds(){

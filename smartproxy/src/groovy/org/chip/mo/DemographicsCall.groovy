@@ -19,7 +19,7 @@ class DemographicsCall extends MilleniumObjectCall{
 	* @param recordId
 	* @return
 	*/
-   def generatePayload(requestParams){
+   def generatePayload(){
 	   def recordId = (String)requestParams.get(RECORDIDPARAM)
 	   builder.PersonId(recordId)
 	   builder.AddressesIndicator('true')
