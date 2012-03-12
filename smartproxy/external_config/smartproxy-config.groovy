@@ -3,7 +3,7 @@ oauth {
     smartEmr {
         token = 'grails-proxy'
         secret = 'grails-proxy'
-        apiBase = 'http://localhost:7000'
+        apiBase = 'http://localhost:7001'
     }
 }
 
@@ -18,19 +18,19 @@ cas{
 
 environments {
     production {
-        grails.serverURL = "http://recombinant-pgd.chip.org:8080/smartproxy"
+        grails.serverURL = "http://10.36.141.253:8080/smartproxy"
 	grails.moURL = 'http://soatstweb1:8888/CHMObjectsToolkit/servlet/'
-	grails.smartURL = 'http://recombinant-pgd.chip.org:7001/proxy_index'
+	grails.smartURL = 'http://10.36.141.253/proxy_index'
     }
     development {
-        grails.serverURL = "http://recombinant-pgd.chip.org:8080/smartproxy"
+        grails.serverURL = "http://10.36.141.253:8080/smartproxy"
 	grails.moURL = 'http://soatstweb1:8888/CHMObjectsToolkit/servlet/'
-	grails.smartURL = 'http://recombinant-pgd.chip.org:7001/proxy_index'
+	grails.smartURL = 'http://10.36.141.253/proxy_index'
     }
     test {
-        grails.serverURL = "http://recombinant-pgd.chip.org:8080/smartproxy"
+        grails.serverURL = "http://10.36.141.253:8080/smartproxy"
 	grails.moURL = 'http://soatstweb1:8888/CHMObjectsToolkit/servlet/'
-	grails.smartURL = 'http://recombinant-pgd.chip.org:7001/proxy_index'
+	grails.smartURL = 'http://10.36.141.253/proxy_index'
     }
 
 }
@@ -217,7 +217,8 @@ cerner{
 	
 log4j = {
     appenders {
-        file name:'file', file:'C:\\logs\\smartproxy.log'
+        file name:'file', file:(System.getProperty('catalina.base') ?: 'target') + '/logs/smartproxy.log'
+	'null' name: 'stacktrace'
     }
     root {
         error 'file'
