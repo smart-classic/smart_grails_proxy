@@ -39,7 +39,7 @@ grails.spring.bean.packages = []
 def externalConfigFileLocation
 environments{
 	production{
-		externalConfigFileLocation="specify me"
+		externalConfigFileLocation="/data2/app/smart/smart_grails_proxy/smartproxy/external_config/"
 	}
 	development{
 		externalConfigFileLocation="external_config\\"
@@ -88,7 +88,6 @@ log4j = {
     }
 
 }
-
 
 tomcat.deploy.username="manager"
 tomcat.deploy.password="secret"
