@@ -83,7 +83,7 @@ class VitalSignsManager {
 		this.eventLists = eventsByParentEventId
 	}
 	
-	def Vitals processEvents(){
+	def processEvents(){
 		
 		//Step 1. Group bp events
 		groupBPEvents()
@@ -112,8 +112,10 @@ class VitalSignsManager {
 			}
 			
 			//Remove the individual bp events from the eventslist.
-			bpEventsIndices.each{index->
-				eventList.remove(index)
+			if(bpEventsIndices!=null){
+				bpEventsIndices.reverseEach{index->
+					eventList.remove(index)
+				}
 			}
 			//Add the bpSet to events list.
 			if(bpSet!=null){
@@ -143,7 +145,7 @@ class VitalSignsManager {
 					//Each bloodPressure property corresponds to one element in the set.
 					event.each{
 						def bloodPressureProperty
-						if (it.value==''){
+						if (it.value==null){
 							//if the event property has a blank value, we have to create a coded value. e.g. bodyPosition
 							bloodPressureProperty= createCodedValue(it.eventTag)
 						}else{
