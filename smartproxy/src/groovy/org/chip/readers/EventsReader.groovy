@@ -61,7 +61,6 @@ class EventsReader {
 			def replyMessage = moResponse.getData()
 			def payload= replyMessage.Payload
 			
-			Event currentEvent = new Event()
 			eventsByParentEventId = new HashMap()
 			//int i = 0
 			//long l1 = new Date().getTime()
@@ -71,7 +70,7 @@ class EventsReader {
 					//i++
 				def currentEventCode=currentNumericResult.EventCode.Value.text()
 				if(vitalEventCodesSet.contains(currentEventCode)){
-					currentEvent.clean()
+					Event currentEvent = new Event()
 					currentEvent.encounterId = currentNumericResult.EncounterId.text()
 					currentEvent.eventCode = currentEventCode
 					currentEvent.value = currentNumericResult.Value.text()
@@ -93,7 +92,7 @@ class EventsReader {
 					//i++
 				def currentEventCode=currentCodedResult.EventCode.Value.text()
 				if(vitalEventCodesSet.contains(currentEventCode)){
-					currentEvent.clean()
+					Event currentEvent = new Event()
 					currentEvent.encounterId = currentCodedResult.EncounterId.text()
 					currentEvent.eventCode = currentEventCode
 					currentEvent.eventTag = currentCodedResult.EventTag.text()
@@ -212,7 +211,7 @@ class EventsReader {
 							bpEventsByBodyPosition.get(bodyPosition).add(
 								new Event(encounterId: complexEvent.encounterId,
 										eventCode: VitalSignsManager.EVENTCODEPOSITION,,
-										eventTag: complexEvent.eventTag,
+										eventTag: bodyPosition,
 										eventId: complexEvent.eventId,
 										parentEventId: complexEvent.parentEventId,
 										eventEndDateTime: complexEvent.eventEndDateTime,
@@ -241,7 +240,7 @@ class EventsReader {
 		//Step 4
 		//Remove mappings for all complexEventsList
 		complexParentEventIds.each{
-			eventsByParentEventId.remove(this)
+			eventsByParentEventId.remove(it)
 		}
 	}
 	
