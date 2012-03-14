@@ -145,6 +145,15 @@ cerner{
 			EVENTCODESYS= "mm[Hg]"
 			EVENTCODEDIA= "mm[Hg]"
 		}
+		//values are of no importance to us in the bpEvents map. We are only interested in the keyset.
+		//The keyset contains all the events which are a part of blood pressure
+		bpEvents{
+			EVENTCODESYS=""
+			EVENTCODEDIA=""
+			EVENTCODELOCATION=""
+			EVENTCODEPOSITION=""
+			EVENTCODEBPMETHOD=""
+		}
 	}
 }
 	
