@@ -12,16 +12,4 @@ class Event {
 	def eventCode
 	def value
 	def eventTag
-	
-	def clean = {
-		encounterId = ""
-		eventCode = ""
-		value = ""
-		eventId = ""
-		parentEventId = ""
-		eventEndDateTime = ""
-		updateDateTime = ""
-		eventTag = ""
-	}
-
 }

@@ -38,7 +38,7 @@ class ResultsCall extends MilleniumObjectCall{
 			Name('CLINICAL INFORMATION')
 		}
 		
-		Map encountersById = (HashMap)requestParams.get(MORESPONSEPARAM)
+		Map encountersById = (HashMap)requestParams.get(MO_RESPONSE_PARAM)
 		Set encounterIds = encountersById.keySet()
 		builder.EncounterIds(){
 			encounterIds.each{encounterId->
@@ -65,7 +65,7 @@ class ResultsCall extends MilleniumObjectCall{
 		Map eventsByParentEventId = eventsReader.getEvents()
 		
 		vitalSignsManager.recordEvents(eventsByParentEventId)
-		vitalSignsManager.recordEncounters((HashMap)requestParams.get(MORESPONSEPARAM, moResponse))
+		vitalSignsManager.recordEncounters((HashMap)requestParams.get(MO_RESPONSE_PARAM, moResponse))
 		vitalSignsManager.processEvents()
 		
 		Vitals vitals = vitalSignsManager.getVitals()
