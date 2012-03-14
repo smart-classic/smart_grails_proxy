@@ -22,57 +22,29 @@ class VitalSignsManager {
 	Map<String, Encounter> encountersById
 	
 	Set<VitalSigns> vitalSignsSet = new HashSet()
-		
-	private static final String EVENTCODEHEIGHT
-	private static final String EVENTCODEWEIGHT
-	private static final String EVENTCODERRATE
-	private static final String EVENTCODEHEARTRATE
-	private static final String EVENTCODEOSAT
-	private static final String EVENTCODETEMP
-	private static final String EVENTCODESYS
-	private static final String EVENTCODEDIA
-	private static final String EVENTCODELOCATION
-	private static final String EVENTCODEPOSITION
-	private static final String EVENTCODEBPMETHOD
-	private static final String EVENTCODESYSSUPINE
-	private static final String EVENTCODESYSSITTING
-	private static final String EVENTCODESYSSTANDING
-	private static final String EVENTCODEDIASUPINE
-	private static final String EVENTCODEDIASITTING
-	private static final String EVENTCODEDIASTANDING
 	
+	/**
+	 * eventCodesMap
+	 */
+	static final Map ecm
+		
 	static final Set bpEventCodesSet
 
 	
 	static{
-		
 		def config = ConfigurationHolder.config
 		
-		EVENTCODEHEIGHT=config.cerner.mo.eventCode.EVENTCODEHEIGHT
-		EVENTCODEWEIGHT=config.cerner.mo.eventCode.EVENTCODEWEIGHT
-		EVENTCODERRATE=config.cerner.mo.eventCode.EVENTCODERRATE
-		EVENTCODEHEARTRATE=config.cerner.mo.eventCode.EVENTCODEHEARTRATE
-		EVENTCODEOSAT=config.cerner.mo.eventCode.EVENTCODEOSAT
-		EVENTCODETEMP=config.cerner.mo.eventCode.EVENTCODETEMP
-		EVENTCODESYS=config.cerner.mo.eventCode.EVENTCODESYS
-		EVENTCODEDIA=config.cerner.mo.eventCode.EVENTCODEDIA
-		EVENTCODELOCATION=config.cerner.mo.eventCode.EVENTCODELOCATION
-		EVENTCODEPOSITION=config.cerner.mo.eventCode.EVENTCODEPOSITION
-		EVENTCODEBPMETHOD=config.cerner.mo.eventCode.EVENTCODEBPMETHOD
-		EVENTCODESYSSUPINE=config.cerner.mo.eventCode.EVENTCODESYSSUPINE
-		EVENTCODESYSSITTING=config.cerner.mo.eventCode.EVENTCODESYSSITTING
-		EVENTCODESYSSTANDING=config.cerner.mo.eventCode.EVENTCODESYSSTANDING
-		EVENTCODEDIASUPINE=config.cerner.mo.eventCode.EVENTCODEDIASUPINE
-		EVENTCODEDIASITTING=config.cerner.mo.eventCode.EVENTCODEDIASITTING
-		EVENTCODEDIASTANDING=config.cerner.mo.eventCode.EVENTCODEDIASTANDING
+		ecm = config.cerner.mo.eventCode
 		
-		bpEventCodesSet = new HashSet()
-		bpEventCodesSet.add(EVENTCODESYS)
-		bpEventCodesSet.add(EVENTCODEDIA)
-		bpEventCodesSet.add(EVENTCODELOCATION)
-		bpEventCodesSet.add(EVENTCODEPOSITION)
-		bpEventCodesSet.add(EVENTCODEBPMETHOD)
-		
+		bpEventCodesSet = readBPEventCodes(config.cerner.mo.bpEvents.keySet())
+	}
+	
+	static def readBPEventCodes(bpEvents){
+		def hashSet = new HashSet()
+		bpEvents.each {bpEvent->
+			hashSet.add(ecm.get(bpEvent))
+		}
+		return hashSet
 	}
 	
 	def recordEncounters(Map<String,Encounter> encountersById){
@@ -98,15 +70,13 @@ class VitalSignsManager {
 	def groupBPEvents(){
 		this.eventLists.each {key, eventList ->
 			//For each event list, group together the bpevents in to a bpSet.
-			Set bpSet
-			List bpEventsIndices
+			Set bpSet=new HashSet()
+			List bpEventsIndices = new ArrayList()
 			eventList.each {event ->
 				if (bpEventCodesSet.contains(event.eventCode)){
-					bpSet = (bpSet==null)?new HashSet():bpSet
 					bpSet.add(event)
 					
 					//Remove the event from the events list.
-					bpEventsIndices = (bpEventsIndices==null)?new ArrayList():bpEventsIndices
 					bpEventsIndices.add(eventList.indexOf(event))
 				}
 			}
@@ -129,7 +99,7 @@ class VitalSignsManager {
 			def encounterId
 			//For each eventlist - create a set containing VitalSign and BloodPressure objects
 			VitalSigns vitalSigns=new VitalSigns()
-			BloodPressure bloodPressure
+			BloodPressure bloodPressure = new BloodPressure()
 			eventList.each {event ->
 				if(event instanceof Event){
 					//an event object. Create a corresponding vitalsign object 
@@ -154,7 +124,6 @@ class VitalSignsManager {
 						}
 
 						def propertyType = SmartMapper.map(it.eventCode, 'Type')
-						bloodPressure = (bloodPressure==null)?new BloodPressure():bloodPressure
 						bloodPressure.setProperty(propertyType, bloodPressureProperty)
 						
 						//read the encounterId for this event

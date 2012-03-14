@@ -13,7 +13,7 @@ abstract class MilleniumObjectCall {
 	protected Map<String,Object> requestParams = new HashMap()
 	
 	protected static final String RECORDIDPARAM = "RECORDIDPARAM"
-	protected static final String MORESPONSEPARAM = "MORESPONSE"
+	protected static final String MO_RESPONSE_PARAM = "MO_RESPONSE"
 	
 	private static final String MO_RESP_STATUS_NODATA="NoData"
 	private static final String MO_RESP_STATUS_ERROR="Error"
@@ -38,7 +38,7 @@ abstract class MilleniumObjectCall {
 	}
 	
 	def makeCall(recordId, moUrl, moResponse){
-		requestParams.put(MORESPONSEPARAM, moResponse);
+		requestParams.put(MO_RESPONSE_PARAM, moResponse);
 		makeCall(recordId, moUrl)
 	}
 	

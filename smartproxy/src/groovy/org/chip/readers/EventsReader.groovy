@@ -6,48 +6,40 @@ import org.chip.managers.VitalSignsManager;
 import org.chip.mo.exceptions.MOCallException;
 import org.chip.mo.model.Event;
 import org.chip.rdf.vitals.VitalSign;
+import org.codehaus.groovy.grails.commons.ConfigurationHolder;
 
 class EventsReader {
 
+	/**
+	* eventCodesMap
+	*/
+   static final Map ecm
+	
 	static final Map bpEventCodeByComplexBPEventCode
 	static final Map bodyPositionByComplexBPEventCode
-	static final Set vitalEventCodesSet
+	static final Collection vitalEventCodes
 	
 	static{
+		def config = ConfigurationHolder.config
+		ecm = config.cerner.mo.eventCode
+		
 		bpEventCodeByComplexBPEventCode = new HashMap()
-		bpEventCodeByComplexBPEventCode.put(VitalSignsManager.EVENTCODESYSSUPINE, VitalSignsManager.EVENTCODESYS)
-		bpEventCodeByComplexBPEventCode.put(VitalSignsManager.EVENTCODESYSSITTING, VitalSignsManager.EVENTCODESYS)
-		bpEventCodeByComplexBPEventCode.put(VitalSignsManager.EVENTCODESYSSTANDING, VitalSignsManager.EVENTCODESYS)
-		bpEventCodeByComplexBPEventCode.put(VitalSignsManager.EVENTCODEDIASUPINE, VitalSignsManager.EVENTCODEDIA)
-		bpEventCodeByComplexBPEventCode.put(VitalSignsManager.EVENTCODEDIASITTING, VitalSignsManager.EVENTCODEDIA)
-		bpEventCodeByComplexBPEventCode.put(VitalSignsManager.EVENTCODEDIASTANDING, VitalSignsManager.EVENTCODEDIA)
+		bpEventCodeByComplexBPEventCode.put(ecm.get("EVENTCODESYSSUPINE"), ecm.get("EVENTCODESYS"))
+		bpEventCodeByComplexBPEventCode.put(ecm.get("EVENTCODESYSSITTING"), ecm.get("EVENTCODESYS"))
+		bpEventCodeByComplexBPEventCode.put(ecm.get("EVENTCODESYSSTANDING"), ecm.get("EVENTCODESYS"))
+		bpEventCodeByComplexBPEventCode.put(ecm.get("EVENTCODEDIASUPINE"), ecm.get("EVENTCODEDIA"))
+		bpEventCodeByComplexBPEventCode.put(ecm.get("EVENTCODEDIASITTING"), ecm.get("EVENTCODEDIA"))
+		bpEventCodeByComplexBPEventCode.put(ecm.get("EVENTCODEDIASTANDING"), ecm.get("EVENTCODEDIA"))
 		
 		bodyPositionByComplexBPEventCode = new HashMap()
-		bodyPositionByComplexBPEventCode.put(VitalSignsManager.EVENTCODESYSSUPINE, 'Supine')
-		bodyPositionByComplexBPEventCode.put(VitalSignsManager.EVENTCODESYSSITTING, 'Supine')
-		bodyPositionByComplexBPEventCode.put(VitalSignsManager.EVENTCODESYSSTANDING, 'Sitting')
-		bodyPositionByComplexBPEventCode.put(VitalSignsManager.EVENTCODEDIASUPINE, 'Sitting')
-		bodyPositionByComplexBPEventCode.put(VitalSignsManager.EVENTCODEDIASITTING, 'Standing')
-		bodyPositionByComplexBPEventCode.put(VitalSignsManager.EVENTCODEDIASTANDING, 'Standing')
+		bodyPositionByComplexBPEventCode.put(ecm.get("EVENTCODESYSSUPINE"), 'Supine')
+		bodyPositionByComplexBPEventCode.put(ecm.get("EVENTCODESYSSITTING"), 'Supine')
+		bodyPositionByComplexBPEventCode.put(ecm.get("EVENTCODESYSSTANDING"), 'Sitting')
+		bodyPositionByComplexBPEventCode.put(ecm.get("EVENTCODEDIASUPINE"), 'Sitting')
+		bodyPositionByComplexBPEventCode.put(ecm.get("EVENTCODEDIASITTING"), 'Standing')
+		bodyPositionByComplexBPEventCode.put(ecm.get("EVENTCODEDIASTANDING"), 'Standing')
 		
-		vitalEventCodesSet = new HashSet()
-		vitalEventCodesSet.add(VitalSignsManager.EVENTCODEHEIGHT)
-		vitalEventCodesSet.add(VitalSignsManager.EVENTCODEWEIGHT)
-		vitalEventCodesSet.add(VitalSignsManager.EVENTCODERRATE)
-		vitalEventCodesSet.add(VitalSignsManager.EVENTCODEHEARTRATE)
-		vitalEventCodesSet.add(VitalSignsManager.EVENTCODEOSAT)
-		vitalEventCodesSet.add(VitalSignsManager.EVENTCODETEMP)
-		vitalEventCodesSet.add(VitalSignsManager.EVENTCODESYS)
-		vitalEventCodesSet.add(VitalSignsManager.EVENTCODEDIA)
-		vitalEventCodesSet.add(VitalSignsManager.EVENTCODEBPMETHOD)
-		vitalEventCodesSet.add(VitalSignsManager.EVENTCODELOCATION)
-		vitalEventCodesSet.add(VitalSignsManager.EVENTCODEPOSITION)
-		vitalEventCodesSet.add(VitalSignsManager.EVENTCODESYSSUPINE)
-		vitalEventCodesSet.add(VitalSignsManager.EVENTCODESYSSITTING)
-		vitalEventCodesSet.add(VitalSignsManager.EVENTCODESYSSTANDING)
-		vitalEventCodesSet.add(VitalSignsManager.EVENTCODEDIASUPINE)
-		vitalEventCodesSet.add(VitalSignsManager.EVENTCODEDIASITTING)
-		vitalEventCodesSet.add(VitalSignsManager.EVENTCODEDIASTANDING)
+		vitalEventCodes = ecm.values()
 	}
 	
 	private Map<String, List> eventsByParentEventId
@@ -69,7 +61,7 @@ class EventsReader {
 			payload.Results.ClinicalEvents.NumericResult.each{ currentNumericResult->
 					//i++
 				def currentEventCode=currentNumericResult.EventCode.Value.text()
-				if(vitalEventCodesSet.contains(currentEventCode)){
+				if(vitalEventCodes.contains(currentEventCode)){
 					Event currentEvent = new Event()
 					currentEvent.encounterId = currentNumericResult.EncounterId.text()
 					currentEvent.eventCode = currentEventCode
@@ -91,7 +83,7 @@ class EventsReader {
 			payload.Results.ClinicalEvents.CodedResult.each{ currentCodedResult->
 					//i++
 				def currentEventCode=currentCodedResult.EventCode.Value.text()
-				if(vitalEventCodesSet.contains(currentEventCode)){
+				if(vitalEventCodes.contains(currentEventCode)){
 					Event currentEvent = new Event()
 					currentEvent.encounterId = currentCodedResult.EncounterId.text()
 					currentEvent.eventCode = currentEventCode
@@ -164,7 +156,6 @@ class EventsReader {
 		
 		//iterate through all event lists
 		eventsByParentEventId.each{parentEventId, events ->
-			if(events.size()>0){
 				def currentEventCode = events.get(0).getEventCode()
 				//Check if there is a mapping for the first event's event code in the complex events map.
 				if (bpEventCodeByComplexBPEventCode.get(currentEventCode)!=null){
@@ -210,7 +201,7 @@ class EventsReader {
 										updateDateTime: complexEvent.updateDateTime))
 							bpEventsByBodyPosition.get(bodyPosition).add(
 								new Event(encounterId: complexEvent.encounterId,
-										eventCode: VitalSignsManager.EVENTCODEPOSITION,,
+										eventCode: ecm.get("EVENTCODEPOSITION"),
 										eventTag: bodyPosition,
 										eventId: complexEvent.eventId,
 										parentEventId: complexEvent.parentEventId,
@@ -230,7 +221,6 @@ class EventsReader {
 					//Also store the parentEventId of the complex events list.
 					complexParentEventIds.add(parentEventId)
 				}
-			}
 		}
 			
 		//Step 3

@@ -79,7 +79,7 @@ class Vitals extends Record {
 				  'sp:value'(vitalSign.value)
 			  'sp:unit'(vitalSign.unit)
 			  }
-			 }
+			}
 		}
 	}
 	
@@ -95,27 +95,19 @@ class Vitals extends Record {
 	}
 	
 	def createEncounter(rdfBuilder, Encounter encounter){
-		/*if(encounterElementCount==0){
-			encounterElementCount++
-		*/
-			rdfBuilder.'sp:encounter'(){
-					/*'sp:Encounter'('rdf:nodeID':encounter.getId()){*/
-					'sp:Encounter'(){
-						'sp:startDate'(encounter.getStartDate())
-						'sp:endDate'(encounter.getEndDate())
-						if(encounter.encounterType.code!=null && encounter.encounterType.code!=""){
-							'sp:encounterType'(){
-								'sp:CodedValue'(){
-									'sp:code'('rdf:resource':encounter.encounterType.code)
-									'dcterms:title'(encounter.encounterType.title)
-								}
-							}
+		rdfBuilder.'sp:encounter'(){
+			'sp:Encounter'(){
+				'sp:startDate'(encounter.getStartDate())
+				'sp:endDate'(encounter.getEndDate())
+				if(encounter.encounterType.code!=null && encounter.encounterType.code!=""){
+					'sp:encounterType'(){
+						'sp:CodedValue'(){
+							'sp:code'('rdf:resource':encounter.encounterType.code)
+								'dcterms:title'(encounter.encounterType.title)
 						}
 					}
 				}
-		/*}
-		else{
-			'sp:encounter'('rdf:nodeID':encounter.getId())
-		}*/
+			}
+		}
 	}
 }
