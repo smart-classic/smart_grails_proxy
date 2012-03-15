@@ -33,10 +33,10 @@ class EventsReader {
 		
 		bodyPositionByComplexBPEventCode = new HashMap()
 		bodyPositionByComplexBPEventCode.put(ecm.get("EVENTCODESYSSUPINE"), 'Supine')
-		bodyPositionByComplexBPEventCode.put(ecm.get("EVENTCODESYSSITTING"), 'Supine')
-		bodyPositionByComplexBPEventCode.put(ecm.get("EVENTCODESYSSTANDING"), 'Sitting')
-		bodyPositionByComplexBPEventCode.put(ecm.get("EVENTCODEDIASUPINE"), 'Sitting')
-		bodyPositionByComplexBPEventCode.put(ecm.get("EVENTCODEDIASITTING"), 'Standing')
+		bodyPositionByComplexBPEventCode.put(ecm.get("EVENTCODESYSSITTING"), 'Sitting')
+		bodyPositionByComplexBPEventCode.put(ecm.get("EVENTCODESYSSTANDING"), 'Standing')
+		bodyPositionByComplexBPEventCode.put(ecm.get("EVENTCODEDIASUPINE"), 'Supine')
+		bodyPositionByComplexBPEventCode.put(ecm.get("EVENTCODEDIASITTING"), 'Sitting')
 		bodyPositionByComplexBPEventCode.put(ecm.get("EVENTCODEDIASTANDING"), 'Standing')
 		
 		vitalEventCodes = ecm.values()
