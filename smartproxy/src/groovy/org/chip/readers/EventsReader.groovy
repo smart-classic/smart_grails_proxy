@@ -46,13 +46,16 @@ class EventsReader {
 	
 	public Map getEvents(){
 		return eventsByParentEventId
-	}
+	} 
 	
 	public read(moResponse){
+		def replyMessage = moResponse.getData()
+		def payload= replyMessage.Payload
+		processPayload(payload)
+	}
+	
+	public processPayload(payload){
 		try{
-			def replyMessage = moResponse.getData()
-			def payload= replyMessage.Payload
-			
 			eventsByParentEventId = new HashMap()
 			//int i = 0
 			//long l1 = new Date().getTime()
