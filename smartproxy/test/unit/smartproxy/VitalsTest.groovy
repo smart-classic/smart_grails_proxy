@@ -151,6 +151,7 @@ class VitalsTest extends GrailsUnitTestCase {
 	}
 	
 	void testVitals(){
+		
 		def xmlSlurper = new XmlSlurper()
 		
 		//parse and process dummy encounters moResponse
