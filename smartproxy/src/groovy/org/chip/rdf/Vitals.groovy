@@ -4,15 +4,18 @@ import org.chip.rdf.vitals.CodedValue;
 import org.chip.rdf.vitals.VitalSign;
 import groovy.xml.StreamingMarkupBuilder
 import org.chip.rdf.vitals.*
+import org.chip.utils.RandomIdGenerator;
 
 class Vitals extends Record {
+
+	Set vitalSignsSet;
+	Map nodeIdsByEncounter;
 	
 	public Vitals(vitalSignsSetIn){
 		vitalSignsSet=vitalSignsSetIn
+		nodeIdsByEncounter=new HashMap()
 	}
 	
-	Set vitalSignsSet;
-
 	def toRDF(){
 		//long l1 = new Date().getTime()
 		//return rdfOut
@@ -95,15 +98,22 @@ class Vitals extends Record {
 	}
 	
 	def createEncounter(rdfBuilder, Encounter encounter){
-		rdfBuilder.'sp:encounter'(){
-			'sp:Encounter'(){
-				'sp:startDate'(encounter.getStartDate())
-				'sp:endDate'(encounter.getEndDate())
-				if(encounter.encounterType.code!=null && encounter.encounterType.code!=""){
-					'sp:encounterType'(){
-						'sp:CodedValue'(){
-							'sp:code'('rdf:resource':encounter.encounterType.code)
-								'dcterms:title'(encounter.encounterType.title)
+		if(nodeIdsByEncounter.keySet().contains(encounter)){
+			def rdfNodeId=nodeIdsByEncounter.get(encounter)
+			rdfBuilder.'sp:encounter'('rdf:nodeID':rdfNodeId)
+		}else{
+			def rdfNodeId=RandomIdGenerator.generateString(9)
+			nodeIdsByEncounter.put(encounter, rdfNodeId)
+			rdfBuilder.'sp:encounter'(){
+				'sp:Encounter'('rdf:nodeId':rdfNodeId){
+					'sp:startDate'(encounter.getStartDate())
+					'sp:endDate'(encounter.getEndDate())
+					if(encounter.encounterType.code!=null && encounter.encounterType.code!=""){
+						'sp:encounterType'(){
+							'sp:CodedValue'(){
+								'sp:code'('rdf:resource':encounter.encounterType.code)
+									'dcterms:title'(encounter.encounterType.title)
+							}
 						}
 					}
 				}
