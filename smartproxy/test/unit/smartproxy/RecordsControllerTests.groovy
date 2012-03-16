@@ -2,7 +2,7 @@ package smartproxy
 
 import grails.test.*
 
-class RecordControllerTests extends ControllerUnitTestCase {
+class RecordsControllerTests extends ControllerUnitTestCase {
     protected void setUp() {
         super.setUp()
     }
