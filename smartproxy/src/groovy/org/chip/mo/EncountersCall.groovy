@@ -42,11 +42,15 @@ class EncountersCall extends MilleniumObjectCall{
    * @return
    */
    def readResponse(moResponse)throws MOCallException{
+	   def replyMessage = moResponse.getData()
+	   def payload= replyMessage.Payload
+	   processPayload(payload)
+   }
+   
+   def processPayload(payload)throws MOCallException{
 	   Map encountersById
 	   try{
 		   encountersById = new HashMap()
-		   def replyMessage = moResponse.getData()
-		   def payload= replyMessage.Payload
 		   //long l1 = new Date().getTime()
 		   // Filter out inpatient encounters, per 12/19/2011 decision.
 		   payload.Encounters.Encounter.findAll {
