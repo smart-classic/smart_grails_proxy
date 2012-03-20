@@ -14,7 +14,8 @@ import org.chip.rdf.vitals.VitalSigns
 import org.codehaus.groovy.grails.commons.ConfigurationHolder;
 
 class VitalsTest extends GrailsUnitTestCase {
-	private Map ecm
+	private def config
+	
 	protected void setUp() {
 		super.setUp()
 		//mock the config
@@ -142,8 +143,7 @@ class VitalsTest extends GrailsUnitTestCase {
 				}
 		''')
 		
-		def config = ConfigurationHolder.config
-		ecm = config.cerner.mo.eventCode
+		config = ConfigurationHolder.config
 	}
 
 	protected void tearDown() {
@@ -151,30 +151,56 @@ class VitalsTest extends GrailsUnitTestCase {
 	}
 	
 	void testVitals(){
+		def ecm = config.cerner.mo.eventCode
+		def	resultsTestData="C:\\repository\\smart\\Results.xml"
+		def resultsByDateTestData="C:\\repository\\smart\\Results-Date.xml"
+		def encountersTestData="C:\\repository\\smart\\Encounters.xml"
 		
-		def xmlSlurper = new XmlSlurper()
+		def encountersById = processEncounters(encountersTestData)
 		
-		//parse and process dummy encounters moResponse
+		def eventsByParentEventId = processResults(resultsTestData)
+		def vitals = createVitals(encountersById, eventsByParentEventId)	
+		examineVitals(vitals)
+		
+		eventsByParentEventId = processResults(resultsByDateTestData)
+		vitals = createVitals(encountersById, eventsByParentEventId)
+		examineVitalsByDates(vitals)	
+	}
+	
+	def processEncounters(encountersTestData){
+		def encountersPayload=parseDataFile(encountersTestData)
 		EncountersCall encountersCall= new EncountersCall()
 		encountersCall.init()
-		def encountersPayload = xmlSlurper.parse("C:\\repository\\smart\\Encounters.xml")
 		Map encountersById = encountersCall.processPayload(encountersPayload)
-		
-		//parse and process dummy results moResponse
+		return encountersById
+	}
+	
+	def processResults(resultsTestData){
+		def resultsPayload = parseDataFile(resultsTestData)
 		EventsReader eventsReader = new EventsReader()
-		def resultsPayload = xmlSlurper.parse("C:\\repository\\smart\\Results.xml")
 		eventsReader.processPayload(resultsPayload)
 		Map eventsByParentEventId = eventsReader.getEvents()
-
-		//pass encounters and results to the vitalSignsManager for processing
+		return eventsByParentEventId
+	}
+	
+	def parseDataFile(dataFile){
+		def xmlSlurper = new XmlSlurper()
+		return xmlSlurper.parse(dataFile)
+	}
+	
+	def createVitals(encountersById, eventsByParentEventId){
 		VitalSignsManager vitalSignsManager = new VitalSignsManager()
 		vitalSignsManager.recordEncounters(encountersById)
 		vitalSignsManager.recordEvents(eventsByParentEventId)
-		
+
 		vitalSignsManager.processEvents()
-		
+
 		Vitals vitals = vitalSignsManager.getVitals()
 		
+		return vitals
+	}
+	
+	void examineVitals(vitals){
 		//Start examining the returned vitals
 		assert vitals!=null
 
@@ -188,7 +214,7 @@ class VitalsTest extends GrailsUnitTestCase {
 			assert vitalSigns.encounter.endDate=="2011-03-31T04:59:00.000+01:00"
 			
 			assert vitalSigns.bloodPressure.bodySite.title=="Right arm"
-			assert vitalSigns.bloodPressure.bodySite.code=="http://www.ihtsdo.org/snomed-ct/concepts/368208006"
+			assert vitalSigns.bloodPressure.bodySite.code=="http://www.ihtsdo.org/snomed-ct/concepts/368209003"
 			
 			assert vitalSigns.bloodPressure.bodyPosition.title=="Standing"
 			assert vitalSigns.bloodPressure.bodyPosition.code=="http://www.ihtsdo.org/snomed-ct/concepts/10904000"
@@ -204,7 +230,7 @@ class VitalsTest extends GrailsUnitTestCase {
 			assert vitalSigns.bloodPressure.diastolic.value=="123"
 			assert vitalSigns.bloodPressure.diastolic.unit=="mm[Hg]"
 			assert vitalSigns.bloodPressure.diastolic.vitalName.title=="Diastolic blood pressure"
-			assert vitalSigns.bloodPressure.diastolic.vitalName.code=="http://loinc.org/codes/8480-4"
+			assert vitalSigns.bloodPressure.diastolic.vitalName.code=="http://loinc.org/codes/8462-4"
 			
 			assert vitalSigns.heartRate.value=="88"
 			assert vitalSigns.heartRate.unit=="{beats}/min"
@@ -228,6 +254,62 @@ class VitalsTest extends GrailsUnitTestCase {
 			
 			assert vitalSigns.height==null
 			assert vitalSigns.weight==null
+		}
+	}
+	
+	def examineVitalsByDates(vitals){
+		assert vitals!=null
+		
+		assert vitals.vitalSignsSet.size()==1
+		
+		vitals.vitalSignsSet.each{vitalSigns->
+			vitalSigns=(VitalSigns)vitalSigns
+			
+			assert vitalSigns.encounter.encounterType.code=="http://smartplatforms.org/terms/codes/EncounterType#ambulatory"
+			assert vitalSigns.encounter.encounterType.title=="Ambulatory encounter"
+			assert vitalSigns.encounter.startDate=="2011-05-18T20:03:00.000+01:00"
+			assert vitalSigns.encounter.endDate=="2011-05-19T04:59:00.000+01:00"
+			
+			assert vitalSigns.bloodPressure.bodySite.title=="Left arm"
+			assert vitalSigns.bloodPressure.bodySite.code=="http://www.ihtsdo.org/snomed-ct/concepts/368208006"
+			
+			assert vitalSigns.bloodPressure.method.title=="Machine"
+			assert vitalSigns.bloodPressure.method.code=="http://smartplatforms.org/terms/codes/BloodPressureMethod#machine"
+			
+			assert vitalSigns.bloodPressure.systolic.value=="168"
+			assert vitalSigns.bloodPressure.systolic.unit=="mm[Hg]"
+			assert vitalSigns.bloodPressure.systolic.vitalName.title=="Systolic blood pressure"
+			assert vitalSigns.bloodPressure.systolic.vitalName.code=="http://loinc.org/codes/8480-6"
+			
+			assert vitalSigns.bloodPressure.diastolic.value=="100"
+			assert vitalSigns.bloodPressure.diastolic.unit=="mm[Hg]"
+			assert vitalSigns.bloodPressure.diastolic.vitalName.title=="Diastolic blood pressure"
+			assert vitalSigns.bloodPressure.diastolic.vitalName.code=="http://loinc.org/codes/8462-4"
+			
+			assert vitalSigns.heartRate.value=="80"
+			assert vitalSigns.heartRate.unit=="{beats}/min"
+			assert vitalSigns.heartRate.vitalName.title=="Heart Rate"
+			assert vitalSigns.heartRate.vitalName.code=="http://loinc.org/codes/8867-4"
+			
+			assert vitalSigns.respiratoryRate.value=="18"
+			assert vitalSigns.respiratoryRate.unit=="{breaths}"
+			assert vitalSigns.respiratoryRate.vitalName.title=="Respiration rate"
+			assert vitalSigns.respiratoryRate.vitalName.code=="http://loinc.org/codes/9279-1"
+			
+			assert vitalSigns.oxygenSaturation.value=="100"
+			assert vitalSigns.oxygenSaturation.unit=="%{HemoglobinSaturation}"
+			assert vitalSigns.oxygenSaturation.vitalName.title=="Oxygen saturation"
+			assert vitalSigns.oxygenSaturation.vitalName.code=="http://loinc.org/codes/2710-2"
+			
+			assert vitalSigns.temperature.value=="37.6"
+			assert vitalSigns.temperature.unit=="Cel"
+			assert vitalSigns.temperature.vitalName.title=="Body temperature"
+			assert vitalSigns.temperature.vitalName.code=="http://loinc.org/codes/8310-5"
+			
+			
+			assert vitalSigns.height==null
+			assert vitalSigns.weight==null
+			assert vitalSigns.bloodPressure.bodyPosition==null
 		}
 	}
 }

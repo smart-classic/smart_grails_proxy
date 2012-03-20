@@ -122,19 +122,25 @@ class EventsReader {
 	 */
 	private List getEventsListForParentEventId(String parentEventId, String eventEndDateTime, String updateDateTime){
 		//find the eventslist by matching parent event id
-		if (eventsByParentEventId.get(parentEventId)==null){
-			//no match by parent event id. match by dates associated with each list.
+		def ret = eventsByParentEventId.get(parentEventId)
+				
+		//no match by parent event id. match by dates associated with each list.
+		if (ret==null){
 			eventsByParentEventId.each{key, value->
 				if(value.size()>0){
-					if(value.get(0).eventEndDateTime==eventEndDateTime && value.get(0).updateDateTime==updateDateTime){
-						return value	
+					if(value.get(0).eventEndDateTime.equals(eventEndDateTime) && value.get(0).updateDateTime.equals(updateDateTime)){
+						ret = value
 					}
 				}
 			}
-			//no match by dates or parent event id. Create a new event list.
-			eventsByParentEventId.put(parentEventId, new ArrayList())
 		}
-		return eventsByParentEventId.get(parentEventId)
+		
+		//no match on date either. create a new list and return
+		if (ret==null){
+			ret = new ArrayList()
+			eventsByParentEventId.put(parentEventId, ret)
+		}
+		return ret
 	}
 	
 
