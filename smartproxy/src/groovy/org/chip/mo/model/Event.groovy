@@ -12,4 +12,12 @@ class Event {
 	def eventCode
 	def value
 	def eventTag
+	
+	public String toString(){
+		String ret=""
+		this.properties.each{property, value->
+			ret+=property+":"+value+", "
+		}
+		return ret 
+	}
 }
