@@ -4,6 +4,9 @@ package org.chip.managers
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 import org.chip.mo.exceptions.MOCallException;
 import org.chip.mo.mappers.SmartMapper;
 import org.chip.mo.model.Event;
@@ -17,6 +20,8 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder;
 
 
 class VitalSignsManager {
+	
+	private static final Log log = LogFactory.getLog(this)
 	
 	Map<String, List> eventLists = new HashMap()
 	Map<String, Encounter> encountersById
@@ -88,10 +93,45 @@ class VitalSignsManager {
 				}
 			}
 			//Add the bpSet to events list.
-			if(bpSet.size()>0){
+			if(isBPSetValid(bpSet)){
 				eventList.add(bpSet)
 			}
 		}
+	}
+	
+	/**
+	 * Checks if the only event in the bpSet is one of the three optional vitals: location, position, method
+	 * @param bpSet
+	 * @return
+	 */
+	def isBPSetValid(bpSet){
+		if(bpSet.size()==0){
+			return false
+		}
+		
+		try{
+			assert bpSet.any{bpEvent->
+				bpEvent.eventCode in [ecm.get("EVENTCODESYS"), ecm.get("EVENTCODEDIA")]
+			}
+		}catch(AssertionError ae){
+			log.error("Found Invalid BP Set. Cannot find corresponding systolic and diastolic values for the following optional bp Events:")
+			bpSet.each {bpEvent->
+				log.error(bpEvent.toString())
+			}
+			return false
+		}
+		
+		/*def bpList = bpSet.asList()
+		if(bpList.size()==1){
+			def event = bpList.get(0)
+			if (event.eventCode in [ecm.get("EVENTCODELOCATION"), ecm.get("EVENTCODEPOSITION"), ecm.get("EVENTCODEBPMETHOD")]){
+				log.error("Found Invalid BP Set. Cannot find corresponding systolic and diastolic values for the following optional bp Event:")
+				log.error(event.toString())
+				return false
+			}
+		}*/
+		
+		return true
 	}
 	
 	def createVitalSignsSet(){
