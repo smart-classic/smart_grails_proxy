@@ -121,16 +121,6 @@ class VitalSignsManager {
 			return false
 		}
 		
-		/*def bpList = bpSet.asList()
-		if(bpList.size()==1){
-			def event = bpList.get(0)
-			if (event.eventCode in [ecm.get("EVENTCODELOCATION"), ecm.get("EVENTCODEPOSITION"), ecm.get("EVENTCODEBPMETHOD")]){
-				log.error("Found Invalid BP Set. Cannot find corresponding systolic and diastolic values for the following optional bp Event:")
-				log.error(event.toString())
-				return false
-			}
-		}*/
-		
 		return true
 	}
 	
