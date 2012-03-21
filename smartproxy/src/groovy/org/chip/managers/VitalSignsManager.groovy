@@ -100,7 +100,8 @@ class VitalSignsManager {
 	}
 	
 	/**
-	 * Checks if the only event in the bpSet is one of the three optional vitals: location, position, method
+	 * Checks if the bpSet contains only optional bp events
+	 * 
 	 * @param bpSet
 	 * @return
 	 */
