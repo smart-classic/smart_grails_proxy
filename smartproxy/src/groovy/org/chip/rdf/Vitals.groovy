@@ -105,7 +105,7 @@ class Vitals extends Record {
 			def rdfNodeId=RandomIdGenerator.generateString(9)
 			nodeIdsByEncounter.put(encounter, rdfNodeId)
 			rdfBuilder.'sp:encounter'(){
-				'sp:Encounter'('rdf:nodeId':rdfNodeId){
+				'sp:Encounter'('rdf:nodeID':rdfNodeId){
 					'sp:startDate'(encounter.getStartDate())
 					'sp:endDate'(encounter.getEndDate())
 					if(encounter.encounterType.code!=null && encounter.encounterType.code!=""){
