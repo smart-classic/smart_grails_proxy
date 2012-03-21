@@ -88,7 +88,7 @@ class VitalSignsManager {
 				}
 			}
 			//Add the bpSet to events list.
-			if(bpSet!=null){
+			if(bpSet.size()>0){
 				eventList.add(bpSet)
 			}
 		}
@@ -99,7 +99,7 @@ class VitalSignsManager {
 			def encounterId
 			//For each eventlist - create a set containing VitalSign and BloodPressure objects
 			VitalSigns vitalSigns=new VitalSigns()
-			BloodPressure bloodPressure = new BloodPressure()
+			BloodPressure bloodPressure
 			eventList.each {event ->
 				if(event instanceof Event){
 					//an event object. Create a corresponding vitalsign object 
@@ -111,6 +111,7 @@ class VitalSignsManager {
 					encounterId = event.getEncounterId()
 				}else if(event instanceof HashSet){
 					//a hashset object with bloodpressure information.
+					bloodPressure = new BloodPressure()
 					//Iterate over all elements in the set and create a bloodpressure object containing individual properties.
 					//Each bloodPressure property corresponds to one element in the set.
 					event.each{
