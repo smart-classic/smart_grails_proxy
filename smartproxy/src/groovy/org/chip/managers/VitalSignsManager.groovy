@@ -127,9 +127,10 @@ class VitalSignsManager {
 	
 	def createVitalSignsSet(){
 		this.eventLists.each {key, eventList ->
-			def encounterId
 			//For each eventlist - create a set containing VitalSign and BloodPressure objects
 			VitalSigns vitalSigns=new VitalSigns()
+			def encounterId
+			String vitalSignsDate
 			BloodPressure bloodPressure
 			eventList.each {event ->
 				if(event instanceof Event){
@@ -137,7 +138,9 @@ class VitalSignsManager {
 					def vitalSign = createVitalSign(event)
 					def vitalType = SmartMapper.map(event.eventCode, 'Type')
 					vitalSigns.setProperty(vitalType, vitalSign)
-					
+
+					//read the end date for this event.
+					vitalSignsDate=event.eventEndDateTime
 					//read the encounterId for this event
 					encounterId = event.getEncounterId()
 				}else if(event instanceof HashSet){
@@ -160,6 +163,8 @@ class VitalSignsManager {
 						
 						//read the encounterId for this event
 						encounterId = it.getEncounterId()
+						//read the end date for this event.
+						vitalSignsDate=it.eventEndDateTime
 					}
 					vitalSigns.setProperty('bloodPressure', bloodPressure)
 				}
@@ -169,7 +174,7 @@ class VitalSignsManager {
 			//Add the encounter to the vitalSigns object.
 			
 			vitalSigns.setProperty('encounter', encountersById.get(encounterId))
-			vitalSigns.setProperty('date', encountersById.get(encounterId).getStartDate())
+			vitalSigns.setProperty('date', vitalSignsDate)
 			
 			//Add the vitalSigns object to the vitalSignsSet.
 			vitalSignsSet.add(vitalSigns)

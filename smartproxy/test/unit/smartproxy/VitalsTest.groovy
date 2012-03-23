@@ -165,6 +165,12 @@ class VitalsTest extends GrailsUnitTestCase {
 		eventsByParentEventId = processResults(resultsByDateTestData)
 		vitals = createVitals(encountersById, eventsByParentEventId)
 		examineVitalsByDates(vitals)	
+		
+		//Tests to verify the dates for vitalsigns objects
+		resultsTestData="C:\\repository\\smart\\ResultsTest.xml"
+		eventsByParentEventId = processResults(resultsTestData)
+		vitals = createVitals(encountersById, eventsByParentEventId)
+		examineVitalSignsDates(vitals)
 	}
 	
 	def processEncounters(encountersTestData){
@@ -311,5 +317,21 @@ class VitalsTest extends GrailsUnitTestCase {
 			assert vitalSigns.weight==null
 			assert vitalSigns.bloodPressure.bodyPosition==null
 		}
+	}
+	
+	def examineVitalSignsDates(vitals){
+		assert vitals!=null
+		//assert vitals.vitalSignsSet.size()==1
+		
+		Set datesSet = new HashSet()
+		vitals.vitalSignsSet.each{vitalSigns->
+			vitalSigns=(VitalSigns)vitalSigns
+			datesSet.add(vitalSigns.date)
+		}
+		
+		assert datesSet.size()==3
+		assert datesSet.contains("2008-10-17T09:15:00.000-04:00")
+		assert datesSet.contains("2008-10-17T08:30:00.000-04:00")
+		assert datesSet.contains("2008-10-17T06:54:00.000-04:00")
 	}
 }
