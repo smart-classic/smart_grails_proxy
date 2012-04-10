@@ -1,0 +1,333 @@
+	<Payload>
+		<Encounters>
+			<Encounter>
+				<AdmitSource>
+					<Display>Physician Referral</Display>
+					<Meaning>PHYS_REFRL</Meaning>
+					<Value>309199</Value>
+				</AdmitSource>
+				<AdmitType>
+					<Display>Elective</Display>
+					<Meaning>ELECTIVE</Meaning>
+					<Value>670840</Value>
+				</AdmitType>
+				<ArriveDateTime>2011-05-18T20:03:00.000+01:00</ArriveDateTime>
+				<Building>
+					<Display>CHB</Display>
+					<Meaning>BUILDING</Meaning>
+					<Value>3110569</Value>
+				</Building>
+				<ContributorSystem>
+					<Display>EPIC_ADT</Display>
+					<Value>3110567</Value>
+				</ContributorSystem>
+				<DepartDateTime>2011-05-19T04:59:00.000+01:00</DepartDateTime>
+				<DischargeDateTime>2011-05-19T04:59:00.000+01:00</DischargeDateTime>
+				<DischargeDisposition>
+					<Display>Home</Display>
+					<Meaning>HOME</Meaning>
+					<Value>638671</Value>
+				</DischargeDisposition>
+				<EncounterId>34853623</EncounterId>
+				<EncounterStatus>
+					<Display>Discharged</Display>
+					<Meaning>DISCHARGED</Meaning>
+					<Value>856</Value>
+				</EncounterStatus>
+				<EncounterType>
+					<Display>Outpatient</Display>
+					<Value>309309</Value>
+				</EncounterType>
+				<EncounterTypeClass>
+					<Display>Outpatient</Display>
+					<Meaning>OUTPATIENT</Meaning>
+					<Value>393</Value>
+				</EncounterTypeClass>
+				<EstimateArriveDateTime>2011-05-18T05:00:00.000+01:00</EstimateArriveDateTime>
+				<Facility>
+					<Display>Children&apos;s Hospital Boston</Display>
+					<Meaning>FACILITY</Meaning>
+					<Value>3110560</Value>
+				</Facility>
+				<FinancialClass>
+					<Display>Self Pay</Display>
+					<Meaning>SELFPAY</Meaning>
+					<Value>684153</Value>
+				</FinancialClass>
+				<Location>
+					<Display>Dr Ansel</Display>
+					<Meaning>AMBULATORY</Meaning>
+					<Value>3844622</Value>
+				</Location>
+				<MedicalService>
+					<Display>Outpatient Lab</Display>
+					<Value>3110824</Value>
+				</MedicalService>
+				<NurseUnit>
+					<Display>Dr Ansel</Display>
+					<Meaning>AMBULATORY</Meaning>
+					<Value>3844622</Value>
+				</NurseUnit>
+				<Organization>
+					<OrganizationId>595843</OrganizationId>
+					<Name>Children&apos;s  Hospital Boston</Name>
+				</Organization>
+				<PersonId>15649511</PersonId>
+				<ReasonForVisit>rash</ReasonForVisit>
+				<RegistrationDateTime>2011-05-18T20:03:00.000+01:00</RegistrationDateTime>
+				<RegistrationPrsnl>
+					<FullName>Contributor_system, EPIC_ADT</FullName>
+					<PrsnlId>651937</PrsnlId>
+				</RegistrationPrsnl>
+				<PatientTimeZone>America/New_York</PatientTimeZone>
+			</Encounter>
+			<Encounter>
+				<AdmitSource>
+					<Display>Physician Referral</Display>
+					<Meaning>PHYS_REFRL</Meaning>
+					<Value>309199</Value>
+				</AdmitSource>
+				<AdmitType>
+					<Display>Elective</Display>
+					<Meaning>ELECTIVE</Meaning>
+					<Value>670840</Value>
+				</AdmitType>
+				<ArriveDateTime>2011-03-30T19:54:00.000+01:00</ArriveDateTime>
+				<Building>
+					<Display>CHB</Display>
+					<Meaning>BUILDING</Meaning>
+					<Value>3110569</Value>
+				</Building>
+				<ContributorSystem>
+					<Display>EPIC_ADT</Display>
+					<Value>3110567</Value>
+				</ContributorSystem>
+				<DepartDateTime>2011-03-31T04:59:00.000+01:00</DepartDateTime>
+				<DischargeDateTime>2011-03-31T04:59:00.000+01:00</DischargeDateTime>
+				<DischargeDisposition>
+					<Display>Home</Display>
+					<Meaning>HOME</Meaning>
+					<Value>638671</Value>
+				</DischargeDisposition>
+				<EncounterId>34842354</EncounterId>
+				<EncounterStatus>
+					<Display>Discharged</Display>
+					<Meaning>DISCHARGED</Meaning>
+					<Value>856</Value>
+				</EncounterStatus>
+				<EncounterType>
+					<Display>Outpatient</Display>
+					<Value>309309</Value>
+				</EncounterType>
+				<EncounterTypeClass>
+					<Display>Outpatient</Display>
+					<Meaning>OUTPATIENT</Meaning>
+					<Value>393</Value>
+				</EncounterTypeClass>
+				<EstimateArriveDateTime>2011-03-30T05:00:00.000+01:00</EstimateArriveDateTime>
+				<Facility>
+					<Display>Children&apos;s Hospital Boston</Display>
+					<Meaning>FACILITY</Meaning>
+					<Value>3110560</Value>
+				</Facility>
+				<FinancialClass>
+					<Display>Self Pay</Display>
+					<Meaning>SELFPAY</Meaning>
+					<Value>684153</Value>
+				</FinancialClass>
+				<Location>
+					<Display>Not Specified</Display>
+					<Meaning>AMBULATORY</Meaning>
+					<Value>3998231</Value>
+				</Location>
+				<MedicalService>
+					<Display>Outpatient Lab</Display>
+					<Value>3110824</Value>
+				</MedicalService>
+				<NurseUnit>
+					<Display>Not Specified</Display>
+					<Meaning>AMBULATORY</Meaning>
+					<Value>3998231</Value>
+				</NurseUnit>
+				<Organization>
+					<OrganizationId>595843</OrganizationId>
+					<Name>Children&apos;s  Hospital Boston</Name>
+				</Organization>
+				<PersonId>15649511</PersonId>
+				<ReasonForVisit>labs</ReasonForVisit>
+				<RegistrationDateTime>2011-03-30T19:54:00.000+01:00</RegistrationDateTime>
+				<RegistrationPrsnl>
+					<FullName>Contributor_system, EPIC_ADT</FullName>
+					<PrsnlId>651937</PrsnlId>
+				</RegistrationPrsnl>
+				<PatientTimeZone>America/New_York</PatientTimeZone>
+			</Encounter>
+			<Encounter>
+				<ArriveDateTime>1869-01-01T05:00:00.000Z</ArriveDateTime>
+				<Building>
+					<Display>DFCHCC - Joint Program</Display>
+					<Meaning>BUILDING</Meaning>
+					<Value>26438478</Value>
+				</Building>
+				<ContributorSystem>
+					<Display>EPIC_ADT</Display>
+					<Value>3110567</Value>
+				</ContributorSystem>
+				<DepartDateTime>2100-01-01T05:00:00.000Z</DepartDateTime>
+				<DischargeDateTime>2100-01-01T05:00:00.000Z</DischargeDateTime>
+				<DischargeDisposition>
+					<Display>Discharge</Display>
+					<Value>3568605</Value>
+				</DischargeDisposition>
+				<EncounterId>34933631</EncounterId>
+				<EncounterStatus>
+					<Display>Discharged</Display>
+					<Meaning>DISCHARGED</Meaning>
+					<Value>856</Value>
+				</EncounterStatus>
+				<EncounterType>
+					<Display>Documents</Display>
+					<Value>3776272</Value>
+				</EncounterType>
+				<EncounterTypeClass>
+					<Display>Outpatient</Display>
+					<Meaning>OUTPATIENT</Meaning>
+					<Value>393</Value>
+				</EncounterTypeClass>
+				<Facility>
+					<Display>DFCHCC - JOINT PROGRAM</Display>
+					<Meaning>FACILITY</Meaning>
+					<Value>26438282</Value>
+				</Facility>
+				<Location>
+					<Display>DFCHCC - Joint Program</Display>
+					<Meaning>AMBULATORY</Meaning>
+					<Value>26438531</Value>
+				</Location>
+				<NurseUnit>
+					<Display>DFCHCC - Joint Program</Display>
+					<Meaning>AMBULATORY</Meaning>
+					<Value>26438531</Value>
+				</NurseUnit>
+				<Organization>
+					<OrganizationId>1384716</OrganizationId>
+					<Name>DFCHCC - Joint Program</Name>
+				</Organization>
+				<PersonId>15649511</PersonId>
+				<RegistrationDateTime>1869-01-01T05:00:00.000Z</RegistrationDateTime>
+				<RegistrationPrsnl>
+					<FullName>Contributor_system, EPIC_ADT</FullName>
+					<PrsnlId>651937</PrsnlId>
+				</RegistrationPrsnl>
+				<PatientTimeZone>America/New_York</PatientTimeZone>
+			</Encounter>
+			<Encounter>
+				<ArriveDateTime>1869-01-01T05:00:00.000Z</ArriveDateTime>
+				<Building>
+					<Display>DFCI - Pediatrics</Display>
+					<Meaning>BUILDING</Meaning>
+					<Value>3859120</Value>
+				</Building>
+				<ContributorSystem>
+					<Display>EPIC_ADT</Display>
+					<Value>3110567</Value>
+				</ContributorSystem>
+				<DepartDateTime>2100-01-01T05:00:00.000Z</DepartDateTime>
+				<DischargeDateTime>2100-01-01T05:00:00.000Z</DischargeDateTime>
+				<DischargeDisposition>
+					<Display>Discharge</Display>
+					<Value>3568605</Value>
+				</DischargeDisposition>
+				<EncounterId>34933637</EncounterId>
+				<EncounterStatus>
+					<Display>Discharged</Display>
+					<Meaning>DISCHARGED</Meaning>
+					<Value>856</Value>
+				</EncounterStatus>
+				<EncounterType>
+					<Display>Documents</Display>
+					<Value>3776272</Value>
+				</EncounterType>
+				<EncounterTypeClass>
+					<Display>Outpatient</Display>
+					<Meaning>OUTPATIENT</Meaning>
+					<Value>393</Value>
+				</EncounterTypeClass>
+				<Facility>
+					<Display>DFCI - Pediatri</Display>
+					<Meaning>FACILITY</Meaning>
+					<Value>3110958</Value>
+				</Facility>
+				<Location>
+					<Display>DFDOC - Medical Records</Display>
+					<Meaning>AMBULATORY</Meaning>
+					<Value>121141848</Value>
+				</Location>
+				<NurseUnit>
+					<Display>DFDOC - Medical Records</Display>
+					<Meaning>AMBULATORY</Meaning>
+					<Value>121141848</Value>
+				</NurseUnit>
+				<Organization>
+					<OrganizationId>599844</OrganizationId>
+					<Name>DFCI - Pediatrics</Name>
+				</Organization>
+				<PersonId>15649511</PersonId>
+				<RegistrationDateTime>1869-01-01T05:00:00.000Z</RegistrationDateTime>
+				<RegistrationPrsnl>
+					<FullName>Contributor_system, EPIC_ADT</FullName>
+					<PrsnlId>651937</PrsnlId>
+				</RegistrationPrsnl>
+				<PatientTimeZone>America/New_York</PatientTimeZone>
+			</Encounter>
+			<Encounter>
+				<ArriveDateTime>1869-01-01T05:00:00.000Z</ArriveDateTime>
+				<ContributorSystem>
+					<Display>EPIC_ADT</Display>
+					<Value>3110567</Value>
+				</ContributorSystem>
+				<DepartDateTime>2100-01-01T05:00:00.000Z</DepartDateTime>
+				<DischargeDateTime>2100-01-01T05:00:00.000Z</DischargeDateTime>
+				<DischargeDisposition>
+					<Display>Discharge</Display>
+					<Value>3568605</Value>
+				</DischargeDisposition>
+				<EncounterId>34933625</EncounterId>
+				<EncounterStatus>
+					<Display>Discharged</Display>
+					<Meaning>DISCHARGED</Meaning>
+					<Value>856</Value>
+				</EncounterStatus>
+				<EncounterType>
+					<Display>Documents</Display>
+					<Value>3776272</Value>
+				</EncounterType>
+				<EncounterTypeClass>
+					<Display>Outpatient</Display>
+					<Meaning>OUTPATIENT</Meaning>
+					<Value>393</Value>
+				</EncounterTypeClass>
+				<Facility>
+					<Display>Children&apos;s Hospital Boston</Display>
+					<Meaning>FACILITY</Meaning>
+					<Value>3110560</Value>
+				</Facility>
+				<Location>
+					<Display>Children&apos;s Hospital Boston</Display>
+					<Meaning>FACILITY</Meaning>
+					<Value>3110560</Value>
+				</Location>
+				<Organization>
+					<OrganizationId>595843</OrganizationId>
+					<Name>Children&apos;s  Hospital Boston</Name>
+				</Organization>
+				<PersonId>15649511</PersonId>
+				<RegistrationDateTime>1869-01-01T05:00:00.000Z</RegistrationDateTime>
+				<RegistrationPrsnl>
+					<FullName>Contributor_system, EPIC_ADT</FullName>
+					<PrsnlId>651937</PrsnlId>
+				</RegistrationPrsnl>
+				<PatientTimeZone>America/New_York</PatientTimeZone>
+			</Encounter>
+		</Encounters>
+	</Payload>
