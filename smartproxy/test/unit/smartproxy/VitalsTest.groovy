@@ -329,9 +329,15 @@ class VitalsTest extends GrailsUnitTestCase {
 			datesSet.add(vitalSigns.date)
 		}
 		
-		assert datesSet.size()==3
-		assert datesSet.contains("2008-10-17T09:15:00.000-04:00")
-		assert datesSet.contains("2008-10-17T08:30:00.000-04:00")
-		assert datesSet.contains("2008-10-17T06:54:00.000-04:00")
+		assert datesSet.size()==9
+		assert datesSet.contains("2011-05-25T12:14:00.000-04:00")
+		assert datesSet.contains("2011-08-02T14:04:00.000-04:00")
+		assert datesSet.contains("2011-08-08T13:33:00.000-04:00")
+		assert datesSet.contains("2011-08-08T13:40:00.000-04:00")
+		assert datesSet.contains("2011-08-08T13:37:00.000-04:00")
+		assert datesSet.contains("2011-08-08T13:30:00.000-04:00")
+		assert datesSet.contains("2011-08-08T13:54:00.000-04:00")
+		assert datesSet.contains("2011-08-08T13:42:00.000-04:00")
+		assert datesSet.contains("2011-05-25T12:25:00.000-04:00")
 	}
 }
