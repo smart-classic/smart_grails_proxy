@@ -12,7 +12,7 @@ proxy layer that will run a specified app in the context of the current patient
 record.
 
 ## Grails translation layer
-This component exposes a subset of the SMART REST API (demographics and
+This component exposes a subset of the SMART REST API (Demographics and
 VitalSigns) by wrapping Cerner's Millennium objects API.  It is designed to work
 in conjunction with the SMART Reference EMR, which handles OAuth, app
 installation, and in-browser UI.
