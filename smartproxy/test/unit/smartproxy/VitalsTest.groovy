@@ -96,14 +96,14 @@ class VitalsTest extends GrailsUnitTestCase {
 						}
 						
 						vitalResource{
-							EVENTCODEHEIGHT= "http://loinc.org/codes/8302-2"
-							EVENTCODEWEIGHT= "http://loinc.org/codes/3141-9"
-							EVENTCODERRATE= "http://loinc.org/codes/9279-1"
-							EVENTCODEHEARTRATE= "http://loinc.org/codes/8867-4"
-							EVENTCODEOSAT= "http://loinc.org/codes/2710-2"
-							EVENTCODETEMP= "http://loinc.org/codes/8310-5"
-							EVENTCODESYS= "http://loinc.org/codes/8480-6"
-							EVENTCODEDIA= "http://loinc.org/codes/8462-4"
+							EVENTCODEHEIGHT= "http://purl.bioontology.org/ontology/LNC/8302-2"
+							EVENTCODEWEIGHT= "http://purl.bioontology.org/ontology/LNC/3141-9"
+							EVENTCODERRATE= "http://purl.bioontology.org/ontology/LNC/9279-1"
+							EVENTCODEHEARTRATE= "http://purl.bioontology.org/ontology/LNC/8867-4"
+							EVENTCODEOSAT= "http://purl.bioontology.org/ontology/LNC/2710-2"
+							EVENTCODETEMP= "http://purl.bioontology.org/ontology/LNC/8310-5"
+							EVENTCODESYS= "http://purl.bioontology.org/ontology/LNC/8480-6"
+							EVENTCODEDIA= "http://purl.bioontology.org/ontology/LNC/8462-4"
 						}
 						
 						vitalResourceTagMap{
@@ -111,13 +111,13 @@ class VitalsTest extends GrailsUnitTestCase {
 							Palpation= "http://smartplatforms.org/terms/codes/BloodPressureMethod#palpation"
 							Automated= "http://smartplatforms.org/terms/codes/BloodPressureMethod#machine"
 							Invasive= "http://smartplatforms.org/terms/codes/BloodPressureMethod#invasive"
-							Sitting= "http://www.ihtsdo.org/snomed-ct/concepts/33586001" 
-							Standing= "http://www.ihtsdo.org/snomed-ct/concepts/10904000"
-							Supine= "http://www.ihtsdo.org/snomed-ct/concepts/40199007"
-							Left_upper="http://www.ihtsdo.org/snomed-ct/concepts/368208006"
-							Right_upper="http://www.ihtsdo.org/snomed-ct/concepts/368209003"
-							Left_lower="http://www.ihtsdo.org/snomed-ct/concepts/61396006"
-							Right_lower="http://www.ihtsdo.org/snomed-ct/concepts/11207009"
+							Sitting= "http://purl.bioontology.org/ontology/SNOMEDCT/33586001" 
+							Standing= "http://purl.bioontology.org/ontology/SNOMEDCT/10904000"
+							Supine= "http://purl.bioontology.org/ontology/SNOMEDCT/40199007"
+							Left_upper="http://purl.bioontology.org/ontology/SNOMEDCT/368208006"
+							Right_upper="http://purl.bioontology.org/ontology/SNOMEDCT/368209003"
+							Left_lower="http://purl.bioontology.org/ontology/SNOMEDCT/61396006"
+							Right_lower="http://purl.bioontology.org/ontology/SNOMEDCT/11207009"
 						}
 						
 						vitalUnits{
@@ -220,10 +220,10 @@ class VitalsTest extends GrailsUnitTestCase {
 			assert vitalSigns.encounter.endDate=="2011-03-31T04:59:00.000+01:00"
 			
 			assert vitalSigns.bloodPressure.bodySite.title=="Right arm"
-			assert vitalSigns.bloodPressure.bodySite.code=="http://www.ihtsdo.org/snomed-ct/concepts/368209003"
+			assert vitalSigns.bloodPressure.bodySite.code=="http://purl.bioontology.org/ontology/SNOMEDCT/368209003"
 			
 			assert vitalSigns.bloodPressure.bodyPosition.title=="Standing"
-			assert vitalSigns.bloodPressure.bodyPosition.code=="http://www.ihtsdo.org/snomed-ct/concepts/10904000"
+			assert vitalSigns.bloodPressure.bodyPosition.code=="http://purl.bioontology.org/ontology/SNOMEDCT/10904000"
 			
 			assert vitalSigns.bloodPressure.method.title=="Palpation"
 			assert vitalSigns.bloodPressure.method.code=="http://smartplatforms.org/terms/codes/BloodPressureMethod#palpation"
@@ -231,32 +231,32 @@ class VitalsTest extends GrailsUnitTestCase {
 			assert vitalSigns.bloodPressure.systolic.value=="88"
 			assert vitalSigns.bloodPressure.systolic.unit=="mm[Hg]"
 			assert vitalSigns.bloodPressure.systolic.vitalName.title=="Systolic blood pressure"
-			assert vitalSigns.bloodPressure.systolic.vitalName.code=="http://loinc.org/codes/8480-6"
+			assert vitalSigns.bloodPressure.systolic.vitalName.code=="http://purl.bioontology.org/ontology/LNC/8480-6"
 			
 			assert vitalSigns.bloodPressure.diastolic.value=="123"
 			assert vitalSigns.bloodPressure.diastolic.unit=="mm[Hg]"
 			assert vitalSigns.bloodPressure.diastolic.vitalName.title=="Diastolic blood pressure"
-			assert vitalSigns.bloodPressure.diastolic.vitalName.code=="http://loinc.org/codes/8462-4"
+			assert vitalSigns.bloodPressure.diastolic.vitalName.code=="http://purl.bioontology.org/ontology/LNC/8462-4"
 			
 			assert vitalSigns.heartRate.value=="88"
 			assert vitalSigns.heartRate.unit=="{beats}/min"
 			assert vitalSigns.heartRate.vitalName.title=="Heart Rate"
-			assert vitalSigns.heartRate.vitalName.code=="http://loinc.org/codes/8867-4"
+			assert vitalSigns.heartRate.vitalName.code=="http://purl.bioontology.org/ontology/LNC/8867-4"
 			
 			assert vitalSigns.respiratoryRate.value=="88"
 			assert vitalSigns.respiratoryRate.unit=="{breaths}"
 			assert vitalSigns.respiratoryRate.vitalName.title=="Respiration rate"
-			assert vitalSigns.respiratoryRate.vitalName.code=="http://loinc.org/codes/9279-1"
+			assert vitalSigns.respiratoryRate.vitalName.code=="http://purl.bioontology.org/ontology/LNC/9279-1"
 			
 			assert vitalSigns.oxygenSaturation.value=="88"
 			assert vitalSigns.oxygenSaturation.unit=="%{HemoglobinSaturation}"
 			assert vitalSigns.oxygenSaturation.vitalName.title=="Oxygen saturation"
-			assert vitalSigns.oxygenSaturation.vitalName.code=="http://loinc.org/codes/2710-2"
+			assert vitalSigns.oxygenSaturation.vitalName.code=="http://purl.bioontology.org/ontology/LNC/2710-2"
 			
 			assert vitalSigns.temperature.value=="29"
 			assert vitalSigns.temperature.unit=="Cel"
 			assert vitalSigns.temperature.vitalName.title=="Body temperature"
-			assert vitalSigns.temperature.vitalName.code=="http://loinc.org/codes/8310-5"
+			assert vitalSigns.temperature.vitalName.code=="http://purl.bioontology.org/ontology/LNC/8310-5"
 			
 			assert vitalSigns.height==null
 			assert vitalSigns.weight==null
@@ -277,7 +277,7 @@ class VitalsTest extends GrailsUnitTestCase {
 			assert vitalSigns.encounter.endDate=="2011-05-19T04:59:00.000+01:00"
 			
 			assert vitalSigns.bloodPressure.bodySite.title=="Left arm"
-			assert vitalSigns.bloodPressure.bodySite.code=="http://www.ihtsdo.org/snomed-ct/concepts/368208006"
+			assert vitalSigns.bloodPressure.bodySite.code=="http://purl.bioontology.org/ontology/SNOMEDCT/368208006"
 			
 			assert vitalSigns.bloodPressure.method.title=="Machine"
 			assert vitalSigns.bloodPressure.method.code=="http://smartplatforms.org/terms/codes/BloodPressureMethod#machine"
@@ -285,32 +285,32 @@ class VitalsTest extends GrailsUnitTestCase {
 			assert vitalSigns.bloodPressure.systolic.value=="168"
 			assert vitalSigns.bloodPressure.systolic.unit=="mm[Hg]"
 			assert vitalSigns.bloodPressure.systolic.vitalName.title=="Systolic blood pressure"
-			assert vitalSigns.bloodPressure.systolic.vitalName.code=="http://loinc.org/codes/8480-6"
+			assert vitalSigns.bloodPressure.systolic.vitalName.code=="http://purl.bioontology.org/ontology/LNC/8480-6"
 			
 			assert vitalSigns.bloodPressure.diastolic.value=="100"
 			assert vitalSigns.bloodPressure.diastolic.unit=="mm[Hg]"
 			assert vitalSigns.bloodPressure.diastolic.vitalName.title=="Diastolic blood pressure"
-			assert vitalSigns.bloodPressure.diastolic.vitalName.code=="http://loinc.org/codes/8462-4"
+			assert vitalSigns.bloodPressure.diastolic.vitalName.code=="http://purl.bioontology.org/ontology/LNC/8462-4"
 			
 			assert vitalSigns.heartRate.value=="80"
 			assert vitalSigns.heartRate.unit=="{beats}/min"
 			assert vitalSigns.heartRate.vitalName.title=="Heart Rate"
-			assert vitalSigns.heartRate.vitalName.code=="http://loinc.org/codes/8867-4"
+			assert vitalSigns.heartRate.vitalName.code=="http://purl.bioontology.org/ontology/LNC/8867-4"
 			
 			assert vitalSigns.respiratoryRate.value=="18"
 			assert vitalSigns.respiratoryRate.unit=="{breaths}"
 			assert vitalSigns.respiratoryRate.vitalName.title=="Respiration rate"
-			assert vitalSigns.respiratoryRate.vitalName.code=="http://loinc.org/codes/9279-1"
+			assert vitalSigns.respiratoryRate.vitalName.code=="http://purl.bioontology.org/ontology/LNC/9279-1"
 			
 			assert vitalSigns.oxygenSaturation.value=="100"
 			assert vitalSigns.oxygenSaturation.unit=="%{HemoglobinSaturation}"
 			assert vitalSigns.oxygenSaturation.vitalName.title=="Oxygen saturation"
-			assert vitalSigns.oxygenSaturation.vitalName.code=="http://loinc.org/codes/2710-2"
+			assert vitalSigns.oxygenSaturation.vitalName.code=="http://purl.bioontology.org/ontology/LNC/2710-2"
 			
 			assert vitalSigns.temperature.value=="37.6"
 			assert vitalSigns.temperature.unit=="Cel"
 			assert vitalSigns.temperature.vitalName.title=="Body temperature"
-			assert vitalSigns.temperature.vitalName.code=="http://loinc.org/codes/8310-5"
+			assert vitalSigns.temperature.vitalName.code=="http://purl.bioontology.org/ontology/LNC/8310-5"
 			
 			
 			assert vitalSigns.height==null
