@@ -111,14 +111,14 @@ cerner{
 		}
 		
 		vitalResource{
-			EVENTCODEHEIGHT= "http://loinc.org/codes/8302-2"
-			EVENTCODEWEIGHT= "http://loinc.org/codes/3141-9"
-			EVENTCODERRATE= "http://loinc.org/codes/9279-1"
-			EVENTCODEHEARTRATE= "http://loinc.org/codes/8867-4"
-			EVENTCODEOSAT= "http://loinc.org/codes/2710-2"
-			EVENTCODETEMP= "http://loinc.org/codes/8310-5"
-			EVENTCODESYS= "http://loinc.org/codes/8480-6"
-			EVENTCODEDIA= "http://loinc.org/codes/8462-4"
+			EVENTCODEHEIGHT= "http://purl.bioontology.org/ontology/LNC/8302-2"
+			EVENTCODEWEIGHT= "http://purl.bioontology.org/ontology/LNC/3141-9"
+			EVENTCODERRATE= "http://purl.bioontology.org/ontology/LNC/9279-1"
+			EVENTCODEHEARTRATE= "http://purl.bioontology.org/ontology/LNC/8867-4"
+			EVENTCODEOSAT= "http://purl.bioontology.org/ontology/LNC/2710-2"
+			EVENTCODETEMP= "http://purl.bioontology.org/ontology/LNC/8310-5"
+			EVENTCODESYS= "http://purl.bioontology.org/ontology/LNC/8480-6"
+			EVENTCODEDIA= "http://purl.bioontology.org/ontology/LNC/8462-4"
 		}
 		
 		vitalResourceTagMap{
@@ -126,13 +126,13 @@ cerner{
 			Palpation= "http://smartplatforms.org/terms/codes/BloodPressureMethod#palpation"
 			Automated= "http://smartplatforms.org/terms/codes/BloodPressureMethod#machine"
 			Invasive= "http://smartplatforms.org/terms/codes/BloodPressureMethod#invasive"
-			Sitting= "http://www.ihtsdo.org/snomed-ct/concepts/33586001" 
-			Standing= "http://www.ihtsdo.org/snomed-ct/concepts/10904000"
-			Supine= "http://www.ihtsdo.org/snomed-ct/concepts/40199007"
-			Left_upper="http://www.ihtsdo.org/snomed-ct/concepts/368208006"
-			Right_upper="http://www.ihtsdo.org/snomed-ct/concepts/368209003"
-			Left_lower="http://www.ihtsdo.org/snomed-ct/concepts/61396006"
-			Right_lower="http://www.ihtsdo.org/snomed-ct/concepts/11207009"
+			Sitting= "http://purl.bioontology.org/ontology/SNOMEDCT/33586001" 
+			Standing= "http://purl.bioontology.org/ontology/SNOMEDCT/10904000"
+			Supine= "http://purl.bioontology.org/ontology/SNOMEDCT/40199007"
+			Left_upper="http://purl.bioontology.org/ontology/SNOMEDCT/368208006"
+			Right_upper="http://purl.bioontology.org/ontology/SNOMEDCT/368209003"
+			Left_lower="http://purl.bioontology.org/ontology/SNOMEDCT/61396006"
+			Right_lower="http://purl.bioontology.org/ontology/SNOMEDCT/11207009"
 		}
 		
 		vitalUnits{
