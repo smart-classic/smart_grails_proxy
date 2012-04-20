@@ -105,7 +105,7 @@ head report
  
 	; Initialize JS variables we'll need to launch the app in an external browser window 
 	row +1 "    var grails_proxy_base = 'http://10.36.142.250:8980/smartproxy/smart/readContext?',"
-	row +1 "	initial_app = 'pedi_bpc@apps.smartplatforms.org',"
+	row +1 "	initial_app = 'bp_centiles@apps.smartplatforms.org',"
 	row +1 "	cas_secret = 'SECRET_HERE',"
 	row +1 "	cas_url = 'http://chssotest.tch.harvard.edu/cas/wsProxy?clientId=smartmpage&sharedSecret='+cas_secret,"
 	row +1 "	httpRequest = new XMLHttpRequest(),"
