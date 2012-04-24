@@ -1,8 +1,12 @@
 package org.chip.mo
 
 import groovy.xml.MarkupBuilder;
+import groovy.xml.StreamingMarkupBuilder
+import groovy.xml.XmlUtil
 import groovyx.net.http.*
+
 import org.chip.mo.exceptions.MOCallException
+
 abstract class MilleniumObjectCall {
 
 	def writer
@@ -97,13 +101,9 @@ abstract class MilleniumObjectCall {
 	
 	def makeRestCall(requestXML, moURL)throws MOCallException{
 		def resp
-		try{
-			def restClient = new RESTClient(moURL+targetServlet)
-			restClient.setContentType(ContentType.XML)
-			resp=restClient.post(body:requestXML, requestContentType : ContentType.XML)
-		}catch(Exception e){
-			throw new MOCallException("Request failed: <!--"+requestXML+"-->",500, e.getMessage())
-		}
+		def restClient = new RESTClient(moURL+targetServlet)
+		restClient.setContentType(ContentType.XML)
+		resp=restClient.post(body:requestXML, requestContentType : ContentType.XML)
 		return resp
 	}
 

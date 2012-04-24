@@ -54,7 +54,7 @@ class EncountersCall extends MilleniumObjectCall{
 		   //long l1 = new Date().getTime()
 		   // Filter out inpatient encounters, per 12/19/2011 decision.
 		   payload.Encounters.Encounter.findAll {
-			 it.EncounterTypeClass.Display.text() != "Inpatient"
+			 it.EncounterTypeClass.Meaning.text() != "INPATIENT"
 		   }.each {
 			   Encounter encounter = new Encounter()
 			   encounter.setStartDate(it.RegistrationDateTime.text())
