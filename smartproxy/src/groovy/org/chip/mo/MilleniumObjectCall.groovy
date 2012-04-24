@@ -28,7 +28,6 @@ abstract class MilleniumObjectCall {
 	
 	static{
 		responseErrorMessageMap = new HashMap<String, String>()
-		responseErrorMessageMap.put(MO_RESP_STATUS_NODATA, "No Information found for Record ID: ")
 		responseErrorMessageMap.put(MO_RESP_STATUS_ERROR, "MO Server returned Error for Record ID: ")
 		
 		responseErrorStatusCodeMap = new HashMap<String, Integer>()
@@ -71,7 +70,8 @@ abstract class MilleniumObjectCall {
 		def replyMessage = resp.getData()
 		def status= replyMessage.Status.text()
 		def isResponseError = false
-		if(status!=MO_RESP_STATUS_SUCCESS){
+		if( status != MO_RESP_STATUS_SUCCESS && 
+			status != MO_RESP_STATUS_NODATA ){
 			def errorMessage = responseErrorMessageMap.get(status)
 			def statusCode = responseErrorStatusCodeMap.get(status)
 			if(errorMessage==null){
