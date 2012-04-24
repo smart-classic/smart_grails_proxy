@@ -93,8 +93,9 @@ class VitalSignsManager {
 				}
 				
 				//Add the bpSet to events list.
-				assertValidBPSet(bpSet);
-				eventList.add(bpSet)
+				if (validBPSet(bpSet)) {
+					eventList.add(bpSet)
+				}
 			}
 			
 		}
@@ -106,14 +107,19 @@ class VitalSignsManager {
 	 * @param bpSet
 	 * @return
 	 */
-	def assertValidBPSet(bpSet){
+	def validBPSet(bpSet){
 
 		assert bpSet.size() > 0, "Empty blood pressure set is invalid: " + bpset;
 		
-		assert bpSet.any{ bpEvent->
-				bpEvent.eventCode in [ecm.get("EVENTCODESYS"), ecm.get("EVENTCODEDIA")]
-		}, "A blood pressure set must have blood pressure values: " + bpSet
-				
+		if (!bpSet.any{ bpEvent-> bpEvent.eventCode == ecm.get("EVENTCODESYS") }) {
+			return false
+		}
+
+		if (!bpSet.any{ bpEvent-> bpEvent.eventCode == ecm.get("EVENTCODEDIA") }) {
+			return false
+		}
+
+		return true;
 	}
 	
 	def createVitalSignsSet(){
