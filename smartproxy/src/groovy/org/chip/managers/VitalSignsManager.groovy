@@ -87,15 +87,16 @@ class VitalSignsManager {
 			}
 			
 			//Remove the individual bp events from the eventslist.
-			if(bpEventsIndices!=null){
+			if(bpEventsIndices.size() > 0){
 				bpEventsIndices.reverseEach{index->
 					eventList.remove(index)
 				}
-			}
-			//Add the bpSet to events list.
-			if(isBPSetValid(bpSet)){
+				
+				//Add the bpSet to events list.
+				assertValidBPSet(bpSet);
 				eventList.add(bpSet)
 			}
+			
 		}
 	}
 	
@@ -105,33 +106,25 @@ class VitalSignsManager {
 	 * @param bpSet
 	 * @return
 	 */
-	def isBPSetValid(bpSet){
-		if(bpSet.size()==0){
-			return false
-		}
+	def assertValidBPSet(bpSet){
+
+		assert bpSet.size() > 0, "Empty blood pressure set is invalid: " + bpset;
 		
-		try{
-			assert bpSet.any{bpEvent->
+		assert bpSet.any{ bpEvent->
 				bpEvent.eventCode in [ecm.get("EVENTCODESYS"), ecm.get("EVENTCODEDIA")]
-			}
-		}catch(AssertionError ae){
-			log.error("Found Invalid BP Set. Cannot find corresponding systolic and diastolic values for the following optional bp Events:")
-			bpSet.each {bpEvent->
-				log.error(bpEvent.toString())
-			}
-			return false
-		}
-		
-		return true
+		}, "A blood pressure set must have blood pressure values: " + bpSet
+				
 	}
 	
 	def createVitalSignsSet(){
+		
 		this.eventLists.each {key, eventList ->
 			//For each eventlist - create a set containing VitalSign and BloodPressure objects
 			VitalSigns vitalSigns=new VitalSigns()
 			def encounterId
 			String vitalSignsDate
 			BloodPressure bloodPressure
+			
 			eventList.each {event ->
 				if(event instanceof Event){
 					//an event object. Create a corresponding vitalsign object 
@@ -167,12 +160,16 @@ class VitalSignsManager {
 						vitalSignsDate=it.eventEndDateTime
 					}
 					vitalSigns.setProperty('bloodPressure', bloodPressure)
+				} else {
+					throw new Exception ("unrecognized event type: " + event);
 				}
 			}
 			
 			//All events in this list have the same encounter id. Read it from the first event.
 			//Add the encounter to the vitalSigns object.
-			
+			assert encounterId != null, "No encounter ID found for " + eventList
+			assert encountersById.get(encounterId) != null, "Encounter ID unkonwn: " + encounterId
+		
 			vitalSigns.setProperty('encounter', encountersById.get(encounterId))
 			vitalSigns.setProperty('date', vitalSignsDate)
 			

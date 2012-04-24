@@ -9,7 +9,7 @@ import org.chip.rdf.vitals.VitalSign;
 import org.codehaus.groovy.grails.commons.ConfigurationHolder;
 
 class EventsReader {
-
+	
 	/**
 	* eventCodesMap
 	*/
@@ -55,7 +55,6 @@ class EventsReader {
 	}
 	
 	public processPayload(payload){
-		try{
 			eventsByParentEventId = new HashMap()
 			//int i = 0
 			//long l1 = new Date().getTime()
@@ -106,9 +105,7 @@ class EventsReader {
 			
 			splitComplexEvents()
 			
-		}catch(Exception e){
-			throw new MOCallException("Error reading MO response", 500, e.getMessage())
-		}
+		
 	}
 	
 	/**
@@ -129,6 +126,8 @@ class EventsReader {
 			eventsByParentEventId.each{key, value->
 				if(value.size()>0){
 					if(value.get(0).eventEndDateTime.equals(eventEndDateTime) && value.get(0).updateDateTime.equals(updateDateTime)){
+						ret = value
+					} else if (ret == null && value.get(0).eventEndDateTime.equals(eventEndDateTime)) {
 						ret = value
 					}
 				}
@@ -162,7 +161,7 @@ class EventsReader {
 	def splitComplexEvents(){
 		Map atomicEventsbyParentEventId = new HashMap()
 		List complexParentEventIds = new ArrayList()
-		
+				
 		//iterate through all event lists
 		eventsByParentEventId.each{parentEventId, events ->
 				def currentEventCode = events.get(0).getEventCode()
@@ -193,7 +192,7 @@ class EventsReader {
 										eventCode: bpEventCode,
 										value: complexEvent.value,
 										eventId: complexEvent.eventId,
-										parentEventId: complexEvent.parentEventId,
+										parentEventId: parentEventId,
 										eventEndDateTime: complexEvent.eventEndDateTime,
 										updateDateTime: complexEvent.updateDateTime)
 								)
@@ -205,7 +204,7 @@ class EventsReader {
 										eventCode: bpEventCode,
 										value: complexEvent.value,
 										eventId: complexEvent.eventId,
-										parentEventId: complexEvent.parentEventId,
+										parentEventId: parentEventId,
 										eventEndDateTime: complexEvent.eventEndDateTime,
 										updateDateTime: complexEvent.updateDateTime))
 							bpEventsByBodyPosition.get(bodyPosition).add(
@@ -213,7 +212,7 @@ class EventsReader {
 										eventCode: ecm.get("EVENTCODEPOSITION"),
 										eventTag: bodyPosition,
 										eventId: complexEvent.eventId,
-										parentEventId: complexEvent.parentEventId,
+										parentEventId: parentEventId,
 										eventEndDateTime: complexEvent.eventEndDateTime,
 										updateDateTime: complexEvent.updateDateTime)
 								)
@@ -231,16 +230,22 @@ class EventsReader {
 					complexParentEventIds.add(parentEventId)
 				}
 		}
+		
 			
 		//Step 3
 		//Add the mapped atomic event lists to our original eventsList map.
 		eventsByParentEventId.putAll(atomicEventsbyParentEventId)
-			
+		
 		//Step 4
 		//Remove mappings for all complexEventsList
 		complexParentEventIds.each{
 			eventsByParentEventId.remove(it)
 		}
+		
+		eventsByParentEventId.each {
+			assert it.value.size() > 0, "Found an empty event set: " + it.value
+		}
+		
 	}
 	
 	def valueIsValid(currentValue){
