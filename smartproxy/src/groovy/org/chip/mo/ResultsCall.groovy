@@ -24,6 +24,9 @@ class ResultsCall extends MilleniumObjectCall{
 		eventsReader = new EventsReader()
 	}
 	
+	
+	
+	
 	/**
 	* Generates MO requests to 
 	* - Get Vitals for a list of Encounters and a given patient id
@@ -40,6 +43,13 @@ class ResultsCall extends MilleniumObjectCall{
 		
 		Map encountersById = (HashMap)requestParams.get(MO_RESPONSE_PARAM)
 		Set encounterIds = encountersById.keySet()
+		
+		// MO Server chokes on an empty encounter IDs list
+		// so we seed it with an empty encounter.
+		if (encounterIds.size() == 0) {
+			encounterIds = [-1]
+		}
+
 		builder.EncounterIds(){
 			encounterIds.each{encounterId->
 				EncounterId(encounterId)
