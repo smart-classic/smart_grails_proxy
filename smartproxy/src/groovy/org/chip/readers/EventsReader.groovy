@@ -44,13 +44,6 @@ class EventsReader {
 	
 	private Map<String, List> eventsByParentEventId
 	
-	private List<Event> eventsList
-	
-	public EventsReader(){
-		eventsByParentEventId = new HashMap()
-		eventsList = new ArrayList()
-	}
-	
 	public Map getEvents(){
 		return eventsByParentEventId
 	} 
@@ -59,8 +52,6 @@ class EventsReader {
 		def replyMessage = moResponse.getData()
 		def payload= replyMessage.Payload
 		processPayload(payload)
-		groupEvents()
-		splitComplexEvents()
 	}
 	
 	public processPayload(payload){
@@ -84,6 +75,7 @@ class EventsReader {
 					
 					//Run a quick validation on the value and add the event to the list only if the value is valid
 					if(valueIsValid(currentEvent.value)){
+						List eventsList = getEventsListForParentEventId(currentEvent.parentEventId, currentEvent.eventEndDateTime, currentEvent.updateDateTime)
 						eventsList.add(currentEvent)
 					}
 				}
@@ -103,94 +95,53 @@ class EventsReader {
 					currentEvent.eventEndDateTime = currentCodedResult.EventEndDateTime.text()
 					currentEvent.updateDateTime = currentCodedResult.UpdateDateTime.text()
 					
+					List eventsList = getEventsListForParentEventId(currentEvent.parentEventId, currentEvent.eventEndDateTime, currentEvent.updateDateTime)
 					eventsList.add(currentEvent)
 				}
 			}
 			//println("number of results returned : " + i)
 			//long l2 = new Date().getTime()
 			//println("vitals reading moresponse took: "+(l2-l1)/1000)
+			
+			splitComplexEvents()
+			
+		
 	}
 	
-	def groupEvents(){
-		eventsList.each {event->
-			
-			//1. Match on parent event id
-			def mappedEventsList = eventsByParentEventId.get(event.parentEventId)
-			
-			if(mappedEventsList==null){//2. No match on parent event id, try to match by end datetime and update datetime.
-				mappedEventsList = matchByEndAndUpdateDateTimes(event.eventEndDateTime, event.updateDateTime)
+	/**
+	 * Finds the eventlist (in eventsByParentEventId map) mapped to the incoming parentEventId. Return matching event list.
+	 * If no match is found against the parentEventId, match against both of the incoming timestamp values. Return matching event list.
+	 * If no match is found create a new list, map it to the incoming parentEventId and return it.
+	 * @param parentEventId
+	 * @param eventEndDateTime
+	 * @param updateDateTime
+	 * @return
+	 */
+	private List getEventsListForParentEventId(String parentEventId, String eventEndDateTime, String updateDateTime){
+		//find the eventslist by matching parent event id
+		def ret = eventsByParentEventId.get(parentEventId)
 				
-				if(mappedEventsList==null){//3. No match on both datetimes, create a new list.
-					mappedEventsList = new ArrayList()
-					eventsByParentEventId.put(event.parentEventId, mappedEventsList)
+		//no match by parent event id. match by dates associated with each list.
+		if (ret==null){
+			eventsByParentEventId.each{key, value->
+				if(value.size()>0){
+					if(value.get(0).eventEndDateTime.equals(eventEndDateTime) && value.get(0).updateDateTime.equals(updateDateTime)){
+						ret = value
+					} else if (ret == null && value.get(0).eventEndDateTime.equals(eventEndDateTime)) {
+						ret = value
+					}
 				}
 			}
-			
-			mappedEventsList.add(event)
 		}
 		
-		//Some events will not be  matched on parentEventId or end and update timestamps.
-		//These events will be present in the map as single element lists.
-		//Remove these events from the map and process just these events, matching on end timestamp alone.
-		List<Event> unmatchedEvents
-		List singleEventParentEventIds
-		eventsByParentEventId.each {parentEventId, eventsList->
-			if(eventsList.size()==1){
-				unmatchedEvents.add(eventsList.get(0))
-				singleEventParentEventIds.add(parentEventId)
-			}
-		}
-		
-		singleEventParentEventIds.each{parentEventId->
-			eventsByParentEventId.remove(parentEventId)
-		}
-		
-		Map eventsMap = new HashMap()
-		unmatchedEvents.each{event->
-			def eventsList = matchByEndDateTime(event.eventEndDateTime, eventsMap)
-			if (eventsList==null){
-				eventsList = new ArrayList()
-				eventsMap.put(event.parentEventId, eventsList)
-			}
-			
-			eventsList.add(event)
-		}
-		
-		eventsByParentEventId.putAll(eventsMap)
-		
-	}
-	
-	//mappedEventsList = matchByEndDateTime(event.eventEndDateTime)
-	
-	//if(mappedEventsList==null){//4. No match on endDateTime either. Create a new eventslist
-	
-	def matchByEndAndUpdateDateTimes(String eventEndDateTime, String updateDateTime){
-		def ret = null
-		def found = false
-		eventsByParentEventId.each{key, value->
-			if(!found && (value.size()>0)){
-				if(value.get(0).eventEndDateTime.equals(eventEndDateTime) && value.get(0).updateDateTime.equals(updateDateTime)){
-					ret = value
-					found=true
-				} 
-			}
+		//no match on date either. create a new list and return
+		if (ret==null){
+			ret = new ArrayList()
+			eventsByParentEventId.put(parentEventId, ret)
 		}
 		return ret
 	}
 	
-	def matchByEndDateTime(String eventEndDateTime, Map eventsMap){
-		def ret = null
-		def found = false
-		eventsMap.each{key, value->
-			if(!found && (value.size()>0)){
-				if(value.get(0).eventEndDateTime.equals(eventEndDateTime)){
-					ret = value
-					found=true
-				}
-			}
-		}
-		return ret
-	}
 
 	/**
 	 * This method extracts atomic bp events from complex bp events.
