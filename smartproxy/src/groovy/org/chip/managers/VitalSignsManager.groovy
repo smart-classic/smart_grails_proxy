@@ -125,62 +125,64 @@ class VitalSignsManager {
 	def createVitalSignsSet(){
 		
 		this.eventLists.each {key, eventList ->
-			//For each eventlist - create a set containing VitalSign and BloodPressure objects
-			VitalSigns vitalSigns=new VitalSigns()
-			def encounterId
-			String vitalSignsDate
-			BloodPressure bloodPressure
-			
-			eventList.each {event ->
-				if(event instanceof Event){
-					//an event object. Create a corresponding vitalsign object 
-					def vitalSign = createVitalSign(event)
-					def vitalType = SmartMapper.map(event.eventCode, 'Type')
-					vitalSigns.setProperty(vitalType, vitalSign)
-
-					//read the end date for this event.
-					vitalSignsDate=event.eventEndDateTime
-					//read the encounterId for this event
-					encounterId = event.getEncounterId()
-				}else if(event instanceof HashSet){
-					//a hashset object with bloodpressure information.
-					bloodPressure = new BloodPressure()
-					//Iterate over all elements in the set and create a bloodpressure object containing individual properties.
-					//Each bloodPressure property corresponds to one element in the set.
-					event.each{
-						def bloodPressureProperty
-						if (it.value==null){
-							//if the event property has a blank value, we have to create a coded value. e.g. bodyPosition
-							bloodPressureProperty= createCodedValue(it.eventTag)
-						}else{
-							//the event property has a value. Create a vital sign object. e.g. systolic
-							bloodPressureProperty = createVitalSign(it)
-						}
-
-						def propertyType = SmartMapper.map(it.eventCode, 'Type')
-						bloodPressure.setProperty(propertyType, bloodPressureProperty)
-						
-						//read the encounterId for this event
-						encounterId = it.getEncounterId()
+			if(eventList.size()>0){
+				//For each eventlist - create a set containing VitalSign and BloodPressure objects
+				VitalSigns vitalSigns=new VitalSigns()
+				def encounterId
+				String vitalSignsDate
+				BloodPressure bloodPressure
+				
+				eventList.each {event ->
+					if(event instanceof Event){
+						//an event object. Create a corresponding vitalsign object 
+						def vitalSign = createVitalSign(event)
+						def vitalType = SmartMapper.map(event.eventCode, 'Type')
+						vitalSigns.setProperty(vitalType, vitalSign)
+	
 						//read the end date for this event.
-						vitalSignsDate=it.eventEndDateTime
+						vitalSignsDate=event.eventEndDateTime
+						//read the encounterId for this event
+						encounterId = event.getEncounterId()
+					}else if(event instanceof HashSet){
+						//a hashset object with bloodpressure information.
+						bloodPressure = new BloodPressure()
+						//Iterate over all elements in the set and create a bloodpressure object containing individual properties.
+						//Each bloodPressure property corresponds to one element in the set.
+						event.each{
+							def bloodPressureProperty
+							if (it.value==null){
+								//if the event property has a blank value, we have to create a coded value. e.g. bodyPosition
+								bloodPressureProperty= createCodedValue(it.eventTag)
+							}else{
+								//the event property has a value. Create a vital sign object. e.g. systolic
+								bloodPressureProperty = createVitalSign(it)
+							}
+	
+							def propertyType = SmartMapper.map(it.eventCode, 'Type')
+							bloodPressure.setProperty(propertyType, bloodPressureProperty)
+							
+							//read the encounterId for this event
+							encounterId = it.getEncounterId()
+							//read the end date for this event.
+							vitalSignsDate=it.eventEndDateTime
+						}
+						vitalSigns.setProperty('bloodPressure', bloodPressure)
+					} else {
+						throw new Exception ("unrecognized event type: " + event);
 					}
-					vitalSigns.setProperty('bloodPressure', bloodPressure)
-				} else {
-					throw new Exception ("unrecognized event type: " + event);
 				}
+				
+				//All events in this list have the same encounter id. Read it from the first event.
+				//Add the encounter to the vitalSigns object.
+				assert encounterId != null, "No encounter ID found for " + eventList
+				assert encountersById.get(encounterId) != null, "Encounter ID unkonwn: " + encounterId
+			
+				vitalSigns.setProperty('encounter', encountersById.get(encounterId))
+				vitalSigns.setProperty('date', vitalSignsDate)
+				
+				//Add the vitalSigns object to the vitalSignsSet.
+				vitalSignsSet.add(vitalSigns)
 			}
-			
-			//All events in this list have the same encounter id. Read it from the first event.
-			//Add the encounter to the vitalSigns object.
-			assert encounterId != null, "No encounter ID found for " + eventList
-			assert encountersById.get(encounterId) != null, "Encounter ID unkonwn: " + encounterId
-		
-			vitalSigns.setProperty('encounter', encountersById.get(encounterId))
-			vitalSigns.setProperty('date', vitalSignsDate)
-			
-			//Add the vitalSigns object to the vitalSignsSet.
-			vitalSignsSet.add(vitalSigns)
 		}
 	}
 	

@@ -185,6 +185,8 @@ class VitalsTest extends GrailsUnitTestCase {
 		def resultsPayload = parseDataFile(resultsTestData)
 		EventsReader eventsReader = new EventsReader()
 		eventsReader.processPayload(resultsPayload)
+		eventsReader.groupEvents()
+		eventsReader.splitComplexEvents()
 		Map eventsByParentEventId = eventsReader.getEvents()
 		return eventsByParentEventId
 	}
