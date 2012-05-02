@@ -68,6 +68,7 @@ class EncountersCall extends MilleniumObjectCall{
 	   }catch(Exception e){
 			throw new MOCallException("Error reading MO response", 500, e.getMessage())
 	   }
+	   //encountersById = new HashMap()
 	   return encountersById
    }
    
