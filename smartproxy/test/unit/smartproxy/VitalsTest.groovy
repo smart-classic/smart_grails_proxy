@@ -152,23 +152,25 @@ class VitalsTest extends GrailsUnitTestCase {
 	
 	void testVitals(){
 		def ecm = config.cerner.mo.eventCode
-		def	resultsTestData="test_data/Results.xml"
-		def resultsByDateTestData="test_data/Results-Date.xml"
-		def encountersTestData="test_data/Encounters.xml"
+
+		def encountersData="test_data/Encounters.xml"
+		def encountersById = processEncounters(encountersData)
 		
-		def encountersById = processEncounters(encountersTestData)
-		
-		def eventsByParentEventId = processResults(resultsTestData)
+		//Test matching events by parentEventId
+		def	resultsData="test_data/Results.xml"
+		def eventsByParentEventId = processResults(resultsData)
 		def vitals = createVitals(encountersById, eventsByParentEventId)	
 		examineVitals(vitals)
 		
-		eventsByParentEventId = processResults(resultsByDateTestData)
+		//Test matching events by end and update timestamps
+		resultsData="test_data/Results-Date.xml"
+		eventsByParentEventId = processResults(resultsData)
 		vitals = createVitals(encountersById, eventsByParentEventId)
 		examineVitalsByDates(vitals)	
 		
-		//Tests to verify the dates for vitalsigns objects
-		resultsTestData="test_data/ResultsTest.xml"
-		eventsByParentEventId = processResults(resultsTestData)
+		//Test to verify the dates assigned to vitalsigns objects
+		resultsData="test_data/ResultsTest.xml"
+		eventsByParentEventId = processResults(resultsData)
 		vitals = createVitals(encountersById, eventsByParentEventId)
 		examineVitalSignsDates(vitals)
 	}
