@@ -61,6 +61,7 @@ class EncountersCall extends MilleniumObjectCall{
 			   encounter.setEndDate(it.DischargeDateTime.text())
 			   encounter.getEncounterType().setCode(encounterResourceMap.get(it.EncounterTypeClass.Display.text()))
 			   encounter.getEncounterType().setTitle(encounterTitleMap.get(it.EncounterTypeClass.Display.text()))
+			   encounter.setBelongsTo(it.PersonId.text())
 			   encountersById.put(it.EncounterId.text(), encounter)
 		   }
 		   //long l2 = new Date().getTime()

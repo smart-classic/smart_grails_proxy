@@ -8,4 +8,6 @@ class Encounter {
 	String startDate
 	String endDate
 	CodedValue encounterType
+	
+	String belongsTo
 }
