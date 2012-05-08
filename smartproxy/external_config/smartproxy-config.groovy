@@ -138,7 +138,7 @@ cerner{
 		vitalUnits{
 			EVENTCODEHEIGHT= "m"
 			EVENTCODEWEIGHT= "kg"
-			EVENTCODERRATE= "{breaths}"
+			EVENTCODERRATE= "{breaths}/min"
 			EVENTCODEHEARTRATE= "{beats}/min"
 			EVENTCODEOSAT= "%{HemoglobinSaturation}"
 			EVENTCODETEMP= "Cel"
