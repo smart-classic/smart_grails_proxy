@@ -54,13 +54,14 @@ class EncountersCall extends MilleniumObjectCall{
 		   //long l1 = new Date().getTime()
 		   // Filter out inpatient encounters, per 12/19/2011 decision.
 		   payload.Encounters.Encounter.findAll {
-			 it.EncounterTypeClass.Display.text() != "Inpatient"
+			 it.EncounterTypeClass.Meaning.text() != "INPATIENT"
 		   }.each {
 			   Encounter encounter = new Encounter()
 			   encounter.setStartDate(it.RegistrationDateTime.text())
 			   encounter.setEndDate(it.DischargeDateTime.text())
 			   encounter.getEncounterType().setCode(encounterResourceMap.get(it.EncounterTypeClass.Display.text()))
 			   encounter.getEncounterType().setTitle(encounterTitleMap.get(it.EncounterTypeClass.Display.text()))
+			   encounter.setBelongsTo(it.PersonId.text())
 			   encountersById.put(it.EncounterId.text(), encounter)
 		   }
 		   //long l2 = new Date().getTime()
@@ -68,6 +69,7 @@ class EncountersCall extends MilleniumObjectCall{
 	   }catch(Exception e){
 			throw new MOCallException("Error reading MO response", 500, e.getMessage())
 	   }
+	   //encountersById = new HashMap()
 	   return encountersById
    }
    

@@ -11,4 +11,5 @@ class VitalSigns {
 	VitalSign oxygenSaturation
 	VitalSign temperature
 	BloodPressure bloodPressure
+	String belongsTo
 }
