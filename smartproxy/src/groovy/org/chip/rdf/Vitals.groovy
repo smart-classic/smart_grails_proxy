@@ -5,6 +5,7 @@ import org.chip.rdf.vitals.VitalSign;
 import groovy.xml.StreamingMarkupBuilder
 import org.chip.rdf.vitals.*
 import org.chip.utils.RandomIdGenerator;
+import org.codehaus.groovy.grails.commons.ConfigurationHolder;
 
 class Vitals extends Record {
 
@@ -19,6 +20,9 @@ class Vitals extends Record {
 	def toRDF(){
 		//long l1 = new Date().getTime()
 		//return rdfOut
+		def config = ConfigurationHolder.config
+		def belongsToUrl = config.smart.belongsTo.ResourceURL
+		
 		def builder = new StreamingMarkupBuilder()
 		builder.encoding="UTF-8"
 		def writer = new StringWriter()
@@ -33,8 +37,9 @@ class Vitals extends Record {
 			'rdf:RDF'(){
 				vitalSignsSet.each{ vitalSigns ->
 						'sp:VitalSigns'(){
+							'sp:belongsTo'('rdf:resource':belongsToUrl+vitalSigns.getBelongsTo())
 							'dcterms:date'(vitalSigns.getDate())
-							createEncounter(rdfBuilder, vitalSigns.getEncounter())
+							createEncounter(belongsToUrl, rdfBuilder, vitalSigns.getEncounter())
 							createVitalSign(rdfBuilder, vitalSigns.height, 'height')
 							createVitalSign(rdfBuilder, vitalSigns.weight, 'weight')
 							createVitalSign(rdfBuilder, vitalSigns.bodyMassIndex, 'bodyMassIndex')
@@ -97,7 +102,7 @@ class Vitals extends Record {
 		}
 	}
 	
-	def createEncounter(rdfBuilder, Encounter encounter){
+	def createEncounter(belongsToUrl, rdfBuilder, Encounter encounter){
 		if(nodeIdsByEncounter.keySet().contains(encounter)){
 			def rdfNodeId=nodeIdsByEncounter.get(encounter)
 			rdfBuilder.'sp:encounter'('rdf:nodeID':rdfNodeId)
@@ -106,6 +111,7 @@ class Vitals extends Record {
 			nodeIdsByEncounter.put(encounter, rdfNodeId)
 			rdfBuilder.'sp:encounter'(){
 				'sp:Encounter'('rdf:nodeID':rdfNodeId){
+					'sp:belongsTo'('rdf:resource':belongsToUrl+encounter.getBelongsTo())
 					'sp:startDate'(encounter.getStartDate())
 					'sp:endDate'(encounter.getEndDate())
 					if(encounter.encounterType.code!=null && encounter.encounterType.code!=""){
