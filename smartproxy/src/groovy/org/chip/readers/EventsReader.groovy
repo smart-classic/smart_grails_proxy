@@ -81,6 +81,7 @@ class EventsReader {
 					currentEvent.parentEventId = currentNumericResult.ParentEventId.text()
 					currentEvent.eventEndDateTime = currentNumericResult.EventEndDateTime.text()
 					currentEvent.updateDateTime = currentNumericResult.UpdateDateTime.text()
+					currentEvent.recordId = currentNumericResult.PersonId.text()
 					
 					//Run a quick validation on the value and add the event to the list only if the value is valid
 					if(valueIsValid(currentEvent.value)){
@@ -102,6 +103,7 @@ class EventsReader {
 					currentEvent.parentEventId = currentCodedResult.ParentEventId.text()
 					currentEvent.eventEndDateTime = currentCodedResult.EventEndDateTime.text()
 					currentEvent.updateDateTime = currentCodedResult.UpdateDateTime.text()
+					currentEvent.recordId = currentCodedResult.PersonId.text()
 					
 					eventsList.add(currentEvent)
 				}
