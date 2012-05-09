@@ -1,9 +1,18 @@
 package org.chip.mo
 
 import groovy.xml.MarkupBuilder;
+import groovy.xml.StreamingMarkupBuilder
+import groovy.xml.XmlUtil
 import groovyx.net.http.*
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.chip.mo.exceptions.MOCallException
+import org.chip.mo.exceptions.InvalidRequestException;
+
 abstract class MilleniumObjectCall {
+	
+	private static final Log log = LogFactory.getLog(this)
 
 	def writer
 	def builder
@@ -24,7 +33,6 @@ abstract class MilleniumObjectCall {
 	
 	static{
 		responseErrorMessageMap = new HashMap<String, String>()
-		responseErrorMessageMap.put(MO_RESP_STATUS_NODATA, "No Information found for Record ID: ")
 		responseErrorMessageMap.put(MO_RESP_STATUS_ERROR, "MO Server returned Error for Record ID: ")
 		
 		responseErrorStatusCodeMap = new HashMap<String, Integer>()
@@ -53,13 +61,16 @@ abstract class MilleniumObjectCall {
 	 */
 	def makeCall(recordId, moURL) throws MOCallException{
 		requestParams.put(RECORDIDPARAM, recordId)
+		def resp
+		try{
+			def requestXML = createRequest()
 		
-		def requestXML = createRequest()
-		
-		def resp = makeRestCall(requestXML, moURL)
-
-		handleExceptions(resp, recordId)
-
+			resp = makeRestCall(requestXML, moURL)
+			
+			handleExceptions(resp, recordId)
+		} catch (InvalidRequestException ire){
+			log.error(ire.exceptionMessage +" for "+ recordId +" because " + ire.rootCause)
+		} 
 		readResponse(resp)
 	}
 	
@@ -67,7 +78,8 @@ abstract class MilleniumObjectCall {
 		def replyMessage = resp.getData()
 		def status= replyMessage.Status.text()
 		def isResponseError = false
-		if(status!=MO_RESP_STATUS_SUCCESS){
+		if( status != MO_RESP_STATUS_SUCCESS && 
+			status != MO_RESP_STATUS_NODATA ){
 			def errorMessage = responseErrorMessageMap.get(status)
 			def statusCode = responseErrorStatusCodeMap.get(status)
 			if(errorMessage==null){
@@ -97,13 +109,9 @@ abstract class MilleniumObjectCall {
 	
 	def makeRestCall(requestXML, moURL)throws MOCallException{
 		def resp
-		try{
-			def restClient = new RESTClient(moURL+targetServlet)
-			restClient.setContentType(ContentType.XML)
-			resp=restClient.post(body:requestXML, requestContentType : ContentType.XML)
-		}catch(Exception e){
-			throw new MOCallException("Request failed: <!--"+requestXML+"-->",500, e.getMessage())
-		}
+		def restClient = new RESTClient(moURL+targetServlet)
+		restClient.setContentType(ContentType.XML)
+		resp=restClient.post(body:requestXML, requestContentType : ContentType.XML)
 		return resp
 	}
 

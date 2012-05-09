@@ -9,7 +9,7 @@ import org.chip.rdf.vitals.VitalSign;
 import org.codehaus.groovy.grails.commons.ConfigurationHolder;
 
 class EventsReader {
-
+	
 	/**
 	* eventCodesMap
 	*/
@@ -44,6 +44,13 @@ class EventsReader {
 	
 	private Map<String, List> eventsByParentEventId
 	
+	private List<Event> eventsList
+	
+	public EventsReader(){
+		eventsByParentEventId = new HashMap()
+		eventsList = new ArrayList()
+	}
+	
 	public Map getEvents(){
 		return eventsByParentEventId
 	} 
@@ -52,10 +59,11 @@ class EventsReader {
 		def replyMessage = moResponse.getData()
 		def payload= replyMessage.Payload
 		processPayload(payload)
+		groupEvents()
+		splitComplexEvents()
 	}
 	
 	public processPayload(payload){
-		try{
 			eventsByParentEventId = new HashMap()
 			//int i = 0
 			//long l1 = new Date().getTime()
@@ -73,10 +81,10 @@ class EventsReader {
 					currentEvent.parentEventId = currentNumericResult.ParentEventId.text()
 					currentEvent.eventEndDateTime = currentNumericResult.EventEndDateTime.text()
 					currentEvent.updateDateTime = currentNumericResult.UpdateDateTime.text()
+					currentEvent.recordId = currentNumericResult.PersonId.text()
 					
 					//Run a quick validation on the value and add the event to the list only if the value is valid
 					if(valueIsValid(currentEvent.value)){
-						List eventsList = getEventsListForParentEventId(currentEvent.parentEventId, currentEvent.eventEndDateTime, currentEvent.updateDateTime)
 						eventsList.add(currentEvent)
 					}
 				}
@@ -95,55 +103,49 @@ class EventsReader {
 					currentEvent.parentEventId = currentCodedResult.ParentEventId.text()
 					currentEvent.eventEndDateTime = currentCodedResult.EventEndDateTime.text()
 					currentEvent.updateDateTime = currentCodedResult.UpdateDateTime.text()
+					currentEvent.recordId = currentCodedResult.PersonId.text()
 					
-					List eventsList = getEventsListForParentEventId(currentEvent.parentEventId, currentEvent.eventEndDateTime, currentEvent.updateDateTime)
 					eventsList.add(currentEvent)
 				}
 			}
 			//println("number of results returned : " + i)
 			//long l2 = new Date().getTime()
 			//println("vitals reading moresponse took: "+(l2-l1)/1000)
+	}
+	
+	def groupEvents(){
+		eventsList.each {event->
 			
-			splitComplexEvents()
+			//1. Match on parent event id
+			def mappedEventsList = eventsByParentEventId.get(event.parentEventId)
 			
-		}catch(Exception e){
-			throw new MOCallException("Error reading MO response", 500, e.getMessage())
+			if(mappedEventsList==null){//2. No match on parent event id, try to match by end datetime and update datetime.
+				mappedEventsList = matchByEndAndUpdateDateTimes(event.eventEndDateTime, event.updateDateTime)
+				
+				if(mappedEventsList==null){//3. No match on both datetimes, create a new list.
+					mappedEventsList = new ArrayList()
+					eventsByParentEventId.put(event.parentEventId, mappedEventsList)
+				}
+			}
+			
+			mappedEventsList.add(event)
 		}
 	}
 	
-	/**
-	 * Finds the eventlist (in eventsByParentEventId map) mapped to the incoming parentEventId. Return matching event list.
-	 * If no match is found against the parentEventId, match against both of the incoming timestamp values. Return matching event list.
-	 * If no match is found create a new list, map it to the incoming parentEventId and return it.
-	 * @param parentEventId
-	 * @param eventEndDateTime
-	 * @param updateDateTime
-	 * @return
-	 */
-	private List getEventsListForParentEventId(String parentEventId, String eventEndDateTime, String updateDateTime){
-		//find the eventslist by matching parent event id
-		def ret = eventsByParentEventId.get(parentEventId)
-				
-		//no match by parent event id. match by dates associated with each list.
-		if (ret==null){
-			eventsByParentEventId.each{key, value->
-				if(value.size()>0){
-					if(value.get(0).eventEndDateTime.equals(eventEndDateTime) && value.get(0).updateDateTime.equals(updateDateTime)){
-						ret = value
-					}
-				}
+	def matchByEndAndUpdateDateTimes(String eventEndDateTime, String updateDateTime){
+		def ret = null
+		def found = false
+		eventsByParentEventId.each{key, value->
+			if(!found && (value.size()>0)){
+				if(value.get(0).eventEndDateTime.equals(eventEndDateTime) && value.get(0).updateDateTime.equals(updateDateTime)){
+					ret = value
+					found=true
+				} 
 			}
-		}
-		
-		//no match on date either. create a new list and return
-		if (ret==null){
-			ret = new ArrayList()
-			eventsByParentEventId.put(parentEventId, ret)
 		}
 		return ret
 	}
 	
-
 	/**
 	 * This method extracts atomic bp events from complex bp events.
 	 * 
@@ -162,7 +164,7 @@ class EventsReader {
 	def splitComplexEvents(){
 		Map atomicEventsbyParentEventId = new HashMap()
 		List complexParentEventIds = new ArrayList()
-		
+				
 		//iterate through all event lists
 		eventsByParentEventId.each{parentEventId, events ->
 				def currentEventCode = events.get(0).getEventCode()
@@ -193,7 +195,7 @@ class EventsReader {
 										eventCode: bpEventCode,
 										value: complexEvent.value,
 										eventId: complexEvent.eventId,
-										parentEventId: complexEvent.parentEventId,
+										parentEventId: parentEventId,
 										eventEndDateTime: complexEvent.eventEndDateTime,
 										updateDateTime: complexEvent.updateDateTime)
 								)
@@ -205,7 +207,7 @@ class EventsReader {
 										eventCode: bpEventCode,
 										value: complexEvent.value,
 										eventId: complexEvent.eventId,
-										parentEventId: complexEvent.parentEventId,
+										parentEventId: parentEventId,
 										eventEndDateTime: complexEvent.eventEndDateTime,
 										updateDateTime: complexEvent.updateDateTime))
 							bpEventsByBodyPosition.get(bodyPosition).add(
@@ -213,7 +215,7 @@ class EventsReader {
 										eventCode: ecm.get("EVENTCODEPOSITION"),
 										eventTag: bodyPosition,
 										eventId: complexEvent.eventId,
-										parentEventId: complexEvent.parentEventId,
+										parentEventId: parentEventId,
 										eventEndDateTime: complexEvent.eventEndDateTime,
 										updateDateTime: complexEvent.updateDateTime)
 								)
@@ -231,16 +233,22 @@ class EventsReader {
 					complexParentEventIds.add(parentEventId)
 				}
 		}
+		
 			
 		//Step 3
 		//Add the mapped atomic event lists to our original eventsList map.
 		eventsByParentEventId.putAll(atomicEventsbyParentEventId)
-			
+		
 		//Step 4
 		//Remove mappings for all complexEventsList
 		complexParentEventIds.each{
 			eventsByParentEventId.remove(it)
 		}
+		
+		eventsByParentEventId.each {
+			assert it.value.size() > 0, "Found an empty event set: " + it.value
+		}
+		
 	}
 	
 	def valueIsValid(currentValue){

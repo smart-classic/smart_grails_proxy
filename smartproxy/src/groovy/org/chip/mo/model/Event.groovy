@@ -13,6 +13,8 @@ class Event {
 	def value
 	def eventTag
 	
+	def recordId
+	
 	public String toString(){
 		String ret=""
 		this.properties.each{property, value->
