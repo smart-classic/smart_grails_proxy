@@ -129,6 +129,7 @@ class VitalSignsManager {
 				//For each eventlist - create a set containing VitalSign and BloodPressure objects
 				VitalSigns vitalSigns=new VitalSigns()
 				def encounterId
+				def recordId
 				String vitalSignsDate
 				BloodPressure bloodPressure
 				
@@ -143,6 +144,8 @@ class VitalSignsManager {
 						vitalSignsDate=event.eventEndDateTime
 						//read the encounterId for this event
 						encounterId = event.getEncounterId()
+						//read the recordId for this event
+						recordId = event.getRecordId()
 					}else if(event instanceof HashSet){
 						//a hashset object with bloodpressure information.
 						bloodPressure = new BloodPressure()
@@ -163,6 +166,8 @@ class VitalSignsManager {
 							
 							//read the encounterId for this event
 							encounterId = it.getEncounterId()
+							//read the recordId for this event
+							recordId = it.getRecordId()
 							//read the end date for this event.
 							vitalSignsDate=it.eventEndDateTime
 						}
@@ -178,6 +183,7 @@ class VitalSignsManager {
 				assert encountersById.get(encounterId) != null, "Encounter ID unkonwn: " + encounterId
 			
 				vitalSigns.setProperty('encounter', encountersById.get(encounterId))
+				vitalSigns.setProperty('belongsTo', recordId)
 				vitalSigns.setProperty('date', vitalSignsDate)
 				
 				//Add the vitalSigns object to the vitalSignsSet.
