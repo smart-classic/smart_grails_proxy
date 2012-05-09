@@ -38,11 +38,7 @@ class MilleniumService {
 		
 		def moResponse=null
 		moCalls.each{moCall->
-			if(moResponse){
-				moResponse = moCall.makeCall(recordId, moURL, moResponse)
-			}else{
-				moResponse = moCall.makeCall(recordId, moURL)
-			}
+			moResponse = moCall.makeCall(recordId, moURL, moResponse)
 		}
 		return moResponse
     }

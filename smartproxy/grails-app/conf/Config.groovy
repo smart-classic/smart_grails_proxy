@@ -42,7 +42,7 @@ environments{
 		externalConfigFileLocation="specify me"
 	}
 	development{
-		externalConfigFileLocation="C:\\grails-config\\smart\\"
+		externalConfigFileLocation="external_config\\"
 	}
 	test{
 		externalConfigFileLocation="${userHome}/grails-config/"

@@ -18,19 +18,22 @@ cas{
 
 environments {
     production {
-        grails.serverURL = "http://recombinant-pgd.chip.org:8080/${appName}"
+        grails.serverURL = "http://recombinant-pgd.chip.org:8080/smartproxy"
 	grails.moURL = 'http://soatstweb1:8888/CHMObjectsToolkit/servlet/'
 	grails.smartURL = 'http://recombinant-pgd.chip.org:7001/proxy_index'
+	smart.belongsTo.ResourceURL = "http://recombinant-pgd.chip.org:8080/smartproxy/records/"
     }
     development {
-        grails.serverURL = "http://recombinant-pgd.chip.org:8080/${appName}"
+        grails.serverURL = "http://recombinant-pgd.chip.org:8080/smartproxy"
 	grails.moURL = 'http://soatstweb1:8888/CHMObjectsToolkit/servlet/'
 	grails.smartURL = 'http://recombinant-pgd.chip.org:7001/proxy_index'
+	smart.belongsTo.ResourceURL = "http://recombinant-pgd.chip.org:8080/smartproxy/records/"
     }
     test {
-        grails.serverURL = "http://recombinant-pgd.chip.org:8080/${appName}"
+        grails.serverURL = "http://recombinant-pgd.chip.org:8080/smartproxy"
 	grails.moURL = 'http://soatstweb1:8888/CHMObjectsToolkit/servlet/'
 	grails.smartURL = 'http://recombinant-pgd.chip.org:7001/proxy_index'
+	smart.belongsTo.ResourceURL = "http://recombinant-pgd.chip.org:8080/smartproxy/records/"
     }
 
 }
@@ -138,7 +141,7 @@ cerner{
 		vitalUnits{
 			EVENTCODEHEIGHT= "m"
 			EVENTCODEWEIGHT= "kg"
-			EVENTCODERRATE= "{breaths}"
+			EVENTCODERRATE= "{breaths}/min"
 			EVENTCODEHEARTRATE= "{beats}/min"
 			EVENTCODEOSAT= "%{HemoglobinSaturation}"
 			EVENTCODETEMP= "Cel"

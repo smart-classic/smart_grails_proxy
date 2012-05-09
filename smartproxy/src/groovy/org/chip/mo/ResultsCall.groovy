@@ -2,6 +2,7 @@ package org.chip.mo;
 
 import org.chip.managers.VitalSignsManager;
 import org.chip.mo.exceptions.MOCallException;
+import org.chip.mo.exceptions.InvalidRequestException;
 import org.chip.mo.model.Event;
 import org.chip.rdf.Vitals;
 import org.chip.rdf.vitals.*;
@@ -24,6 +25,9 @@ class ResultsCall extends MilleniumObjectCall{
 		eventsReader = new EventsReader()
 	}
 	
+	
+	
+	
 	/**
 	* Generates MO requests to 
 	* - Get Vitals for a list of Encounters and a given patient id
@@ -40,6 +44,13 @@ class ResultsCall extends MilleniumObjectCall{
 		
 		Map encountersById = (HashMap)requestParams.get(MO_RESPONSE_PARAM)
 		Set encounterIds = encountersById.keySet()
+		
+		// MO Server chokes on an empty encounter IDs list.
+		// Log it and throw an exception.
+		if (encounterIds.size() == 0) {
+			throw new InvalidRequestException("Error creating MO Request", 404, "No Encounters Found")
+		}
+
 		builder.EncounterIds(){
 			encounterIds.each{encounterId->
 				EncounterId(encounterId)
@@ -60,14 +71,16 @@ class ResultsCall extends MilleniumObjectCall{
 	* @return
 	*/
 	def readResponse(moResponse)throws MOCallException{
-		//parse the moResonse and pass events to the vitalSignsManager
-		eventsReader.read(moResponse)
-		Map eventsByParentEventId = eventsReader.getEvents()
-		
-		vitalSignsManager.recordEvents(eventsByParentEventId)
-		vitalSignsManager.recordEncounters((HashMap)requestParams.get(MO_RESPONSE_PARAM, moResponse))
-		vitalSignsManager.processEvents()
-		
+		if(moResponse !=null){
+			//parse the moResonse and pass events to the vitalSignsManager
+			eventsReader.read(moResponse)
+			Map eventsByParentEventId = eventsReader.getEvents()
+			
+			vitalSignsManager.recordEvents(eventsByParentEventId)
+			vitalSignsManager.recordEncounters((HashMap)requestParams.get(MO_RESPONSE_PARAM, moResponse))
+			vitalSignsManager.processEvents()
+		}
+			
 		Vitals vitals = vitalSignsManager.getVitals()
 		return vitals
 	}
