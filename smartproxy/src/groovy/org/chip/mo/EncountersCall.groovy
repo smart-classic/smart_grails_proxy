@@ -9,13 +9,17 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder;
 
 class EncountersCall extends MilleniumObjectCall{
 	
+	public static final String ENCOUNTER_TYPE_CODING_SYSTEM='encounterType'
+	
 	static final Map encounterResourceMap
 	static final Map encounterTitleMap
+	static final Map codingSystemsMap
 	
 	static{
 		def config = ConfigurationHolder.config
 		encounterResourceMap = config.cerner.mo.encounterResource
 		encounterTitleMap = config.cerner.mo.encounterTitle
+		codingSystemsMap = config.cerner.mo.codingSystemMap
 	}
 	
 	def init(){
@@ -57,11 +61,18 @@ class EncountersCall extends MilleniumObjectCall{
 			 it.EncounterTypeClass.Meaning.text() != "INPATIENT"
 		   }.each {
 			   Encounter encounter = new Encounter()
+			   
 			   encounter.setStartDate(it.RegistrationDateTime.text())
 			   encounter.setEndDate(it.DischargeDateTime.text())
-			   encounter.getEncounterType().setCode(encounterResourceMap.get(it.EncounterTypeClass.Display.text()))
-			   encounter.getEncounterType().setTitle(encounterTitleMap.get(it.EncounterTypeClass.Display.text()))
 			   encounter.setBelongsTo(it.PersonId.text())
+			   
+			   encounter.getEncounterType().setTitle(encounterTitleMap.get(it.EncounterTypeClass.Display.text()))
+			   
+			   encounter.getEncounterType().getCode().setType("EncounterType")
+			   encounter.getEncounterType().getCode().setTitle(encounterTitleMap.get(it.EncounterTypeClass.Display.text()))
+			   encounter.getEncounterType().getCode().setSystem(codingSystemsMap.get(ENCOUNTER_TYPE_CODING_SYSTEM))
+			   encounter.getEncounterType().getCode().setIdentifier(encounterResourceMap.get(it.EncounterTypeClass.Display.text()))
+			   
 			   encountersById.put(it.EncounterId.text(), encounter)
 		   }
 		   //long l2 = new Date().getTime()
