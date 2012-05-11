@@ -21,25 +21,39 @@ environments {
         grails.serverURL = "http://recombinant-pgd.chip.org:8080/smartproxy"
 	grails.moURL = 'http://soatstweb1:8888/CHMObjectsToolkit/servlet/'
 	grails.smartURL = 'http://recombinant-pgd.chip.org:7001/proxy_index'
-	smart.belongsTo.ResourceURL = "http://recombinant-pgd.chip.org:8080/smartproxy/records/"
     }
     development {
         grails.serverURL = "http://recombinant-pgd.chip.org:8080/smartproxy"
 	grails.moURL = 'http://soatstweb1:8888/CHMObjectsToolkit/servlet/'
 	grails.smartURL = 'http://recombinant-pgd.chip.org:7001/proxy_index'
-	smart.belongsTo.ResourceURL = "http://recombinant-pgd.chip.org:8080/smartproxy/records/"
     }
     test {
         grails.serverURL = "http://recombinant-pgd.chip.org:8080/smartproxy"
 	grails.moURL = 'http://soatstweb1:8888/CHMObjectsToolkit/servlet/'
 	grails.smartURL = 'http://recombinant-pgd.chip.org:7001/proxy_index'
-	smart.belongsTo.ResourceURL = "http://recombinant-pgd.chip.org:8080/smartproxy/records/"
     }
 
 }
 
 cerner{
 	mo{
+		encounterResource{
+			Outpatient= "ambulatory"
+			Emergency= "emergency"
+			Field= "field"
+			Home= "home"
+			Inpatient= "inpatient"
+			Virtual="virtual"
+		}
+		encounterTitle{
+			Outpatient="Ambulatory encounter"
+			Emergency= "Emergency encounter"
+			Field= "Field encounter"
+			Home= "Home encounter"
+			Inpatient= "Inpatient encounter"
+			Virtual= "Virtual encounter"
+		}
+		
 		eventCode{
 			EVENTCODEHEIGHT="2700653"
 			EVENTCODEWEIGHT="2700654"
@@ -57,24 +71,9 @@ cerner{
 			EVENTCODESYSSTANDING="1164548"
 			EVENTCODEDIASUPINE="1164539"
 			EVENTCODEDIASITTING="1164542"
-			EVENTCODEDIASTANDING="1164551"	
+			EVENTCODEDIASTANDING="1164551"
 		}
-		encounterResource{
-			Outpatient= "http://smartplatforms.org/terms/codes/EncounterType#ambulatory"
-			Emergency= "http://smartplatforms.org/terms/codes/EncounterType#emergency"
-			Field= "http://smartplatforms.org/terms/codes/EncounterType#field"
-			Home= "http://smartplatforms.org/terms/codes/EncounterType#home"
-			Inpatient= "http://smartplatforms.org/terms/codes/EncounterType#inpatient"
-			Virtual="http://smartplatforms.org/terms/codes/EncounterType#virtual"
-		}
-		encounterTitle{
-			Outpatient="Ambulatory encounter"
-			Emergency= "Emergency encounter"
-			Field= "Field encounter"
-			Home= "Home encounter"
-			Inpatient= "Inpatient encounter"
-			Virtual= "Virtual encounter"
-		}
+		
 		vitalsType{
 			EVENTCODEHEIGHT= "height"
 			EVENTCODEWEIGHT= "weight"
@@ -88,17 +87,18 @@ cerner{
 			EVENTCODELOCATION= "bodySite"
 			EVENTCODEPOSITION= "bodyPosition"
 		}
+		
 		vitalsTitle{		
-			EVENTCODEHEIGHT= "Height (measured)"
-			EVENTCODEWEIGHT= "Body weight (measured)"
+			EVENTCODEHEIGHT= "Body height"
+			EVENTCODEWEIGHT= "Body weight"
 			EVENTCODERRATE= "Respiration rate"
 			EVENTCODEHEARTRATE= "Heart Rate"
 			EVENTCODEOSAT= "Oxygen saturation"
 			EVENTCODETEMP= "Body temperature"
-			EVENTCODESYS= "Systolic blood pressure"
-			EVENTCODEDIA= "Diastolic blood pressure"
+			EVENTCODESYS= "Intravascular systolic"
+			EVENTCODEDIA= "Intravascular diastolic"
 		}
-		
+
 		vitalsTitleTagMap{
 			Auscultation= "Auscultation"
 			Palpation= "Palpation"
@@ -113,29 +113,83 @@ cerner{
 			Right_lower= "Right thigh"
 		}
 		
+		codingSystemMap{
+			encounterType="http://smartplatforms.org/terms/codes/EncounterType#"
+		}
+		
+		vitalsCodingSystemMap{
+			EVENTCODEHEIGHT="http://purl.bioontology.org/ontology/LNC/"
+			EVENTCODEWEIGHT="http://purl.bioontology.org/ontology/LNC/"
+			EVENTCODERRATE="http://purl.bioontology.org/ontology/LNC/"
+			EVENTCODEHEARTRATE="http://purl.bioontology.org/ontology/LNC/"
+			EVENTCODEOSAT="http://purl.bioontology.org/ontology/LNC/"
+			EVENTCODETEMP="http://purl.bioontology.org/ontology/LNC/"
+			EVENTCODESYS="http://purl.bioontology.org/ontology/LNC/"
+			EVENTCODEDIA="http://purl.bioontology.org/ontology/LNC/"
+		}
+		
+		vitalsCodingSystemTagMap{
+			Auscultation= "http://smartplatforms.org/terms/codes/BloodPressureMethod#"
+			Palpation= "http://smartplatforms.org/terms/codes/BloodPressureMethod#"
+			Automated= "http://smartplatforms.org/terms/codes/BloodPressureMethod#"
+			Invasive= "http://smartplatforms.org/terms/codes/BloodPressureMethod#"
+			Sitting= "http://purl.bioontology.org/ontology/SNOMEDCT/"
+			Standing= "http://purl.bioontology.org/ontology/SNOMEDCT/"
+			Supine= "http://purl.bioontology.org/ontology/SNOMEDCT/"
+			Left_upper= "http://purl.bioontology.org/ontology/SNOMEDCT/"
+			Right_upper="http://purl.bioontology.org/ontology/SNOMEDCT/"
+			Left_lower= "http://purl.bioontology.org/ontology/SNOMEDCT/"
+			Right_lower= "http://purl.bioontology.org/ontology/SNOMEDCT/"
+		}
+		
+		vitalsCodeTypeMap{
+			EVENTCODEHEIGHT="VitalSign"
+			EVENTCODEWEIGHT="VitalSign"
+			EVENTCODERRATE="VitalSign"
+			EVENTCODEHEARTRATE="VitalSign"
+			EVENTCODEOSAT="VitalSign"
+			EVENTCODETEMP="VitalSign"
+			EVENTCODESYS="VitalSign"
+			EVENTCODEDIA="VitalSign"
+		}
+		
+		vitalsCodeTypeTagMap{
+			Auscultation= "BloodPressureMethod"
+			Palpation= "BloodPressureMethod"
+			Automated= "BloodPressureMethod"
+			Invasive= "BloodPressureMethod"
+			Sitting= "BloodPressureBodyPosition"
+			Standing= "BloodPressureBodyPosition"
+			Supine= "BloodPressureBodyPosition"
+			Left_upper= "BloodPressureBodySite"
+			Right_upper="BloodPressureBodySite"
+			Left_lower= "BloodPressureBodySite"
+			Right_lower= "BloodPressureBodySite"
+		}
+		
 		vitalResource{
-			EVENTCODEHEIGHT= "http://purl.bioontology.org/ontology/LNC/8302-2"
-			EVENTCODEWEIGHT= "http://purl.bioontology.org/ontology/LNC/3141-9"
-			EVENTCODERRATE= "http://purl.bioontology.org/ontology/LNC/9279-1"
-			EVENTCODEHEARTRATE= "http://purl.bioontology.org/ontology/LNC/8867-4"
-			EVENTCODEOSAT= "http://purl.bioontology.org/ontology/LNC/2710-2"
-			EVENTCODETEMP= "http://purl.bioontology.org/ontology/LNC/8310-5"
-			EVENTCODESYS= "http://purl.bioontology.org/ontology/LNC/8480-6"
-			EVENTCODEDIA= "http://purl.bioontology.org/ontology/LNC/8462-4"
+			EVENTCODEHEIGHT= "8302-2"
+			EVENTCODEWEIGHT= "3141-9"
+			EVENTCODERRATE= "9279-1"
+			EVENTCODEHEARTRATE= "8867-4"
+			EVENTCODEOSAT= "2710-2"
+			EVENTCODETEMP= "8310-5"
+			EVENTCODESYS= "8480-6"
+			EVENTCODEDIA= "8462-4"
 		}
 		
 		vitalResourceTagMap{
-			Auscultation= "http://smartplatforms.org/terms/codes/BloodPressureMethod#auscultation"
-			Palpation= "http://smartplatforms.org/terms/codes/BloodPressureMethod#palpation"
-			Automated= "http://smartplatforms.org/terms/codes/BloodPressureMethod#machine"
-			Invasive= "http://smartplatforms.org/terms/codes/BloodPressureMethod#invasive"
-			Sitting= "http://purl.bioontology.org/ontology/SNOMEDCT/33586001" 
-			Standing= "http://purl.bioontology.org/ontology/SNOMEDCT/10904000"
-			Supine= "http://purl.bioontology.org/ontology/SNOMEDCT/40199007"
-			Left_upper="http://purl.bioontology.org/ontology/SNOMEDCT/368208006"
-			Right_upper="http://purl.bioontology.org/ontology/SNOMEDCT/368209003"
-			Left_lower="http://purl.bioontology.org/ontology/SNOMEDCT/61396006"
-			Right_lower="http://purl.bioontology.org/ontology/SNOMEDCT/11207009"
+			Auscultation= "auscultation"
+			Palpation= "palpation"
+			Automated= "machine"
+			Invasive= "invasive"
+			Sitting= "33586001" 
+			Standing= "10904000"
+			Supine= "40199007"
+			Left_upper="368208006"
+			Right_upper="368209003"
+			Left_lower="61396006"
+			Right_lower="11207009"
 		}
 		
 		vitalUnits{

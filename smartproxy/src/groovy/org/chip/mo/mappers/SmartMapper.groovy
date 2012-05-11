@@ -4,13 +4,14 @@ import java.util.Map;
 import org.codehaus.groovy.grails.commons.ConfigurationHolder;
 
 class SmartMapper {
-	
 	static final Map mappingTypeMap
 	
 	static final Map vitalTypeMap
 	static final Map vitalTitleMap
 	static final Map vitalResourceMap
 	static final Map vitalUnitMap
+	static final Map vitalsCodingSystemsMap
+	static final Map vitalsCodeTypeMap
 	
 	static{
 		
@@ -26,11 +27,19 @@ class SmartMapper {
 		
 		vitalUnitMap = readEventCodesConfigMap(config.cerner.mo.eventCode, config.cerner.mo.vitalUnits)
 		
+		vitalsCodingSystemsMap = readEventCodesConfigMap(config.cerner.mo.eventCode, config.cerner.mo.vitalsCodingSystemMap)
+		vitalsCodingSystemsMap.putAll(readEventTagConfigMap(config.cerner.mo.vitalsCodingSystemTagMap))
+		
+		vitalsCodeTypeMap = readEventCodesConfigMap(config.cerner.mo.eventCode, config.cerner.mo.vitalsCodeTypeMap)
+		vitalsCodeTypeMap.putAll(readEventTagConfigMap(config.cerner.mo.vitalsCodeTypeTagMap))
+		
 		mappingTypeMap = new HashMap()
 		mappingTypeMap.put('Type', vitalTypeMap)
 		mappingTypeMap.put('Title', vitalTitleMap)
 		mappingTypeMap.put('Resource', vitalResourceMap)
 		mappingTypeMap.put('Unit', vitalUnitMap)
+		mappingTypeMap.put('codingSystem', vitalsCodingSystemsMap)
+		mappingTypeMap.put('codeType', vitalsCodeTypeMap)
 	}
 	
 	static def readEventCodesConfigMap(eventCodesMap, propertiesMap){
