@@ -9,6 +9,8 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder;
 
 class Vitals extends Record {
 
+	public final static String CODE_RDF_TYPE='http://smartplatforms.org/terms#Code'
+	
 	Set vitalSignsSet;
 	Map nodeIdsByEncounter;
 	
@@ -21,7 +23,8 @@ class Vitals extends Record {
 		//long l1 = new Date().getTime()
 		//return rdfOut
 		def config = ConfigurationHolder.config
-		def belongsToUrl = config.smart.belongsTo.ResourceURL
+		def belongsToUrl = config.oauth.smartEmr.apiBase
+		belongsToUrl += '/records/'
 		
 		def builder = new StreamingMarkupBuilder()
 		builder.encoding="UTF-8"
@@ -34,6 +37,7 @@ class Vitals extends Record {
 			mkp.declareNamespace('dc':'http://purl.org/dc/elements/1.1/')
 			mkp.declareNamespace('dcterms':'http://purl.org/dc/terms/')
 			mkp.declareNamespace('v':'http://www.w3.org/2006/vcard/ns#')
+			mkp.declareNamespace('spcode':'http://smartplatforms.org/terms/codes/')
 			'rdf:RDF'(){
 				vitalSignsSet.each{ vitalSigns ->
 						'sp:VitalSigns'(){
@@ -66,9 +70,18 @@ class Vitals extends Record {
 				'sp:BloodPressure'(){
 					createVitalSign(rdfBuilder, bloodPressure.diastolic, 'diastolic')
 					createVitalSign(rdfBuilder, bloodPressure.systolic, 'systolic')
-					createCodedValue(rdfBuilder, bloodPressure.bodyPosition, 'bodyPosition')
-					createCodedValue(rdfBuilder, bloodPressure.bodySite, 'bodySite')
-					createCodedValue(rdfBuilder, bloodPressure.method, 'method')
+					
+					'sp:bodyPosition'(){
+						createCodedValue(rdfBuilder, bloodPressure.bodyPosition)
+					}
+					
+					'sp:bodySite'(){
+						createCodedValue(rdfBuilder, bloodPressure.bodySite)
+					}
+					
+					'sp:method'(){
+						createCodedValue(rdfBuilder, bloodPressure.method)
+					}
 				}
 			}
 		}
@@ -79,10 +92,7 @@ class Vitals extends Record {
 			 rdfBuilder."sp:${type}"(){
 			  'sp:VitalSign'(){
 				  'sp:vitalName'(){
-					  'sp:CodedValue'(){
-						  'sp:code'('rdf:resource':vitalSign.vitalName.code)
-						  'dcterms:title'(vitalSign.vitalName.title)
-					  }
+					  createCodedValue(rdfBuilder, vitalSign.vitalName)
 				  }
 				  'sp:value'(vitalSign.value)
 			  'sp:unit'(vitalSign.unit)
@@ -90,14 +100,24 @@ class Vitals extends Record {
 			}
 		}
 	}
-	
-	def createCodedValue(rdfBuilder, CodedValue codedValue, String type){
+
+	def createCodedValue(rdfBuilder, CodedValue codedValue){
 		if(codedValue!=null){
-			rdfBuilder."sp:${type}"(){
-				'sp:CodedValue'(){
-					'sp:code'('rdf:resource':codedValue.code)
-					'dcterms:title'(codedValue.title)
-				}
+			rdfBuilder.'sp:CodedValue'(){
+				'dcterms:title'(codedValue.title)
+				createCode(rdfBuilder, codedValue.getCode())
+				//'sp:code'('rdf:resource':codedValue.code)
+			}
+		}
+	}
+	
+	def createCode(rdfBuilder, Code code){
+		rdfBuilder.'sp:code'(){
+			"spcode:${code.type}"('rdf:about':code.system+code.identifier){
+				'rdf:type'('rdf:resource':CODE_RDF_TYPE)
+				'dcterms:title'(code.title)
+				'sp:system'(code.system)
+				'dcterms:identifier'(code.identifier)
 			}
 		}
 	}
@@ -116,10 +136,7 @@ class Vitals extends Record {
 					'sp:endDate'(encounter.getEndDate())
 					if(encounter.encounterType.code!=null && encounter.encounterType.code!=""){
 						'sp:encounterType'(){
-							'sp:CodedValue'(){
-								'sp:code'('rdf:resource':encounter.encounterType.code)
-									'dcterms:title'(encounter.encounterType.title)
-							}
+							createCodedValue(rdfBuilder, encounter.encounterType)
 						}
 					}
 				}
