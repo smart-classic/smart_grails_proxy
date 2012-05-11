@@ -197,7 +197,8 @@ class EventsReader {
 										eventId: complexEvent.eventId,
 										parentEventId: parentEventId,
 										eventEndDateTime: complexEvent.eventEndDateTime,
-										updateDateTime: complexEvent.updateDateTime)
+										updateDateTime: complexEvent.updateDateTime,
+										recordId: complexEvent.recordId)
 								)
 						}else{
 							// new list for the body position.
@@ -209,7 +210,9 @@ class EventsReader {
 										eventId: complexEvent.eventId,
 										parentEventId: parentEventId,
 										eventEndDateTime: complexEvent.eventEndDateTime,
-										updateDateTime: complexEvent.updateDateTime))
+										updateDateTime: complexEvent.updateDateTime,
+										recordId: complexEvent.recordId)
+								)
 							bpEventsByBodyPosition.get(bodyPosition).add(
 								new Event(encounterId: complexEvent.encounterId,
 										eventCode: ecm.get("EVENTCODEPOSITION"),
@@ -217,7 +220,8 @@ class EventsReader {
 										eventId: complexEvent.eventId,
 										parentEventId: parentEventId,
 										eventEndDateTime: complexEvent.eventEndDateTime,
-										updateDateTime: complexEvent.updateDateTime)
+										updateDateTime: complexEvent.updateDateTime,
+										recordId: complexEvent.recordId)
 								)
 						}
 					}

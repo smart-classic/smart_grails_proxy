@@ -2,7 +2,11 @@ package org.chip.rdf.vitals
 
 class CodedValue {
 	
-	String code
+	public CodedValue(){
+		code = new Code()
+	}
+	
+	Code code
 	String title
 	
 }

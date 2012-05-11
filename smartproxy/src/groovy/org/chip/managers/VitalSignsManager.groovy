@@ -12,6 +12,7 @@ import org.chip.mo.mappers.SmartMapper;
 import org.chip.mo.model.Event;
 import org.chip.rdf.Vitals;
 import org.chip.rdf.vitals.BloodPressure;
+import org.chip.rdf.vitals.Code;
 import org.chip.rdf.vitals.CodedValue;
 import org.chip.rdf.vitals.Encounter;
 import org.chip.rdf.vitals.VitalSign;
@@ -202,11 +203,21 @@ class VitalSignsManager {
 	
 	def createCodedValue(String eventCode){
 		CodedValue codedValue = new CodedValue()
-		codedValue.setCode(SmartMapper.map(eventCode, 'Resource'))
+		codedValue.setCode(
+			createCode(eventCode)
+		)
 		codedValue.setTitle(SmartMapper.map(eventCode, 'Title'))
 		return codedValue
 	}
 
+	def createCode(eventCode){
+		Code code = new Code()
+		code.setType(SmartMapper.map(eventCode, 'codeType'))
+		code.setTitle(SmartMapper.map(eventCode, 'Title'))
+		code.setSystem(SmartMapper.map(eventCode, 'codingSystem'))
+		code.setIdentifier(SmartMapper.map(eventCode, 'Resource'))
+		return code
+	}
 	/**
 	 * Only the heights need to be converted from m to cm.
 	 * This method takes care of that.
