@@ -1,18 +1,21 @@
 package org.chip.rdf;
 
+import org.codehaus.groovy.grails.commons.ConfigurationHolder;
+
 import groovy.xml.StreamingMarkupBuilder
 
 public class Demographics extends Record {
 	
 	public static final String MRN_SYSTEM='CHB'
 	
-	public Demographics(String birthDateTime, String givenName, String familyName, String gender, String zipcode, String mrn){
+	public Demographics(String birthDateTime, String givenName, String familyName, String gender, String zipcode, String mrn, String personId){
 		this.birthDateTime=birthDateTime;
 		this.givenName=givenName;
 		this.familyName=familyName;
 		this.gender=gender;
 		this.zipcode=zipcode;
 		this.mrn=mrn;
+		this.personId=personId;
 	}
 	
 	public String getBirthDateTime() {
@@ -51,6 +54,7 @@ public class Demographics extends Record {
 	private String gender;
 	private String zipcode;
 	private String mrn;
+	private String personId;
 	
 	/**
 	 * Performs the actual RDF generation from a demographics object
@@ -58,6 +62,11 @@ public class Demographics extends Record {
 	 * @return
 	 */
 	def toRDF(){
+		
+		def config = ConfigurationHolder.config
+		def belongsToUrl = config.oauth.smartEmr.apiBase
+		belongsToUrl += '/records/'
+		
 		def builder = new StreamingMarkupBuilder()
 		builder.encoding="UTF-8"
 		def rdfBuilder = {
@@ -69,6 +78,7 @@ public class Demographics extends Record {
 			mkp.declareNamespace('dcterms':'http://purl.org/dc/terms/')
 			'rdf:RDF'(){
 				'sp:Demographics'(){
+					'sp:belongsTo'('rdf:resource':belongsToUrl+this.personId)
 					'v:n'() {
 						'v:Name'() {
 							'v:given-name'(this.getGivenName())
