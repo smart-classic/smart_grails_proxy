@@ -38,12 +38,15 @@ class DemographicsCall extends MilleniumObjectCall{
 	  def gender=""
 	  def zipcode=""
 	  def mrn=""
+	  def personId=""
 	  try{
 		  def replyMessage = moResponse.getData()
 		  def payload= replyMessage.Payload
 		  
 		  def person = payload.Person
-		   birthDateTime = person.BirthDateTime.text()
+		  
+		  personId=person.PersonId.text()
+		  birthDateTime = person.BirthDateTime.text()
 		  if(birthDateTime.length()>0){
 			  birthDateTime=person.BirthDateTime.text().substring(0, 10)
 		  }
@@ -65,6 +68,6 @@ class DemographicsCall extends MilleniumObjectCall{
 		 }catch(Exception e){
 			throw new MOCallException("Error reading MO response", 500, e.getMessage())
 		}
-	  return new Demographics(birthDateTime, givenName, familyName, gender, zipcode, mrn)
+	  return new Demographics(birthDateTime, givenName, familyName, gender, zipcode, mrn, personId)
   }
 }
