@@ -65,7 +65,12 @@ abstract class MilleniumObjectCall {
 		try{
 			def requestXML = createRequest()
 		
+			long l1 = new Date().getTime()
+			
 			resp = makeRestCall(requestXML, moURL)
+			
+			long l2 = new Date().getTime()
+			log.info("Call for transaction: "+transaction+" took "+(l2-l1)/1000)
 			
 			handleExceptions(resp, recordId)
 		} catch (InvalidRequestException ire){
