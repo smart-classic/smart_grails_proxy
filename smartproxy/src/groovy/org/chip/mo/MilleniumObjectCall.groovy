@@ -72,15 +72,14 @@ abstract class MilleniumObjectCall {
 			long l2 = new Date().getTime()
 			log.info("Call for transaction: "+transaction+" took "+(l2-l1)/1000)
 			
-			handleExceptions(resp, recordId)
+			handleExceptions(resp.getData(), recordId)
 		} catch (InvalidRequestException ire){
 			log.error(ire.exceptionMessage +" for "+ recordId +" because " + ire.rootCause)
 		} 
 		readResponse(resp)
 	}
 	
-	def handleExceptions(resp, recordId)throws MOCallException{
-		def replyMessage = resp.getData()
+	def handleExceptions(replyMessage, recordId)throws MOCallException{
 		def status= replyMessage.Status.text()
 		def isResponseError = false
 		if( status != MO_RESP_STATUS_SUCCESS && 
