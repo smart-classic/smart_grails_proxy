@@ -25,7 +25,34 @@ class ResultsCall extends MilleniumObjectCall{
 		eventsReader = new EventsReader()
 	}
 	
-	
+	/**
+	* The Workhorse method. (overrides the base implementation)
+	* -Creates the outgoing MO request.
+	* -calls makeRestCall to make the actual MO call.
+	* -calls readResponse to create an RDF Model from the MO response.
+	* @param recordId
+	* @param moURL
+	* @return
+	*/
+   def makeCall(recordId, moURL) throws MOCallException{
+	   requestParams.put(RECORDIDPARAM, recordId)
+	   def resp
+	   try{
+		   def requestXML = createRequest()
+	   
+		   long l1 = new Date().getTime()
+		   
+		   resp = makeRestCall(requestXML, moURL)
+		   
+		   long l2 = new Date().getTime()
+		   log.info("Call for transaction: "+transaction+" took "+(l2-l1)/1000)
+		   
+		   handleExceptions(resp, recordId)
+	   } catch (InvalidRequestException ire){
+		   log.error(ire.exceptionMessage +" for "+ recordId +" because " + ire.rootCause)
+	   }
+	   readResponse(resp)
+   }
 	
 	
 	/**
