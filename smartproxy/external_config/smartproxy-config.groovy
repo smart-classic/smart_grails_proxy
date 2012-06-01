@@ -18,19 +18,19 @@ cas{
 
 environments {
     production {
-        grails.serverURL = "http://10.36.141.253:8080/smartproxy"
+        grails.serverURL = "http://10.36.141.252:8080/smartproxy"
 	grails.moURL = 'http://soatstweb1:8888/CHMObjectsToolkit/servlet/'
-	grails.smartURL = 'http://10.36.141.253/proxy_index'
+	grails.smartURL = 'http://10.36.141.252/proxy_index'
     }
     development {
-        grails.serverURL = "http://10.36.141.253:8080/smartproxy"
+        grails.serverURL = "http://10.36.141.252:8080/smartproxy"
 	grails.moURL = 'http://soatstweb1:8888/CHMObjectsToolkit/servlet/'
-	grails.smartURL = 'http://10.36.141.253/proxy_index'
+	grails.smartURL = 'http://10.36.141.252/proxy_index'
     }
     test {
-        grails.serverURL = "http://10.36.141.253:8080/smartproxy"
+        grails.serverURL = "http://10.36.141.252:8080/smartproxy"
 	grails.moURL = 'http://soatstweb1:8888/CHMObjectsToolkit/servlet/'
-	grails.smartURL = 'http://10.36.141.253/proxy_index'
+	grails.smartURL = 'http://10.36.141.252/proxy_index'
     }
 
 }
