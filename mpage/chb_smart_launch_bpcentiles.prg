@@ -104,11 +104,14 @@ head report
 	row +1 "<script>"
  
 	; Initialize JS variables we'll need to launch the app in an external browser window 
-	row +1 "    var grails_proxy_base = 'http://10.36.142.250:8980/smartproxy/smart/readContext?',"
-	row +1 "	initial_app = 'bp_centiles@apps.smartplatforms.org',"
+	row +1 "    var grails_proxy = 'HEMAPRD_IP_HERE',"
 	row +1 "	cas_secret = 'SECRET_HERE',"
-	row +1 "	cas_url = 'http://chssotest.tch.harvard.edu/cas/wsProxy?clientId=smartmpage&sharedSecret='+cas_secret,"
+	row +1 "	cas_client_id = 'CLIENT_ID_HERE',"
+	row +1 "	cas_base_url = 'CAS_BASE_URL_HERE',"
+	row +1 "	cas_url = cas_base_url+'?clientId='+cas_client_id+'&sharedSecret='+cas_secret,"
+	row +1 "	grails_proxy_url = 'http://'+grails_proxy+':8080/smartproxy/smart/readContext?',"
 	row +1 "	httpRequest = new XMLHttpRequest(),"
+	row +1 "	initial_app = 'bp_centiles@apps.smartplatforms.org',"
 	row +1 "	cas_token;"
  
 	; Include the patient ID and encounter ID among JS variables
@@ -120,6 +123,7 @@ head report
  
 detail
 	row +1 "Launching BP Centiles in external window for: ", p.name_full_formatted
+	row +1 "<br>Click the house icon above to re-launch."
  
  
 foot report
@@ -156,7 +160,7 @@ foot report
 	; Once we have a proxyTicket, launch the app in an external window 
 	row +1 "function launchApp() {"
 	row +1 "    APPLINK(100, "
-	row +1 "        grails_proxy_base + "
+	row +1 "        grails_proxy_url + "
 	row +1 "        'initial_app='+initial_app + "
 	row +1 "        '&record_id=' + record_id + "
 	row +1 "        '&encounter_id=' + encounter_id + "
