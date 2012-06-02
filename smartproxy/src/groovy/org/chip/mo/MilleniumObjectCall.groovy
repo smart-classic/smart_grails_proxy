@@ -62,15 +62,18 @@ abstract class MilleniumObjectCall {
 	def makeCall(recordId, moURL) throws MOCallException{
 		requestParams.put(RECORDIDPARAM, recordId)
 		def resp
+		def requestXML
 		try{
-			def requestXML = createRequest()
-		
-			resp = makeRestCall(requestXML, moURL)
-			
-			handleExceptions(resp, recordId)
+			requestXML = createRequest()
 		} catch (InvalidRequestException ire){
 			log.error(ire.exceptionMessage +" for "+ recordId +" because " + ire.rootCause)
-		} 
+			throw new MOCallException(ire.exceptionMessage, 500, ire.rootCause)
+		}
+		
+		resp = makeRestCall(requestXML, moURL)
+		
+		handleExceptions(resp, recordId)
+
 		readResponse(resp)
 	}
 	
@@ -109,9 +112,15 @@ abstract class MilleniumObjectCall {
 	
 	def makeRestCall(requestXML, moURL)throws MOCallException{
 		def resp
-		def restClient = new RESTClient(moURL+targetServlet)
-		restClient.setContentType(ContentType.XML)
-		resp=restClient.post(body:requestXML, requestContentType : ContentType.XML)
+		try{
+			def restClient = new RESTClient(moURL+targetServlet)
+			restClient.setContentType(ContentType.XML)
+			resp=restClient.post(body:requestXML, requestContentType : ContentType.XML)
+		}catch(URISyntaxException urise){
+			throw new Exception("Invalid MO server URI: "+ moURL+targetServlet, urise)
+		}catch(IOException ioe){
+			throw new Exception("Error communicating with MO server at: "+ moURL+targetServlet, ioe)
+		}
 		return resp
 	}
 

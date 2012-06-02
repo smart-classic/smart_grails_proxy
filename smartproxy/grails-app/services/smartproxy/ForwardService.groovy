@@ -34,20 +34,34 @@ class ForwardService {
         def token = ConfigurationHolder.config.oauth.smartEmr.token
         def secret= ConfigurationHolder.config.oauth.smartEmr.secret
         def apiBase= ConfigurationHolder.config.oauth.smartEmr.apiBase
-        def smartClient= new RESTClient(apiBase)
+		
+		def created
+		def getUrl
+		try{
+	        def smartClient= new RESTClient(apiBase)
+	
+	        // Instantiate as a consumer for 2-legged OAuth calls (no access tokens)
+	        smartClient.auth.oauth(token, secret, "", "");
+	
+	
+	        created = smartClient.post(path: "/records/create/proxied",
+	                                        body : [record_id:personId,
+	                                        record_name:getNameForPersonId(personId)],
+	                                        requestContentType : URLENC )
+	        if(created.status == 200){
+				getUrl = smartClient.get(path:"/records/"+personId+"/generate_direct_url")
+	        }
+		}catch(URISyntaxException urise){
+			throw new Exception("Invalid smart server URI: "+ apiBase, urise)
+		}catch(IOException ioe){
+			throw new Exception("Error communicating with SMART server at: "+ apiBase, ioe)
+		}
 
-        // Instantiate as a consumer for 2-legged OAuth calls (no access tokens)
-        smartClient.auth.oauth(token, secret, "", "");
-
-
-        def created = smartClient.post(path: "/records/create/proxied",
-                                        body : [record_id:personId,
-                                        record_name:getNameForPersonId(personId)],
-                                        requestContentType : URLENC )
-        assert created.status == 200
-
-        def getUrl = smartClient.get(path:"/records/"+personId+"/generate_direct_url")
-        assert getUrl.status == 200
+		if (created.status!=200 || getUrl.status!=200){
+			log.error("Failed to get 'forward to' URL for record: "+ personId + " from smart emr at: "+apiBase)
+			throw new Exception("SMART Emr url generation failure")
+		}
+		
 
         def forwardToURL = getUrl.data.readLine() + initialApp
 		return forwardToURL
@@ -68,7 +82,7 @@ class ForwardService {
 	def getNameForPersonId(personId){
 		def  record = milleniumService.makeCall('demographics', personId)
 		if(record=='Error'){
-			println("Unable to get Name for the patient")
+			log.warn("Unable to get Name for the patient")
 			return ""
 		}
 		return record.getGivenName()+" "+record.getFamilyName()
