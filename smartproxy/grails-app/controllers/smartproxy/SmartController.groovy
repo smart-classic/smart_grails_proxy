@@ -1,5 +1,7 @@
 package smartproxy
 
+import org.chip.mo.exceptions.MOCallException;
+
 class SmartController {
 
     def forwardService
@@ -15,9 +17,29 @@ class SmartController {
         def casToken=params['cas_token']
         def initialApp=params['initial_app']
 
-        assert casVerificationService.verifyCasToken(casToken)
+		def forwardToURL
 
-        def forwardToURL = forwardService.createURL(personId, domain, initialApp)
+		def failureReason=""
+		def rootCause=""
+
+		try{
+			if (!casVerificationService.verifyCasToken(casToken)){
+				throw new Exception("Authentication Failed Exception")
+			}
+			forwardToURL = forwardService.createURL(personId, domain, initialApp)
+		}catch(MOCallException moce){
+			failureReason=moce.getExceptionMessage()
+			rootCause=moce.getRootCause()
+			render(view:"error", model:[failureReason:failureReason, rootCause:rootCause])
+			return
+		}catch(Exception e){
+			failureReason=e.getMessage()
+			rootCause=e.getCause()?.getMessage()
+			rootCause=(rootCause==null?"":rootCause)
+			render(view:"error", model:[failureReason:failureReason, rootCause:rootCause])
+			return
+		}
+		
 		redirect(url:forwardToURL)
 	}
 }
