@@ -19,12 +19,12 @@ class SmartController {
 
 		def forwardToURL
 
-		def failureReason
-		def rootCause
+		def failureReason=""
+		def rootCause=""
 
 		try{
 			if (!casVerificationService.verifyCasToken(casToken)){
-				throw new Exception("Failed Authentication Exception")
+				throw new Exception("Authentication Failed Exception")
 			}
 			forwardToURL = forwardService.createURL(personId, domain, initialApp)
 		}catch(MOCallException moce){
@@ -35,6 +35,7 @@ class SmartController {
 		}catch(Exception e){
 			failureReason=e.getMessage()
 			rootCause=e.getCause()?.getMessage()
+			rootCause=(rootCause==null?"":rootCause)
 			render(view:"error", model:[failureReason:failureReason, rootCause:rootCause])
 			return
 		}
