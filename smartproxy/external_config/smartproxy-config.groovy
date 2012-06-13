@@ -202,6 +202,7 @@ cerner{
 			EVENTCODESYS= "mm[Hg]"
 			EVENTCODEDIA= "mm[Hg]"
 		}
+		
 		//values are of no importance to us in the bpEvents map. We are only interested in the keyset.
 		//The keyset contains all the events which are a part of blood pressure
 		bpEvents{
@@ -210,6 +211,26 @@ cerner{
 			EVENTCODELOCATION=""
 			EVENTCODEPOSITION=""
 			EVENTCODEBPMETHOD=""
+		}
+		
+		//The keyset contains all the event names that together make up relavant BP and Vitals's information
+		eventSetNames{
+				WEIGHT="Weight"
+				HEIGHT="Height"
+				TEMP="Temperature"
+				HR="Heart Rate"
+				RR="Respiratory Rate"
+				SBP="Systolic Blood Pressure"
+				DBP="Diastolic Blood Pressure"
+				METHOD="Blood Pressure Method"
+				LOCATION="Blood Pressure Location"
+				POSTURE="Vital Signs Posture"
+				SBPSUPINE="Systolic Blood Pressure Supine"
+				SBPSITTING="Systolic Blood Pressure Sitting"
+				SBPSTANDING="Systolic Blood Pressure Standing"
+				DBPSUPINE="Diastolic Blood Pressure Supine"
+				DBPSITTING="Diastolic Blood Pressure Sitting"
+				DBPSTANDING="Diastolic Blood Pressure Standing"
 		}
 	}
 }
