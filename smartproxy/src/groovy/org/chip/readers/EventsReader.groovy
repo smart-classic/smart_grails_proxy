@@ -60,20 +60,19 @@ class EventsReader {
 		return eventsByParentEventId
 	} 
 	
-	public read(moResponse){
-		def replyMessage = moResponse.getData()
-		def payload= replyMessage.Payload
-		processPayload(payload)
+	public read(moResponseXml){
+		def clinicalEvents= moResponseXml
+		processPayload(clinicalEvents)
 		groupEvents()
 		splitComplexEvents()
 	}
 	
-	public processPayload(payload){
+	public processPayload(clinicalEvents){
 			eventsByParentEventId = new HashMap()
 			int i = 0
 			//Create events for all Numeric Results in the moResponse
 			//Group the events by parent event id (or timestamps)
-			payload.Results.ClinicalEvents.NumericResult.each{ currentNumericResult->
+			clinicalEvents.NumericResult.each{ currentNumericResult->
 					i++
 				def currentEventCode=currentNumericResult.EventCode.Value.text()
 				if(vitalEventCodes.contains(currentEventCode)){
@@ -95,7 +94,7 @@ class EventsReader {
 			}
 			//Create events for all Coded Results in the moResponse
 			//Group the events by parent event id (or timestamps)
-			payload.Results.ClinicalEvents.CodedResult.each{ currentCodedResult->
+			clinicalEvents.CodedResult.each{ currentCodedResult->
 					i++
 				def currentEventCode=currentCodedResult.EventCode.Value.text()
 				if(vitalEventCodes.contains(currentEventCode)){
