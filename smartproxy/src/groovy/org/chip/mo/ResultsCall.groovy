@@ -68,8 +68,8 @@ class ResultsCall extends MilleniumObjectCall{
 		   log.error(ire.exceptionMessage +" for "+ recordId +" because " + ire.rootCause)
 		}
 		
-		def resp = aggregateResults(resultsMap)
-		readResponse(resp)
+		def respXml = aggregateResults(resultsMap)
+		readResponse(respXml)
    }
    
    def makeAsyncCall(requestXML, moURL, recordId) throws MOCallException{
@@ -101,26 +101,39 @@ class ResultsCall extends MilleniumObjectCall{
    }
    
    def aggregateResults(resultsMap){
-	   def clinicalEvents=resultsMap.get().get().Payload.Results.ClinicalEvents
+	   def clinicalEvents
+	   def mapIdx=0
 	   resultsMap.each{key, result->
+		   //get the MO reply message from the http response
 		   def replyMessage = result.get()
-		   def numericResults=replyMessage.Payload.Results.ClinicalEvents.NumericResult
-		   def codedResults = replyMessage.Payload.Results.ClinicalEvents.CodedResult
 		   
-			for (numericResult in numericResults){
-				clinicalEvents.appendNode(numericResult)
-			}   
-			
-			for (codedResult in codedResults){
-				clinicalEvents.appendNode(codedResult)
-			}
+		   //If it's the first element in the map, extract the ClinicalEvents xml element
+		   if(mapIdx==0){
+			   clinicalEvents=replyMessage.Payload.Results.ClinicalEvents
+			   mapIdx++
+		   }else{//If we are past the first element, just append all Results elements to the ClinicalEvents xml element
+			   def numericResults=replyMessage.Payload.Results.ClinicalEvents.NumericResult
+			   def codedResults = replyMessage.Payload.Results.ClinicalEvents.CodedResult
+			   
+				for (numericResult in numericResults){
+					clinicalEvents.appendNode(numericResult)
+				}   
+				
+				for (codedResult in codedResults){
+					clinicalEvents.appendNode(codedResult)
+				}
+		   }
 	   }
 	   
 	   def outputBuilder = new StreamingMarkupBuilder()
+	   outputBuilder.encoding="UTF-8"
 	   def writer = new StringWriter()
-	   writer<<outputBuilder.bind { mkp.yield clinicalEvents }
-	   String aggregatedResponse = writer.toString() {};
+	   writer<<outputBuilder.bind {mkp.yield clinicalEvents}
+	   String aggregatedResponse = writer.toString()
 	   def aggregatedResponseXml = new XmlSlurper().parseText(aggregatedResponse)
+	   log.info("Printing aggregated response")
+	   log.info(aggregatedResponse)
+	   log.info("Done printing aggregated response")
 	   return aggregatedResponseXml
    }
 	
@@ -166,14 +179,14 @@ class ResultsCall extends MilleniumObjectCall{
 	* @param moResponse
 	* @return
 	*/
-	def readResponse(moResponse)throws MOCallException{
-		if(moResponse !=null){
+	def readResponse(moResponseXml)throws MOCallException{
+		if(moResponseXml !=null){
 			//parse the moResonse and pass events to the vitalSignsManager
-			eventsReader.read(moResponse)
+			eventsReader.read(moResponseXml)
 			Map eventsByParentEventId = eventsReader.getEvents()
 			
 			vitalSignsManager.recordEvents(eventsByParentEventId)
-			vitalSignsManager.recordEncounters((HashMap)requestParams.get(MO_RESPONSE_PARAM, moResponse))
+			vitalSignsManager.recordEncounters((HashMap)requestParams.get(MO_RESPONSE_PARAM, moResponseXml))
 			vitalSignsManager.processEvents()
 		}
 			
