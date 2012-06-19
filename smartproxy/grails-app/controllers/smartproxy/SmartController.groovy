@@ -24,7 +24,7 @@ class SmartController {
 
 		try{
 			if (!casVerificationService.verifyCasToken(casToken)){
-				throw new Exception("Authentication Failed Exception")
+				throw new Exception("No valid CAS token supplied")
 			}
 			forwardToURL = forwardService.createURL(personId, domain, initialApp)
 		}catch(MOCallException moce){
