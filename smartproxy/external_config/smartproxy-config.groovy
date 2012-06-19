@@ -225,5 +225,6 @@ log4j = {
 	}
 	
 	//Comment the following line if you want to disable logging all MO requests and responses
-	debug 	"org.apache.http.wire"
+	//debug 	"org.apache.http.wire"
+	debug		"org.apache.http.headers"
 }
