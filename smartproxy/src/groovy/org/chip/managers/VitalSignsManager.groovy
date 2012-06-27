@@ -19,7 +19,12 @@ import org.chip.rdf.vitals.VitalSign;
 import org.chip.rdf.vitals.VitalSigns;
 import org.codehaus.groovy.grails.commons.ConfigurationHolder;
 
-
+/**
+* VitalSignsManager.groovy
+* Purpose:Processes the parsed MO response containing encounter and results information. 
+* @author mkapoor
+* @version Jun 19, 2012 12:53:03 PM
+*/
 class VitalSignsManager {
 	
 	private static final Log log = LogFactory.getLog(this)
@@ -53,26 +58,40 @@ class VitalSignsManager {
 		return hashSet
 	}
 	
+	/**
+	 * Records the incoming encountersById map containing all Encounters mapped to their id in.
+	 * This will be used by the manager to assign an encounter to each VitalSigns object it creates
+	 * @param encountersById
+	 */
 	def recordEncounters(Map<String,Encounter> encountersById){
 		this.encountersById = encountersById
 	}
 	
+	/**
+	 * Records the incoming events mapped by their event ids.
+	 * The events can have either numerical or coded results
+	 * @param eventsByParentEventId
+	 * @return
+	 */
 	def recordEvents(Map<String, List<Event>> eventsByParentEventId){
 		this.eventLists = eventsByParentEventId
 	}
 	
 	def processEvents(){
 		
-		//Step 1. Group bp events
+		//Step 1.
 		groupBPEvents()
 		
-		//Step 2. Create vitalsign, bloodpressure and vitalSigns objects. Also assign the appropriate encounter object to the vitalSigns object.
+		//Step 2.
 		createVitalSignsSet()
 		
-		//Step 3. Run any required unit conversions
+		//Step 3.
 		convertValues()
 	}
 	
+	/**
+	 * Group bp events together
+	 */
 	def groupBPEvents(){
 		this.eventLists.each {key, eventList ->
 			//For each event list, group together the bpevents in to a bpSet.
@@ -123,6 +142,12 @@ class VitalSignsManager {
 		return true;
 	}
 	
+	/**
+	 * Iterate over the list of events 
+	 * Create vitalsign, bloodpressure and vitalSigns objects, grouping the related objects into a single VitalSigns object.
+	 * Assign the appropriate encounter object to the vitalSigns object.
+	 * Creates a set of VitalSigns objects  
+	 */
 	def createVitalSignsSet(){
 		
 		this.eventLists.each {key, eventList ->
@@ -196,7 +221,7 @@ class VitalSignsManager {
 	def createVitalSign(Event event){
 		VitalSign vitalSign = new VitalSign()
 		vitalSign.setUnit(SmartMapper.map(event.eventCode, 'Unit'))
-		vitalSign.setValue(event.value)
+		vitalSign.setValue(event.eventValue)
 		vitalSign.setVitalName(createCodedValue(event.eventCode))
 		return vitalSign
 	}
@@ -219,8 +244,8 @@ class VitalSignsManager {
 		return code
 	}
 	/**
-	 * Only the heights need to be converted from m to cm.
-	 * This method takes care of that.
+	 * Run any required unit conversions
+	 * - height values need to be converted from m to cm.
 	 * @param currentValue
 	 * @param currentEventCode
 	 * @return

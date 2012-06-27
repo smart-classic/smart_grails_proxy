@@ -11,6 +11,13 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder;
 
 import groovy.xml.MarkupBuilder;
 
+/**
+* ResultsCall.groovy
+* Purpose: Represents the Millennium Object call to filter and return Results information for a specific Person id.
+* Only clinical information is returned.
+* @author mkapoor
+* @version Jun 19, 2012 12:53:03 PM
+*/
 class ResultsCall extends MilleniumObjectCall{
 	
 	VitalSignsManager vitalSignsManager
@@ -37,7 +44,7 @@ class ResultsCall extends MilleniumObjectCall{
 	def generatePayload(){
 		def recordId = (String)requestParams.get(RECORDIDPARAM)
 		builder.PersonId(recordId)
-		builder.EventCount('999')
+		builder.EventCount('999')//We are only interested in the top 999 results for now.
 		builder.EventSet(){
 			Name('CLINICAL INFORMATION')
 		}
@@ -61,14 +68,10 @@ class ResultsCall extends MilleniumObjectCall{
 	/**
 	* Pass the encountersById map containing all Encounters mapped to their id in.
 	* This will be used by the manager to assign an encounter to each VitalSigns object it creates
+	* Record results with the vitalSignsManager to process later.
 	* 
-	* Read the MO response for Vitals:
-	* 	Iterate through all NumericResults
-	*		record each with the vitalSignsManager to process later.
-	* 	Iterate through all CodedResults
-	*		record each with the vitalSignsManager to process later.
 	* @param moResponse
-	* @return
+	* @return vitals
 	*/
 	def readResponse(moResponse)throws MOCallException{
 		if(moResponse !=null){

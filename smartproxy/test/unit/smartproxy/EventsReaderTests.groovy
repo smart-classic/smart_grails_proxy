@@ -49,12 +49,12 @@ class EventsReaderTests extends GrailsUnitTestCase {
 		//Incoming complex events.
 		EventsReader eventsReader = new EventsReader()
 		eventsReader.eventsByParentEventId = new HashMap()
-		eventsReader.eventsByParentEventId.put("99999999", [new Event([encounterId:"34853623", parentEventId:"1174641199", eventEndDateTime:"2011-08-08T13:54:00.000-04:00", updateDateTime:"2011-08-08T18:55:09.000+01:00", eventId:"1174641203", eventCode:"1164539", value:"60", eventTag:null]),
-															new Event([encounterId:"34853623", parentEventId:"1174641199", eventEndDateTime:"2011-08-08T13:54:00.000-04:00", updateDateTime:"2011-08-08T18:55:09.000+01:00", eventId:"1174641201", eventCode:"1164536", value:"90", eventTag:null]),
-															new Event([encounterId:"34853623", parentEventId:"1174641199", eventEndDateTime:"2011-08-08T13:54:00.000-04:00", updateDateTime:"2011-08-08T18:55:09.000+01:00", eventId:"1174641207", eventCode:"1164542", value:"59", eventTag:null]),
-															new Event([encounterId:"34853623", parentEventId:"1174641199", eventEndDateTime:"2011-08-08T13:54:00.000-04:00", updateDateTime:"2011-08-08T18:55:09.000+01:00", eventId:"1174641205", eventCode:"1164545", value:"89", eventTag:null]),
-															new Event([encounterId:"34853623", parentEventId:"1174641199", eventEndDateTime:"2011-08-08T13:54:00.000-04:00", updateDateTime:"2011-08-08T18:55:09.000+01:00", eventId:"1174641209", eventCode:"1164548", value:"88", eventTag:null]),
-															new Event([encounterId:"34853623", parentEventId:"1174641199", eventEndDateTime:"2011-08-08T13:54:00.000-04:00", updateDateTime:"2011-08-08T18:55:09.000+01:00", eventId:"1174641211", eventCode:"1164551", value:"58", eventTag:null])])
+		eventsReader.eventsByParentEventId.put("99999999", [new Event([encounterId:"34853623", parentEventId:"1174641199", eventEndDateTime:"2011-08-08T13:54:00.000-04:00", updateDateTime:"2011-08-08T18:55:09.000+01:00", eventId:"1174641203", eventCode:"1164539", eventValue:"60", eventTag:null]),
+															new Event([encounterId:"34853623", parentEventId:"1174641199", eventEndDateTime:"2011-08-08T13:54:00.000-04:00", updateDateTime:"2011-08-08T18:55:09.000+01:00", eventId:"1174641201", eventCode:"1164536", eventValue:"90", eventTag:null]),
+															new Event([encounterId:"34853623", parentEventId:"1174641199", eventEndDateTime:"2011-08-08T13:54:00.000-04:00", updateDateTime:"2011-08-08T18:55:09.000+01:00", eventId:"1174641207", eventCode:"1164542", eventValue:"59", eventTag:null]),
+															new Event([encounterId:"34853623", parentEventId:"1174641199", eventEndDateTime:"2011-08-08T13:54:00.000-04:00", updateDateTime:"2011-08-08T18:55:09.000+01:00", eventId:"1174641205", eventCode:"1164545", eventValue:"89", eventTag:null]),
+															new Event([encounterId:"34853623", parentEventId:"1174641199", eventEndDateTime:"2011-08-08T13:54:00.000-04:00", updateDateTime:"2011-08-08T18:55:09.000+01:00", eventId:"1174641209", eventCode:"1164548", eventValue:"88", eventTag:null]),
+															new Event([encounterId:"34853623", parentEventId:"1174641199", eventEndDateTime:"2011-08-08T13:54:00.000-04:00", updateDateTime:"2011-08-08T18:55:09.000+01:00", eventId:"1174641211", eventCode:"1164551", eventValue:"58", eventTag:null])])
 
 		//Call method to split complex events
 		eventsReader.splitComplexEvents()

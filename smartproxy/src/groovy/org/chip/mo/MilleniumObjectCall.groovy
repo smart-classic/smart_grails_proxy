@@ -10,6 +10,13 @@ import org.apache.commons.logging.LogFactory;
 import org.chip.mo.exceptions.MOCallException
 import org.chip.mo.exceptions.InvalidRequestException;
 
+/**
+* MilleniumObjectCall.groovy
+* Purpose: Provides shared functionality for different Millennium Object calls. 
+* This is the base class that should be extended to provide specific Millenium Object API implementations.
+* @author mkapoor
+* @version Jun 19, 2012 12:53:03 PM
+*/
 abstract class MilleniumObjectCall {
 	
 	private static final Log log = LogFactory.getLog(this)
@@ -36,7 +43,7 @@ abstract class MilleniumObjectCall {
 		responseErrorMessageMap.put(MO_RESP_STATUS_ERROR, "MO Server returned Error for Record ID: ")
 		
 		responseErrorStatusCodeMap = new HashMap<String, Integer>()
-		responseErrorStatusCodeMap.put(MO_RESP_STATUS_ERROR, 500)
+		responseErrorStatusCodeMap.put(MO_RESP_STATUS_ERROR, 502)
 		responseErrorStatusCodeMap.put(MO_RESP_STATUS_NODATA, 404)
 	}
 	
@@ -87,7 +94,7 @@ abstract class MilleniumObjectCall {
 			def statusCode = responseErrorStatusCodeMap.get(status)
 			if(errorMessage==null){
 				errorMessage = "Unexpected response from MO "
-				statusCode = 500
+				statusCode = 502
 			}
 			throw new MOCallException(errorMessage+ recordId, statusCode, "MO Response returned status of "+status)
 		}

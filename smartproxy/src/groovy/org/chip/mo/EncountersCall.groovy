@@ -7,6 +7,12 @@ import org.chip.rdf.vitals.Encounter;
 import org.chip.rdf.vitals.VitalSigns;
 import org.codehaus.groovy.grails.commons.ConfigurationHolder;
 
+/**
+* EncountersCall.groovy
+* Purpose: Represents the Millennium Object call to filter and return Encounter information for a specific Person id.
+* @author mkapoor
+* @version Jun 19, 2012 12:53:03 PM
+*/
 class EncountersCall extends MilleniumObjectCall{
 	
 	public static final String ENCOUNTER_TYPE_CODING_SYSTEM='encounterType'
@@ -29,8 +35,7 @@ class EncountersCall extends MilleniumObjectCall{
 	}
 	
 	/**
-	* Generates MO requests to 
-	* - Get Encounters for a given patient ID
+	* Generates MO requests to get Encounters for a given patient ID
 	* @param recordId
 	* @return
 	*/
@@ -46,16 +51,13 @@ class EncountersCall extends MilleniumObjectCall{
    * @return
    */
    def readResponse(moResponse)throws MOCallException{
-	   def replyMessage = moResponse.getData()
-	   def payload= replyMessage.Payload
-	   processPayload(payload)
+	   processPayload(moResponse.getData().Payload)
    }
    
    def processPayload(payload)throws MOCallException{
 	   Map encountersById
 	   try{
 		   encountersById = new HashMap()
-		   //long l1 = new Date().getTime()
 		   // Filter out inpatient encounters, per 12/19/2011 decision.
 		   payload.Encounters.Encounter.findAll {
 			 it.EncounterTypeClass.Meaning.text() != "INPATIENT"
@@ -75,12 +77,9 @@ class EncountersCall extends MilleniumObjectCall{
 			   
 			   encountersById.put(it.EncounterId.text(), encounter)
 		   }
-		   //long l2 = new Date().getTime()
-		   //println("encounter reading moresponse took: "+(l2-l1)/1000)
 	   }catch(Exception e){
-			throw new MOCallException("Error reading MO response", 500, e.getMessage())
+			throw new MOCallException("Error reading MO response for Encounters", 500, e.getMessage())
 	   }
-	   //encountersById = new HashMap()
 	   return encountersById
    }
    
