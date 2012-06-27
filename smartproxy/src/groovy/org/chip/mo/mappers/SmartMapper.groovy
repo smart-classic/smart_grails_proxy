@@ -3,6 +3,13 @@ package org.chip.mo.mappers
 import java.util.Map;
 import org.codehaus.groovy.grails.commons.ConfigurationHolder;
 
+/**
+* SmartMapper.groovy
+* Purpose: Provides mapping between various MO supplied entities and corresponding SMART values.
+* The mappings are defined in the external config file which is accessed through the ConfigurationHolder.
+* @author mkapoor
+* @version Jun 19, 2012 12:53:03 PM
+*/
 class SmartMapper {
 	static final Map mappingTypeMap
 	
