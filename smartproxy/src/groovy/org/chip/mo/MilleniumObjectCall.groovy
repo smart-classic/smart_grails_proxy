@@ -74,7 +74,7 @@ abstract class MilleniumObjectCall {
 			requestXML = createRequest()
 		} catch (InvalidRequestException ire){
 			log.error(ire.exceptionMessage +" for "+ recordId +" because " + ire.rootCause)
-			throw new MOCallException(ire.exceptionMessage, 500, ire.rootCause)
+			throw new MOCallException(ire.exceptionMessage, ire.statusCode, ire.rootCause)
 		}
 		
 		resp = makeRestCall(requestXML, moURL)
