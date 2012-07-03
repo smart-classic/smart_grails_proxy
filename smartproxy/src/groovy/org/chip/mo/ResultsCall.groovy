@@ -55,7 +55,7 @@ class ResultsCall extends MilleniumObjectCall{
 		// MO Server chokes on an empty encounter IDs list.
 		// Log it and throw an exception.
 		if (encounterIds.size() == 0) {
-			throw new InvalidRequestException("Error creating MO Request", 404, "No Encounters Found")
+			throw new InvalidRequestException("Error creating MO Request", 500, "No Encounters Found")
 		}
 
 		builder.EncounterIds(){
