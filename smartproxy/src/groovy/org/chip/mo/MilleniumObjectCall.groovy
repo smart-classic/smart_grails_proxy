@@ -31,16 +31,17 @@ abstract class MilleniumObjectCall {
 	protected static final String RECORDIDPARAM = "RECORDIDPARAM"
 	protected static final String MO_RESPONSE_PARAM = "MO_RESPONSE"
 	
-	private static final String MO_RESP_STATUS_NODATA="NoData"
-	private static final String MO_RESP_STATUS_ERROR="Error"
-	private static final String MO_RESP_STATUS_SUCCESS="Success"
+	protected static final String MO_RESP_STATUS_NODATA="NoData"
+	protected static final String MO_RESP_STATUS_ERROR="Error"
+	protected static final String MO_RESP_STATUS_SUCCESS="Success"
 	
-	private static Map responseErrorMessageMap
-	private static Map responseErrorStatusCodeMap
+	protected static Map responseErrorMessageMap
+	protected static Map responseErrorStatusCodeMap
 	
 	static{
 		responseErrorMessageMap = new HashMap<String, String>()
 		responseErrorMessageMap.put(MO_RESP_STATUS_ERROR, "MO Server returned Error for Record ID: ")
+		responseErrorMessageMap.put(MO_RESP_STATUS_NODATA, "MO Server returned no data for Record ID: ")
 		
 		responseErrorStatusCodeMap = new HashMap<String, Integer>()
 		responseErrorStatusCodeMap.put(MO_RESP_STATUS_ERROR, 502)
@@ -87,13 +88,12 @@ abstract class MilleniumObjectCall {
 	def handleExceptions(resp, recordId)throws MOCallException{
 		def replyMessage = resp.getData()
 		def status= replyMessage.Status.text()
-		def isResponseError = false
 		if( status != MO_RESP_STATUS_SUCCESS && 
 			status != MO_RESP_STATUS_NODATA ){
 			def errorMessage = responseErrorMessageMap.get(status)
 			def statusCode = responseErrorStatusCodeMap.get(status)
 			if(errorMessage==null){
-				errorMessage = "Unexpected response from MO "
+				errorMessage = "Unexpected or no response from MO "
 				statusCode = 502
 			}
 			throw new MOCallException(errorMessage+ recordId, statusCode, "MO Response returned status of "+status)
