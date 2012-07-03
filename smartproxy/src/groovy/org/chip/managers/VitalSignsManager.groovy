@@ -179,7 +179,7 @@ class VitalSignsManager {
 						//Each bloodPressure property corresponds to one element in the set.
 						event.each{
 							def bloodPressureProperty
-							if (it.value==null){
+							if (it.eventValue==null){
 								//if the event property has a blank value, we have to create a coded value. e.g. bodyPosition
 								bloodPressureProperty= createCodedValue(it.eventTag)
 							}else{
