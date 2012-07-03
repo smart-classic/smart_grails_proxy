@@ -68,12 +68,17 @@ class EncountersCall extends MilleniumObjectCall{
 			   encounter.setEndDate(it.DischargeDateTime.text())
 			   encounter.setBelongsTo(it.PersonId.text())
 			   
-			   encounter.getEncounterType().setTitle(encounterTitleMap.get(it.EncounterTypeClass.Display.text()))
+			   def encounterTitle = encounterTitleMap.get(it.EncounterTypeClass.Display.text())
+			   if(encounterTitle==null) encounterTitle = "Ambulatory encounter"
+			   def encounterResource = encounterResourceMap.get(it.EncounterTypeClass.Display.text())
+			   if(encounterResource==null) encounterResource = "ambulatory"
+			   
+			   encounter.getEncounterType().setTitle(encounterTitle)
 			   
 			   encounter.getEncounterType().getCode().setType("EncounterType")
-			   encounter.getEncounterType().getCode().setTitle(encounterTitleMap.get(it.EncounterTypeClass.Display.text()))
+			   encounter.getEncounterType().getCode().setTitle(encounterTitle)
 			   encounter.getEncounterType().getCode().setSystem(codingSystemsMap.get(ENCOUNTER_TYPE_CODING_SYSTEM))
-			   encounter.getEncounterType().getCode().setIdentifier(encounterResourceMap.get(it.EncounterTypeClass.Display.text()))
+			   encounter.getEncounterType().getCode().setIdentifier(encounterResource)
 			   
 			   encountersById.put(it.EncounterId.text(), encounter)
 		   }
