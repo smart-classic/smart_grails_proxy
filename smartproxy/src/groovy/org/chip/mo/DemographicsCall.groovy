@@ -78,4 +78,18 @@ class DemographicsCall extends MilleniumObjectCall{
 		}
 	  return new Demographics(birthDateTime, givenName, familyName, gender, zipcode, mrn, personId)
   }
+  
+  def handleExceptions(resp, recordId)throws MOCallException{
+	  def replyMessage = resp.getData()
+	  def status= replyMessage.Status.text()
+	  if( status != MO_RESP_STATUS_SUCCESS){
+		  def errorMessage = responseErrorMessageMap.get(status)
+		  def statusCode = responseErrorStatusCodeMap.get(status)
+		  if(errorMessage==null){
+			  errorMessage = "Unexpected or no response from MO "
+			  statusCode = 502
+		  }
+		  throw new MOCallException(errorMessage+ recordId, statusCode, "MO Response returned status of "+status)
+	  }
+  }
 }
