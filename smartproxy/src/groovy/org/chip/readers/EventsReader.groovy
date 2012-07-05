@@ -82,12 +82,12 @@ class EventsReader {
 	
 	public processPayload(payload){
 			eventsByParentEventId = new HashMap()
-			//int i = 0
+			int i = 0
 			//long l1 = new Date().getTime()
 			//Create events for all Numeric Results in the moResponse
 			//Group the events by parent event id (or timestamps)
 			payload.Results.ClinicalEvents.NumericResult.each{ currentNumericResult->
-					//i++
+					i++
 				def currentEventCode=currentNumericResult.EventCode.Value.text()
 				if(vitalEventCodes.contains(currentEventCode)){
 					Event currentEvent = new Event()
@@ -109,7 +109,7 @@ class EventsReader {
 			//Create events for all Coded Results in the moResponse
 			//Group the events by parent event id (or timestamps)
 			payload.Results.ClinicalEvents.CodedResult.each{ currentCodedResult->
-					//i++
+					i++
 				def currentEventCode=currentCodedResult.EventCode.Value.text()
 				if(vitalEventCodes.contains(currentEventCode)){
 					Event currentEvent = new Event()
@@ -125,6 +125,7 @@ class EventsReader {
 					eventsList.add(currentEvent)
 				}
 			}
+			log.info("number of results returned : " + i)
 			//println("number of results returned : " + i)
 			//long l2 = new Date().getTime()
 			//println("vitals reading moresponse took: "+(l2-l1)/1000)
