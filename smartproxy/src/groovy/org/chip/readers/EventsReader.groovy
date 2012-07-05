@@ -219,7 +219,7 @@ class EventsReader {
 							bpEventsByBodyPosition.get(bodyPosition).add(
 								new Event(encounterId: complexEvent.encounterId,
 										eventCode: bpEventCode,
-										eventValue: complexEvent.value,
+										eventValue: complexEvent.eventValue,
 										eventId: complexEvent.eventId,
 										parentEventId: parentEventId,
 										eventEndDateTime: complexEvent.eventEndDateTime,
@@ -232,7 +232,7 @@ class EventsReader {
 							bpEventsByBodyPosition.get(bodyPosition).add(
 								new Event(encounterId: complexEvent.encounterId,
 										eventCode: bpEventCode,
-										eventValue: complexEvent.value,
+										eventValue: complexEvent.eventValue,
 										eventId: complexEvent.eventId,
 										parentEventId: parentEventId,
 										eventEndDateTime: complexEvent.eventEndDateTime,
