@@ -73,20 +73,23 @@ abstract class MilleniumObjectCall {
 		def requestXML
 		try{
 			requestXML = createRequest()
+			long l1 = new Date().getTime()
+			
+			resp = makeRestCall(requestXML, moURL)
+			
+			long l2 = new Date().getTime()
+			log.info("Call for transaction: "+transaction+" took "+(l2-l1)/1000)
+			
+			handleExceptions(resp.getData(), recordId)
 		} catch (InvalidRequestException ire){
 			log.error(ire.exceptionMessage +" for "+ recordId +" because " + ire.rootCause)
 			throw new MOCallException(ire.exceptionMessage, ire.statusCode, ire.rootCause)
 		}
 		
-		resp = makeRestCall(requestXML, moURL)
-		
-		handleExceptions(resp, recordId)
-
 		readResponse(resp)
 	}
 	
-	def handleExceptions(resp, recordId)throws MOCallException{
-		def replyMessage = resp.getData()
+	def handleExceptions(replyMessage, recordId)throws MOCallException{
 		def status= replyMessage.Status.text()
 		if( status != MO_RESP_STATUS_SUCCESS && 
 			status != MO_RESP_STATUS_NODATA ){

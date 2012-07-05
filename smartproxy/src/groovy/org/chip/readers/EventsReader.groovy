@@ -2,6 +2,9 @@ package org.chip.readers
 
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.lf5.viewer.LogFactor5Dialog;
 import org.chip.managers.VitalSignsManager;
 import org.chip.mo.exceptions.MOCallException;
 import org.chip.mo.model.Event;
@@ -19,6 +22,8 @@ class EventsReader {
 	public static final String BODY_POSITION_STANDING="Standing"
 	public static final String BODY_POSITION_SUPINE="Supine"
 	public static final String BODY_POSITION_SITTING="Sitting"
+	
+	private static final Log log = LogFactory.getLog(this)
 	
 	/**
 	* eventCodesMap
@@ -72,22 +77,20 @@ class EventsReader {
 	 * @param moResponse
 	 * @return
 	 */
-	public read(moResponse){
-		def replyMessage = moResponse.getData()
-		def payload= replyMessage.Payload
+	public read(moResponseXml){
+		def clinicalEvents= moResponseXml
 		processPayload(payload)
 		groupEvents()
 		splitComplexEvents()
 	}
 	
-	public processPayload(payload){
+	public processPayload(clinicalEvents){
 			eventsByParentEventId = new HashMap()
-			//int i = 0
-			//long l1 = new Date().getTime()
+			int i = 0
 			//Create events for all Numeric Results in the moResponse
 			//Group the events by parent event id (or timestamps)
-			payload.Results.ClinicalEvents.NumericResult.each{ currentNumericResult->
-					//i++
+			clinicalEvents.NumericResult.each{ currentNumericResult->
+					i++
 				def currentEventCode=currentNumericResult.EventCode.Value.text()
 				if(vitalEventCodes.contains(currentEventCode)){
 					Event currentEvent = new Event()
@@ -108,8 +111,8 @@ class EventsReader {
 			}
 			//Create events for all Coded Results in the moResponse
 			//Group the events by parent event id (or timestamps)
-			payload.Results.ClinicalEvents.CodedResult.each{ currentCodedResult->
-					//i++
+			clinicalEvents.CodedResult.each{ currentCodedResult->
+					i++
 				def currentEventCode=currentCodedResult.EventCode.Value.text()
 				if(vitalEventCodes.contains(currentEventCode)){
 					Event currentEvent = new Event()
@@ -125,9 +128,7 @@ class EventsReader {
 					eventsList.add(currentEvent)
 				}
 			}
-			//println("number of results returned : " + i)
-			//long l2 = new Date().getTime()
-			//println("vitals reading moresponse took: "+(l2-l1)/1000)
+			log.info("number of results returned : " + i)
 	}
 	
 	def groupEvents(){
