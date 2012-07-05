@@ -2,11 +2,13 @@ package org.chip.readers
 
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
 import org.chip.managers.VitalSignsManager;
 import org.chip.mo.exceptions.MOCallException;
 import org.chip.mo.model.Event;
 import org.chip.rdf.vitals.VitalSign;
 import org.codehaus.groovy.grails.commons.ConfigurationHolder;
+import org.apache.commons.logging.LogFactory;
 
 /**
 * EventsReader.groovy
@@ -15,6 +17,8 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder;
 * @version Jun 19, 2012 12:53:03 PM
 */
 class EventsReader {
+	
+	private static final Log log = LogFactory.getLog(this)
 	
 	public static final String BODY_POSITION_STANDING="Standing"
 	public static final String BODY_POSITION_SUPINE="Supine"
