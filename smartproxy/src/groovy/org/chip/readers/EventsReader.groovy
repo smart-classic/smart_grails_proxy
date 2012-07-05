@@ -79,7 +79,7 @@ class EventsReader {
 	 */
 	public read(moResponseXml){
 		def clinicalEvents= moResponseXml
-		processPayload(payload)
+		processPayload(clinicalEvents)
 		groupEvents()
 		splitComplexEvents()
 	}
