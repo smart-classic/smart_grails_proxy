@@ -87,6 +87,7 @@ class EventsReader {
 	public processPayload(payload){
 			eventsByParentEventId = new HashMap()
 			int i = 0
+			int j = 0
 			//long l1 = new Date().getTime()
 			//Create events for all Numeric Results in the moResponse
 			//Group the events by parent event id (or timestamps)
@@ -94,6 +95,7 @@ class EventsReader {
 					i++
 				def currentEventCode=currentNumericResult.EventCode.Value.text()
 				if(vitalEventCodes.contains(currentEventCode)){
+					j++
 					Event currentEvent = new Event()
 					currentEvent.encounterId = currentNumericResult.EncounterId.text()
 					currentEvent.eventCode = currentEventCode
@@ -116,6 +118,7 @@ class EventsReader {
 					i++
 				def currentEventCode=currentCodedResult.EventCode.Value.text()
 				if(vitalEventCodes.contains(currentEventCode)){
+					j++
 					Event currentEvent = new Event()
 					currentEvent.encounterId = currentCodedResult.EncounterId.text()
 					currentEvent.eventCode = currentEventCode
@@ -130,6 +133,7 @@ class EventsReader {
 				}
 			}
 			log.info("number of results returned : " + i)
+			log.info("number of vital results returned: "+j)
 			//println("number of results returned : " + i)
 			//long l2 = new Date().getTime()
 			//println("vitals reading moresponse took: "+(l2-l1)/1000)
