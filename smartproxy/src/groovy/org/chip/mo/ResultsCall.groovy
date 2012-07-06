@@ -109,8 +109,11 @@ class ResultsCall extends MilleniumObjectCall{
 		   
 		   //If it's the first element in the map, extract the ClinicalEvents xml element
 		   if(mapIdx==0){
-			   clinicalEvents=replyMessage.Payload.Results.ClinicalEvents
-			   mapIdx++
+			   def payload = replyMessage.Payload
+			   if(payload.size()==1){
+				   clinicalEvents=replyMessage.Payload.Results.ClinicalEvents
+				   mapIdx++
+			   }
 		   }else{//If we are past the first element, just append all Results elements to the ClinicalEvents xml element
 			   def numericResults=replyMessage.Payload.Results.ClinicalEvents.NumericResult
 			   def codedResults = replyMessage.Payload.Results.ClinicalEvents.CodedResult
