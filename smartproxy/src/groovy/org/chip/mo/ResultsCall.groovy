@@ -30,10 +30,12 @@ class ResultsCall extends MilleniumObjectCall{
 	private static final Log log = LogFactory.getLog(this)
 	
 	static Map eventSetNames
+	static int eventCount
 	
 	static{
 		def config = ConfigurationHolder.config
 		eventSetNames = config.cerner.mo.eventSetNames
+		eventCount = config.cerner.mo.eventCount
 	}
 	
 	VitalSignsManager vitalSignsManager
@@ -163,7 +165,7 @@ class ResultsCall extends MilleniumObjectCall{
 	def generatePayload(){
 		def recordId = (String)requestParams.get(RECORDIDPARAM)
 		builder.PersonId(recordId)
-		builder.EventCount('999')//We are only interested in the top 999 results for now.
+		builder.EventCount(eventCount)//We are only interested in the top 999 results for now.
 		builder.EventSet(){
 			Name('EVENTSETNAME')
 		}
