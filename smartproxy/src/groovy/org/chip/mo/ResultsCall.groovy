@@ -78,9 +78,11 @@ class ResultsCall extends MilleniumObjectCall{
 		
 		long l1 = new Date().getTime()
 		def respXml = aggregateResults(resultsMap)
-		Vitals vitals = readResponse(respXml)
 		long l2 = new Date().getTime()
-		log.info("Aggregating, Reading and processing MO response took "+(l2-l1)/1000)
+		Vitals vitals = readResponse(respXml)
+		long l3 = new Date().getTime()
+		log.info("Aggregating MO response took "+(l2-l1)/1000)
+		log.info("Reading and processing MO response took "+(l3-l2)/1000)
 		return vitals
    }
    
