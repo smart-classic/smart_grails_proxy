@@ -76,8 +76,12 @@ class ResultsCall extends MilleniumObjectCall{
 		   throw new MOCallException(ire.exceptionMessage, ire.statusCode, ire.rootCause)
 		}
 		
+		long l1 = new Date().getTime()
 		def respXml = aggregateResults(resultsMap)
-		readResponse(respXml)
+		Vitals vitals = readResponse(respXml)
+		long l2 = new Date().getTime()
+		log.info("Aggregating, Reading and processing MO response took "+(l2-l1)/1000)
+		return vitals
    }
    
    def makeAsyncCall(requestXML, moURL, recordId) throws MOCallException{
