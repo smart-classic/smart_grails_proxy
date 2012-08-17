@@ -10,7 +10,7 @@ oauth {
 cas{
     chb {
         skipValidation = false
-        casValidationUrl =  'http://chssotest.tch.harvard.edu/cas/wsProxyValidate'
+        casValidationUrl =  'http://chssoprod.tch.harvard.edu/cas/wsProxyValidate'
         casClientId = 'smartmpage'
         casServiceId = 'SmartWebApp'
     }
@@ -19,17 +19,17 @@ cas{
 environments {
     production {
         grails.serverURL = "http://10.36.141.252:8080/smartproxy"
-	grails.moURL = 'http://soatstweb1:8888/CHMObjectsToolkit/servlet/'
+	grails.moURL = 'http://chbsoa.tch.harvard.edu:8888/CHMObjectsToolkit/servlet/'
 	grails.smartURL = 'http://10.36.141.252/proxy_index'
     }
     development {
         grails.serverURL = "http://10.36.141.252:8080/smartproxy"
-	grails.moURL = 'http://soatstweb1:8888/CHMObjectsToolkit/servlet/'
+	grails.moURL = 'http://chbsoa.tch.harvard.edu:8888/CHMObjectsToolkit/servlet/'
 	grails.smartURL = 'http://10.36.141.252/proxy_index'
     }
     test {
         grails.serverURL = "http://10.36.141.252:8080/smartproxy"
-	grails.moURL = 'http://soatstweb1:8888/CHMObjectsToolkit/servlet/'
+	grails.moURL = 'http://chbsoa.tch.harvard.edu:8888/CHMObjectsToolkit/servlet/'
 	grails.smartURL = 'http://10.36.141.252/proxy_index'
     }
 
@@ -226,5 +226,5 @@ log4j = {
 	
 	//Comment the following line if you want to disable logging all MO requests and responses
 	//debug 	"org.apache.http.wire"
-	debug		"org.apache.http.headers"
+       debug		"org.apache.http.headers"
 }
