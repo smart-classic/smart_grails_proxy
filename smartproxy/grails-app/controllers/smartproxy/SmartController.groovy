@@ -2,11 +2,22 @@ package smartproxy
 
 import org.chip.mo.exceptions.MOCallException;
 
+/**
+* SmartController.groovy
+* Purpose: Handles the incoming requests from PowerChart (forwarding mPage)
+* @author mkapoor
+* @version Jun 19, 2012 12:53:03 PM
+*/
 class SmartController {
 
     def forwardService
     def casVerificationService
-
+	
+	/**
+	 * Records the supplied context variables.
+	 * Validates the incoming token (in the request from PowerChart) using the casVerificationService.
+	 * Fetches a SMART url to forward the browser to using the forwardService
+	 */
     def readContext = {
 		switch(request.method){
 			case "HEAD":
