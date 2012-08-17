@@ -1,5 +1,12 @@
 package smartproxy
 import org.chip.mo.exceptions.MOCallException;
+
+/**
+* RecordsController.groovy
+* Purpose:Handles all requests for records from Cerner. Invokes the millenium service with the request and renders the rdf response.
+* @author mkapoor
+* @version Jun 19, 2012 12:53:03 PM
+*/
 class RecordsController {
 
     def index = { }

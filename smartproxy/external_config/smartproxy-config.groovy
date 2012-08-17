@@ -221,7 +221,7 @@ log4j = {
 	'null' name: 'stacktrace'
     }
     root {
-        error 'file'
+        info 'file'
 	}
 	
 	//Comment the following line if you want to disable logging all MO requests and responses
