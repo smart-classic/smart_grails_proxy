@@ -42,7 +42,7 @@ environments{
 		externalConfigFileLocation="/data2/app/smart/smart_grails_proxy/smartproxy/external_config/"
 	}
 	development{
-		externalConfigFileLocation="external_config\\"
+		externalConfigFileLocation="/data2/app/smart/smart_grails_proxy/smartproxy/external_config/"
 	}
 	test{
 		externalConfigFileLocation="${userHome}/grails-config/"
@@ -88,6 +88,7 @@ log4j = {
     }
 
 }
+
 
 tomcat.deploy.username="manager"
 tomcat.deploy.password="secret"
