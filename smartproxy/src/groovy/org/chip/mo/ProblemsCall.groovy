@@ -1,7 +1,14 @@
 package org.chip.mo
 
+import org.chip.mo.exceptions.MOCallException;
 import org.chip.rdf.Problem
 
+/**
+* ProblemsCall.groovy
+* Purpose: Represents the Millennium Object call to filter and return Problems information for a specific Person id.
+* @author mkapoor
+* @version Jun 19, 2012 12:53:03 PM
+*/
 class ProblemsCall extends MilleniumObjectCall {
 
    def init(){
@@ -34,19 +41,17 @@ class ProblemsCall extends MilleniumObjectCall {
 	   def payload= replyMessage.Payload
 	   
 	   def problems = new ArrayList()
-	   def help = payload.Problems.Problem.Nomenclature.SourceVocabulary.Value.text()
-	   payload.Problems.Problem.each{
-		   def snomedConcept = it.Nomenclature.SourceVocabulary.Value.text()
-		   def title = it.Nomenclature.SourceString.text()
-		   def onsetDate = it.OnsetDateTime.text()
-		   if(onsetDate.size()>0){
-			   onsetDate=onsetDate.substring(0, 10)
+	   try{
+		   def help = payload.Problems.Problem.Nomenclature.SourceVocabulary.Value.text()
+		   payload.Problems.Problem.each{
+			   def snomedConcept = it.Nomenclature.SourceVocabulary.Value.text()
+			   def title = it.Nomenclature.SourceString.text()
+			   def onsetDate = it.OnsetDateTime.text()
+			   def resolutionDate = it.ActualResolutionDateTime.text()
+			   problems.add(new Problem(snomedConcept, title, onsetDate, resolutionDate) )
 		   }
-		   def resolutionDate = it.ActualResolutionDateTime.text()
-		   if(resolutionDate.size()>0){
-			   resolutionDate=resolutionDate.substring(0, 10)
-		   }
-		   problems.add(new Problem(snomedConcept, title, onsetDate, resolutionDate) )
+	   }catch(Exception e){
+	   		throw new MOCallException("Error reading MO response for Problems", 500, e.getMessage())
 	   }
 	   return problems
    }

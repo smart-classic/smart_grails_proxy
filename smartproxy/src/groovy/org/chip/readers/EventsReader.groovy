@@ -2,13 +2,27 @@ package org.chip.readers
 
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
 import org.chip.managers.VitalSignsManager;
 import org.chip.mo.exceptions.MOCallException;
 import org.chip.mo.model.Event;
 import org.chip.rdf.vitals.VitalSign;
 import org.codehaus.groovy.grails.commons.ConfigurationHolder;
+import org.apache.commons.logging.LogFactory;
 
+/**
+* EventsReader.groovy
+* Purpose: Provides functionality to read the MO response for a request for Clinical Information.
+* @author mkapoor
+* @version Jun 19, 2012 12:53:03 PM
+*/
 class EventsReader {
+	
+	private static final Log log = LogFactory.getLog(this)
+	
+	public static final String BODY_POSITION_STANDING="Standing"
+	public static final String BODY_POSITION_SUPINE="Supine"
+	public static final String BODY_POSITION_SITTING="Sitting"
 	
 	/**
 	* eventCodesMap
@@ -55,6 +69,13 @@ class EventsReader {
 		return eventsByParentEventId
 	} 
 	
+	/**
+	 * - Loops through Numeric and Coded results, creating Event objects.
+	 * - Group related events together (matching on parentEventId or DateTime values).
+	 * - Splits complex events (StandingSystolic) to atomic constituent events (Standing body position and Systolic bp measure) 
+	 * @param moResponse
+	 * @return
+	 */
 	public read(moResponse){
 		def replyMessage = moResponse.getData()
 		def payload= replyMessage.Payload
@@ -65,18 +86,20 @@ class EventsReader {
 	
 	public processPayload(payload){
 			eventsByParentEventId = new HashMap()
-			//int i = 0
+			int i = 0
+			int j = 0
 			//long l1 = new Date().getTime()
 			//Create events for all Numeric Results in the moResponse
 			//Group the events by parent event id (or timestamps)
 			payload.Results.ClinicalEvents.NumericResult.each{ currentNumericResult->
-					//i++
+					i++
 				def currentEventCode=currentNumericResult.EventCode.Value.text()
 				if(vitalEventCodes.contains(currentEventCode)){
+					j++
 					Event currentEvent = new Event()
 					currentEvent.encounterId = currentNumericResult.EncounterId.text()
 					currentEvent.eventCode = currentEventCode
-					currentEvent.value = currentNumericResult.Value.text()
+					currentEvent.eventValue = currentNumericResult.Value.text()
 					currentEvent.eventId = currentNumericResult.EventId.text()
 					currentEvent.parentEventId = currentNumericResult.ParentEventId.text()
 					currentEvent.eventEndDateTime = currentNumericResult.EventEndDateTime.text()
@@ -84,7 +107,7 @@ class EventsReader {
 					currentEvent.recordId = currentNumericResult.PersonId.text()
 					
 					//Run a quick validation on the value and add the event to the list only if the value is valid
-					if(valueIsValid(currentEvent.value)){
+					if(valueIsValid(currentEvent.eventValue)){
 						eventsList.add(currentEvent)
 					}
 				}
@@ -92,9 +115,10 @@ class EventsReader {
 			//Create events for all Coded Results in the moResponse
 			//Group the events by parent event id (or timestamps)
 			payload.Results.ClinicalEvents.CodedResult.each{ currentCodedResult->
-					//i++
+					i++
 				def currentEventCode=currentCodedResult.EventCode.Value.text()
 				if(vitalEventCodes.contains(currentEventCode)){
+					j++
 					Event currentEvent = new Event()
 					currentEvent.encounterId = currentCodedResult.EncounterId.text()
 					currentEvent.eventCode = currentEventCode
@@ -108,6 +132,8 @@ class EventsReader {
 					eventsList.add(currentEvent)
 				}
 			}
+			log.info("number of results returned : " + i)
+			log.info("number of vital results returned: "+j)
 			//println("number of results returned : " + i)
 			//long l2 = new Date().getTime()
 			//println("vitals reading moresponse took: "+(l2-l1)/1000)
@@ -178,9 +204,9 @@ class EventsReader {
 					List sittingBPEvents = new ArrayList()
 					
 					Map bpEventsByBodyPosition = new HashMap()
-					bpEventsByBodyPosition.put("Supine", supineBPEvents)
-					bpEventsByBodyPosition.put("Sitting", sittingBPEvents)
-					bpEventsByBodyPosition.put("Standing", standingBPEvents)
+					bpEventsByBodyPosition.put(BODY_POSITION_SUPINE, supineBPEvents)
+					bpEventsByBodyPosition.put(BODY_POSITION_SITTING, sittingBPEvents)
+					bpEventsByBodyPosition.put(BODY_POSITION_STANDING, standingBPEvents)
 					
 					events.each{complexEvent->
 						
@@ -193,7 +219,7 @@ class EventsReader {
 							bpEventsByBodyPosition.get(bodyPosition).add(
 								new Event(encounterId: complexEvent.encounterId,
 										eventCode: bpEventCode,
-										value: complexEvent.value,
+										eventValue: complexEvent.eventValue,
 										eventId: complexEvent.eventId,
 										parentEventId: parentEventId,
 										eventEndDateTime: complexEvent.eventEndDateTime,
@@ -206,7 +232,7 @@ class EventsReader {
 							bpEventsByBodyPosition.get(bodyPosition).add(
 								new Event(encounterId: complexEvent.encounterId,
 										eventCode: bpEventCode,
-										value: complexEvent.value,
+										eventValue: complexEvent.eventValue,
 										eventId: complexEvent.eventId,
 										parentEventId: parentEventId,
 										eventEndDateTime: complexEvent.eventEndDateTime,
