@@ -220,7 +220,7 @@ log4j = {
         file name:'file', file:'C:\\logs\\smartproxy.log'
     }
     root {
-        error 'file'
+        info 'file'
 	}
 	
 	//Comment the following line if you want to disable logging all MO requests and responses

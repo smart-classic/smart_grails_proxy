@@ -10,6 +10,13 @@ import org.apache.commons.logging.LogFactory;
 import org.chip.mo.exceptions.MOCallException
 import org.chip.mo.exceptions.InvalidRequestException;
 
+/**
+* MilleniumObjectCall.groovy
+* Purpose: Provides shared functionality for different Millennium Object calls. 
+* This is the base class that should be extended to provide specific Millenium Object API implementations.
+* @author mkapoor
+* @version Jun 19, 2012 12:53:03 PM
+*/
 abstract class MilleniumObjectCall {
 	
 	private static final Log log = LogFactory.getLog(this)
@@ -24,19 +31,20 @@ abstract class MilleniumObjectCall {
 	protected static final String RECORDIDPARAM = "RECORDIDPARAM"
 	protected static final String MO_RESPONSE_PARAM = "MO_RESPONSE"
 	
-	private static final String MO_RESP_STATUS_NODATA="NoData"
-	private static final String MO_RESP_STATUS_ERROR="Error"
-	private static final String MO_RESP_STATUS_SUCCESS="Success"
+	protected static final String MO_RESP_STATUS_NODATA="NoData"
+	protected static final String MO_RESP_STATUS_ERROR="Error"
+	protected static final String MO_RESP_STATUS_SUCCESS="Success"
 	
-	private static Map responseErrorMessageMap
-	private static Map responseErrorStatusCodeMap
+	protected static Map responseErrorMessageMap
+	protected static Map responseErrorStatusCodeMap
 	
 	static{
 		responseErrorMessageMap = new HashMap<String, String>()
 		responseErrorMessageMap.put(MO_RESP_STATUS_ERROR, "MO Server returned Error for Record ID: ")
+		responseErrorMessageMap.put(MO_RESP_STATUS_NODATA, "MO Server returned no data for Record ID: ")
 		
 		responseErrorStatusCodeMap = new HashMap<String, Integer>()
-		responseErrorStatusCodeMap.put(MO_RESP_STATUS_ERROR, 500)
+		responseErrorStatusCodeMap.put(MO_RESP_STATUS_ERROR, 502)
 		responseErrorStatusCodeMap.put(MO_RESP_STATUS_NODATA, 404)
 	}
 	
@@ -67,10 +75,15 @@ abstract class MilleniumObjectCall {
 			requestXML = createRequest()
 		} catch (InvalidRequestException ire){
 			log.error(ire.exceptionMessage +" for "+ recordId +" because " + ire.rootCause)
-			throw new MOCallException(ire.exceptionMessage, 500, ire.rootCause)
+			throw new MOCallException(ire.exceptionMessage, ire.statusCode, ire.rootCause)
 		}
 		
+		long l1 = new Date().getTime()
+		
 		resp = makeRestCall(requestXML, moURL)
+		
+		long l2 = new Date().getTime()
+		log.info("Call for transaction: "+transaction+" took "+(l2-l1)/1000)
 		
 		handleExceptions(resp, recordId)
 
@@ -80,14 +93,13 @@ abstract class MilleniumObjectCall {
 	def handleExceptions(resp, recordId)throws MOCallException{
 		def replyMessage = resp.getData()
 		def status= replyMessage.Status.text()
-		def isResponseError = false
 		if( status != MO_RESP_STATUS_SUCCESS && 
 			status != MO_RESP_STATUS_NODATA ){
 			def errorMessage = responseErrorMessageMap.get(status)
 			def statusCode = responseErrorStatusCodeMap.get(status)
 			if(errorMessage==null){
-				errorMessage = "Unexpected response from MO "
-				statusCode = 500
+				errorMessage = "Unexpected or no response from MO "
+				statusCode = 502
 			}
 			throw new MOCallException(errorMessage+ recordId, statusCode, "MO Response returned status of "+status)
 		}

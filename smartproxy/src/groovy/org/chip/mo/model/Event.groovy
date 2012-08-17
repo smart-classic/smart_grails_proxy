@@ -1,5 +1,11 @@
 package org.chip.mo.model
 
+/**
+* Event.groovy
+* Purpose: Represents the Millenium Object provided information for an Event.
+* @author mkapoor
+* @version Jun 19, 2012 12:53:03 PM
+*/
 class Event {
 	
 	def encounterId
@@ -10,7 +16,7 @@ class Event {
 	def eventId
 	
 	def eventCode
-	def value
+	def eventValue
 	def eventTag
 	
 	def recordId
