@@ -87,6 +87,9 @@ class VitalSignsManager {
 		
 		//Step 3.
 		convertValues()
+		
+		//Step 4.
+		persistVitalSigns()
 	}
 	
 	/**
@@ -209,7 +212,7 @@ class VitalSignsManager {
 				assert encountersById.get(encounterId) != null, "Encounter ID unkonwn: " + encounterId
 			
 				vitalSigns.setProperty('encounter', encountersById.get(encounterId))
-				vitalSigns.setProperty('belongsTo', recordId)
+				vitalSigns.setProperty('patientId', recordId)
 				vitalSigns.setProperty('date', vitalSignsDate)
 				
 				//Add the vitalSigns object to the vitalSignsSet.
@@ -262,5 +265,11 @@ class VitalSignsManager {
 	
 	def getVitals(){
 		return new Vitals(vitalSignsSet)
+	}
+	
+	def persistVitalSigns(){
+		vitalSignsSet.each{vitalSigns->
+			vitalSigns.save(flush:true)
+		}
 	}
 }

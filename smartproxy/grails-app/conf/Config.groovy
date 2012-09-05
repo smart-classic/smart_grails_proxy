@@ -65,7 +65,8 @@ if (System.getProperty(PROPERTY_ENV_NAME) && new File(System.getProperty(PROPERT
 // 2: If no command line optins, check in ~/grails-config
 else if (new File(externalConfigFileLocation+"${appName}-config.groovy").exists()) {
     println "*** User defined config: file:${externalConfigFileLocation}${appName}-config.groovy. ***"
-    grails.config.locations = ["file:${externalConfigFileLocation}${appName}-config.groovy"]
+    grails.config.locations << "file:${externalConfigFileLocation}${appName}-config.groovy"
+	grails.config.locations << "file:${externalConfigFileLocation}DataSource.groovy"
 }
 // 3: Finally, check for a System Environment variable
 //    that will define where we should look.
@@ -75,9 +76,6 @@ else if (System.getenv(SYSTEM_ENV_NAME) && new File(System.getenv(SYSTEM_ENV_NAM
 }
 println "(*) grails.config.locations = ${grails.config.locations}"
 println "--------------------------------------------------------"
-
-
-println grails.config.locations
 
 // log4j configuration
 log4j = {

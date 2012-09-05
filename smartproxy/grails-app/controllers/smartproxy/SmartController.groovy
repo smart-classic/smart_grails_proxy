@@ -60,4 +60,13 @@ class SmartController {
 				break
 		}
 	}
+	
+	def readEncounters = {
+		switch(request.method){
+			case "POST":
+				def personId=params['record_id']
+				def encounterId=params['encounter_id']
+				forwardService.processEncounters(personId)
+		}
+	}
 }

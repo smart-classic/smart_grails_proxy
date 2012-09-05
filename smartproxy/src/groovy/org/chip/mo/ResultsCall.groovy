@@ -17,6 +17,8 @@ import groovyx.net.http.ContentType;
 
 import org.apache.commons.logging.LogFactory;
 
+import smartproxy.EncounterService;
+
 import groovy.xml.StreamingMarkupBuilder
 
 /**
@@ -40,11 +42,13 @@ class ResultsCall extends MilleniumObjectCall{
 	
 	VitalSignsManager vitalSignsManager
 	EventsReader eventsReader
+	EncounterService encounterService
 	
 	def init(){
 		super.init()
 		transaction = 'ReadResultsByCount'
 		targetServlet = 'com.cerner.results.ResultsServlet'
+		encounterService = new EncounterService()
 		
 		vitalSignsManager = new VitalSignsManager()
 		eventsReader = new EventsReader()
@@ -170,8 +174,7 @@ class ResultsCall extends MilleniumObjectCall{
 			Name('EVENTSETNAME')
 		}
 		
-		Map encountersById = (HashMap)requestParams.get(MO_RESPONSE_PARAM)
-		Set encounterIds = encountersById.keySet()
+		Set encounterIds = getEncounterIds(recordId)
 		
 		// MO Server chokes on an empty encounter IDs list.
 		// Log it and throw an exception.
@@ -186,6 +189,20 @@ class ResultsCall extends MilleniumObjectCall{
 		}
 	}
 	
+	def getEncounterIds(patientId){
+		Set encounterIds
+		Map encountersById = (HashMap)requestParams.get(MO_RESPONSE_PARAM)
+		
+		//If no encounter call was made, encountersById will be null.
+		//Fetch encounter ids from the db
+		if (null==encountersById){
+			encounterIds = encounterService.getEncounterIdsForPatient(patientId)
+		}else{
+			encounterIds = encountersById.keySet()
+		}
+		return encounterIds
+	}
+	
 	/**
 	* Pass the encountersById map containing all Encounters mapped to their id in.
 	* This will be used by the manager to assign an encounter to each VitalSigns object it creates
@@ -196,12 +213,23 @@ class ResultsCall extends MilleniumObjectCall{
 	*/
 	def readResponse(moResponseXml)throws MOCallException{
 		if(moResponseXml !=null){
+			def recordId = (String)requestParams.get(RECORDIDPARAM)
+			
 			//parse the moResonse and pass events to the vitalSignsManager
 			eventsReader.read(moResponseXml)
 			Map eventsByParentEventId = eventsReader.getEvents()
-			
 			vitalSignsManager.recordEvents(eventsByParentEventId)
-			vitalSignsManager.recordEncounters((HashMap)requestParams.get(MO_RESPONSE_PARAM, moResponseXml))
+			
+			//pass encounters to vitalSignsManager
+			Map encountersById = (HashMap)requestParams.get(MO_RESPONSE_PARAM)
+			//If no encounter call was made, encountersById will be null.
+			//Fetch encounters from the db
+			if(null==encountersById){
+				encountersById = encounterService.getEncountersByIdForPatient(recordId)
+			}
+			vitalSignsManager.recordEncounters(encountersById)
+			
+			//Process away.
 			vitalSignsManager.processEvents()
 		}
 			

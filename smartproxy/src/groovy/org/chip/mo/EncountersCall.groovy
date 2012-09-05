@@ -66,7 +66,7 @@ class EncountersCall extends MilleniumObjectCall{
 			   
 			   encounter.setStartDate(it.RegistrationDateTime.text())
 			   encounter.setEndDate(it.DischargeDateTime.text())
-			   encounter.setBelongsTo(it.PersonId.text())
+			   encounter.setPatientId(it.PersonId.text())
 			   
 			   def encounterTitle = encounterTitleMap.get(it.EncounterTypeClass.Display.text())
 			   if(encounterTitle==null) encounterTitle = "Ambulatory encounter"

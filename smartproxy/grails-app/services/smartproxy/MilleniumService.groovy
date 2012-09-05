@@ -23,7 +23,7 @@ class MilleniumService {
 	static {
 		transactionStepsMap.put 'demographics', ['Demographics']
 		transactionStepsMap.put 'problems', ['Problems']
-		transactionStepsMap.put 'vital_signs', ['Encounters','Results']
+		transactionStepsMap.put 'vital_signs', ['Results']
 	}
 
 	/**

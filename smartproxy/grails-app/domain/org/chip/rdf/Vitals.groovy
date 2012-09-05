@@ -41,7 +41,7 @@ class Vitals extends Record {
 			'rdf:RDF'(){
 				vitalSignsSet.each{ vitalSigns ->
 						'sp:VitalSigns'(){
-							'sp:belongsTo'('rdf:resource':belongsToUrl+vitalSigns.getBelongsTo())
+							'sp:belongsTo'('rdf:resource':belongsToUrl+vitalSigns.getPatientId())
 							'dcterms:date'(vitalSigns.getDate())
 							createEncounter(belongsToUrl, rdfBuilder, vitalSigns.getEncounter())
 							createVitalSign(rdfBuilder, vitalSigns.height, 'height')
@@ -131,7 +131,7 @@ class Vitals extends Record {
 			nodeIdsByEncounter.put(encounter, rdfNodeId)
 			rdfBuilder.'sp:encounter'(){
 				'sp:Encounter'('rdf:nodeID':rdfNodeId){
-					'sp:belongsTo'('rdf:resource':belongsToUrl+encounter.getBelongsTo())
+					'sp:belongsTo'('rdf:resource':belongsToUrl+encounter.getPatientId())
 					'sp:startDate'(encounter.getStartDate())
 					'sp:endDate'(encounter.getEndDate())
 					if(encounter.encounterType.code!=null && encounter.encounterType.code!=""){
