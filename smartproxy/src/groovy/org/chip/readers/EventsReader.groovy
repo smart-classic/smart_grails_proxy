@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.chip.managers.VitalSignsManager;
+import org.chip.mo.exceptions.InErrorException;
 import org.chip.mo.exceptions.MOCallException;
 import org.chip.mo.model.Event;
 import org.chip.rdf.vitals.VitalSign;
@@ -182,10 +183,16 @@ class EventsReader {
 		//Create a list of all parent event ids that point to event lists with "In Error" events.
 		//If any event in the event list is "In Error", the entire list needs to be deleted.
 		eventsByParentEventId.each{parentEventId, events->
-			events.each{event->
-				if(IN_ERROR_EVENT_TAG==event.eventTag){
-					inErrorParentEventIds.add(parentEventId)
+			try{
+				events.each{event->
+					if(IN_ERROR_EVENT_TAG==event.eventTag){
+						inErrorParentEventIds.add(parentEventId)
+						throw new MOCallException("", 500, "")
+					}
 				}
+			}
+			catch(MOCallException){
+				//Do Nothing. This just breaks out of the inner closure so the entire event list is not evaluated.
 			}
 		}
 		
