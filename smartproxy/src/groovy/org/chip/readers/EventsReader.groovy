@@ -20,6 +20,8 @@ class EventsReader {
 	
 	private static final Log log = LogFactory.getLog(this)
 	
+	public static final String IN_ERROR_EVENT_TAG="In Error"
+	
 	public static final String BODY_POSITION_STANDING="Standing"
 	public static final String BODY_POSITION_SUPINE="Supine"
 	public static final String BODY_POSITION_SITTING="Sitting"
@@ -81,6 +83,7 @@ class EventsReader {
 		def payload= replyMessage.Payload
 		processPayload(payload)
 		groupEvents()
+		removeInErrorEvents()
 		splitComplexEvents()
 	}
 	
@@ -100,6 +103,7 @@ class EventsReader {
 					currentEvent.encounterId = currentNumericResult.EncounterId.text()
 					currentEvent.eventCode = currentEventCode
 					currentEvent.eventValue = currentNumericResult.Value.text()
+					currentEvent.eventTag = currentNumericResult.EventTag.text()
 					currentEvent.eventId = currentNumericResult.EventId.text()
 					currentEvent.parentEventId = currentNumericResult.ParentEventId.text()
 					currentEvent.eventEndDateTime = currentNumericResult.EventEndDateTime.text()
@@ -170,6 +174,25 @@ class EventsReader {
 			}
 		}
 		return ret
+	}
+	
+	def removeInErrorEvents(){
+		List inErrorParentEventIds = new ArrayList()
+		
+		//Create a list of all parent event ids that point to event lists with "In Error" events.
+		//If any event in the event list is "In Error", the entire list needs to be deleted.
+		eventsByParentEventId.each{parentEventId, events->
+			events.each{event->
+				if(IN_ERROR_EVENT_TAG==event.eventTag){
+					inErrorParentEventIds.add(parentEventId)
+				}
+			}
+		}
+		
+		//Delete all the lists that have atleast one "In Error" event.
+		inErrorParentEventIds.each{
+			eventsByParentEventId.remove(it)
+		}
 	}
 	
 	/**
