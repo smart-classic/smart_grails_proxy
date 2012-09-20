@@ -17,6 +17,8 @@ class MilleniumService {
 	
 	/**
 	 * Maps the incoming transaction to a list of resolving vital calls.
+	 * The vital_signs call can include a 'Encounters' call which precedes the 'Results' call.
+	 * Disabled now because encounter information is sent in by the forwarding mPage and then read from the db.
 	 */
 	static Map transactionStepsMap = new HashMap()
 	

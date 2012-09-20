@@ -19,7 +19,7 @@ environments {
 			password = "smart"
 			loggingSql = true
 			formatSql = true
-			dbCreate = "update"
+			//dbCreate = "update"
 		}
 	}
 	test {

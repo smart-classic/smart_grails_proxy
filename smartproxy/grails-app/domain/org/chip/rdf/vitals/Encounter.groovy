@@ -13,6 +13,7 @@ class Encounter {
 	
 	static mapping = {
 		id generator: 'assigned', name: "encounterId", type: 'string'
+		version false
 	}
 	
 }

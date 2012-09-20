@@ -32,8 +32,6 @@ class VitalSignsManager {
 	Map<String, List> eventLists = new HashMap()
 	Map<String, Encounter> encountersById
 	
-	Set<VitalSigns> vitalSignsSet = new HashSet()
-	
 	/**
 	 * eventCodesMap
 	 */
@@ -83,13 +81,8 @@ class VitalSignsManager {
 		groupBPEvents()
 		
 		//Step 2.
-		createVitalSignsSet()
-		
-		//Step 3.
-		convertValues()
-		
-		//Step 4.
 		persistVitalSigns()
+		
 	}
 	
 	/**
@@ -149,9 +142,9 @@ class VitalSignsManager {
 	 * Iterate over the list of events 
 	 * Create vitalsign, bloodpressure and vitalSigns objects, grouping the related objects into a single VitalSigns object.
 	 * Assign the appropriate encounter object to the vitalSigns object.
-	 * Creates a set of VitalSigns objects  
+	 * Save the vitalSigns to db  
 	 */
-	def createVitalSignsSet(){
+	def persistVitalSigns(){
 		
 		this.eventLists.each {key, eventList ->
 			if(eventList.size()>0){
@@ -200,6 +193,7 @@ class VitalSignsManager {
 							//read the end date for this event.
 							vitalSignsDate=it.eventEndDateTime
 						}
+						bloodPressure.save()
 						vitalSigns.setProperty('bloodPressure', bloodPressure)
 					} else {
 						throw new Exception ("unrecognized event type: " + event);
@@ -215,8 +209,10 @@ class VitalSignsManager {
 				vitalSigns.setProperty('patientId', recordId)
 				vitalSigns.setProperty('date', vitalSignsDate)
 				
-				//Add the vitalSigns object to the vitalSignsSet.
-				vitalSignsSet.add(vitalSigns)
+				//Run any required unit conversions
+				convertValues(vitalSigns)
+				//Save the vitalSigns object to the db.
+				vitalSigns.save(flush:true)
 			}
 		}
 	}
@@ -226,24 +222,35 @@ class VitalSignsManager {
 		vitalSign.setUnit(SmartMapper.map(event.eventCode, 'Unit'))
 		vitalSign.setValue(event.eventValue)
 		vitalSign.setVitalName(createCodedValue(event.eventCode))
+		vitalSign.save()
 		return vitalSign
 	}
 	
 	def createCodedValue(String eventCode){
-		CodedValue codedValue = new CodedValue()
-		codedValue.setCode(
-			createCode(eventCode)
-		)
-		codedValue.setTitle(SmartMapper.map(eventCode, 'Title'))
+		String title=SmartMapper.map(eventCode, 'Title')
+		CodedValue codedValue = CodedValue.get(title)
+		if(null==codedValue){
+			codedValue = new CodedValue()
+			codedValue.setCode(
+				createCode(eventCode)
+			)
+			codedValue.setTitle(SmartMapper.map(eventCode, 'Title'))
+			codedValue.save()
+		}
 		return codedValue
 	}
 
 	def createCode(eventCode){
-		Code code = new Code()
-		code.setType(SmartMapper.map(eventCode, 'codeType'))
-		code.setTitle(SmartMapper.map(eventCode, 'Title'))
-		code.setSystem(SmartMapper.map(eventCode, 'codingSystem'))
-		code.setIdentifier(SmartMapper.map(eventCode, 'Resource'))
+		String title=SmartMapper.map(eventCode, 'Title')
+		Code code = Code.get(title)
+		if(null==code){
+			code = new Code()
+			code.setType(SmartMapper.map(eventCode, 'codeType'))
+			code.setTitle(SmartMapper.map(eventCode, 'Title'))
+			code.setSystem(SmartMapper.map(eventCode, 'codingSystem'))
+			code.setIdentifier(SmartMapper.map(eventCode, 'Resource'))
+			code.save()
+		}
 		return code
 	}
 	/**
@@ -253,23 +260,17 @@ class VitalSignsManager {
 	 * @param currentEventCode
 	 * @return
 	 */
-	def convertValues(){
-		vitalSignsSet.each{vitalSigns->
-			if(vitalSigns.height!=null){
-				double height = Double.parseDouble(vitalSigns.height.value)
-				height = height/100
-				vitalSigns.height.value = Double.toString(height)
-			}
+	def convertValues(vitalSigns){
+		if(vitalSigns.height!=null){
+			double height = Double.parseDouble(vitalSigns.height.value)
+			height = height/100
+			vitalSigns.height.value = Double.toString(height)
 		}
 	}
 	
 	def getVitals(){
+		Set<VitalSigns> vitalSignsSet = new HashSet()
+		vitalSignsSet.addAll(VitalSigns.list())
 		return new Vitals(vitalSignsSet)
-	}
-	
-	def persistVitalSigns(){
-		vitalSignsSet.each{vitalSigns->
-			vitalSigns.save(flush:true)
-		}
 	}
 }

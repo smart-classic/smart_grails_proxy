@@ -5,4 +5,9 @@ class Code {
 	String title
 	String system
 	String identifier
+	
+	static mapping = {
+		version false
+		id generator: 'assigned', name: "title", type: 'string'
+	}
 }

@@ -9,4 +9,8 @@ class VitalSign {
 	String value
 	String unit
 	CodedValue vitalName
+	
+	static mapping = {
+		version false
+	}
 }

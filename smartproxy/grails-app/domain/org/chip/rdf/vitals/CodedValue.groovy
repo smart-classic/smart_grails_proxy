@@ -9,4 +9,9 @@ class CodedValue {
 	Code code
 	String title
 	
+	static mapping = {
+		version false
+		id generator: 'assigned', name: "title", type: 'string'
+	}
+	
 }

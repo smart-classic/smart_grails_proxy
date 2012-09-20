@@ -12,6 +12,7 @@ class SmartController {
 
     def forwardService
     def casVerificationService
+	def encounterService
 	
 	/**
 	 * Records the supplied context variables.
@@ -66,7 +67,7 @@ class SmartController {
 			case "POST":
 				def personId=params['record_id']
 				def encounterId=params['encounter_id']
-				forwardService.processEncounters(personId)
+				encounterService.processEncounters(personId)
 		}
 	}
 }

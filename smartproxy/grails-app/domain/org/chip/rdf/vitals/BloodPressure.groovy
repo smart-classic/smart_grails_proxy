@@ -6,4 +6,16 @@ class BloodPressure {
 	VitalSign diastolic
 	VitalSign systolic
 	CodedValue method
+	
+	static mapping = {
+		version false
+	}
+	
+	static constraints = {
+		bodyPosition(nullable:true)
+		bodySite(nullable:true)
+		diastolic(nullable:true)
+		systolic(nullable:true)
+		method(nullable:true)
+	}
 }
