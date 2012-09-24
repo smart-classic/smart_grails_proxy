@@ -40,11 +40,11 @@ class MilleniumService {
 	 * @return the java.lang. object
 	 * @throws MOCallException the mO call exception
 	 */
-	def makeCall(transaction, recordId) throws MOCallException {
+	def makeCall(transaction, recordId, requestParams) throws MOCallException {
 		if((recordId==null)||(recordId.trim().length()==0)){
 			throw new MOCallException("Record ID not specified", 400, "")
 		}
-		def moCalls = createMOCalls(transaction)
+		def moCalls = createMOCalls(transaction, requestParams)
 		def moURL = ConfigurationHolder.config.grails.moURL
 		
 		def moResponse=null
@@ -61,7 +61,7 @@ class MilleniumService {
 	 * @return the java.lang. object
 	 * @throws MOCallException the mO call exception
 	 */
-	def createMOCalls(transaction) throws MOCallException{
+	def createMOCalls(transaction, requestParams) throws MOCallException{
 		def moCalls
 		try{
 			moCalls = new ArrayList()
@@ -69,6 +69,7 @@ class MilleniumService {
 				Class moCallClass = this.class.classLoader.loadClass('org.chip.mo.'+transactionStep+'Call')
 				def moCallObj=moCallClass.newInstance()
 				moCallObj.init()
+				moCallObj.registerRequestParams(requestParams)
 				moCalls.add(moCallObj)
 			}
 			

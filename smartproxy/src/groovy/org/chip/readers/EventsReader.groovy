@@ -285,6 +285,19 @@ class EventsReader {
 		
 		return true
 	}
+	
+	/**
+	 * Returns a set of encounter ids of all encounters for which the events were retuned.
+	 * @return returnedEncounterIdsSet
+	 */
+	def getReturnedEncounterIdsSet(){
+		Set<String> returnedEncounterIdsSet = new HashSet()
+		eventsList.each{event->
+			String encounterId = event.getEncounterId()
+			returnedEncounterIdsSet.add(encounterId)
+		}
+		return returnedEncounterIdsSet
+	}
 }
 
 

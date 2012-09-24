@@ -1,7 +1,7 @@
 package org.chip.rdf.vitals
 
 class VitalSigns {
-	String date
+	Date date
 	Encounter encounter
 	VitalSign weight
 	VitalSign height

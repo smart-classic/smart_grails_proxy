@@ -20,12 +20,18 @@ class EncountersCall extends MilleniumObjectCall{
 	static final Map encounterResourceMap
 	static final Map encounterTitleMap
 	static final Map codingSystemsMap
+	static Map encounterClassMap
 	
 	static{
 		def config = ConfigurationHolder.config
 		encounterResourceMap = config.cerner.mo.encounterResource
 		encounterTitleMap = config.cerner.mo.encounterTitle
 		codingSystemsMap = config.cerner.mo.codingSystemMap
+		
+		encounterClassMap = new HashMap()
+		encounterClassMap.put('393','Outpatient')
+		encounterClassMap.put('391','Inpatient')
+		encounterClassMap.put('389','Emergency')
 	}
 	
 	def init(){

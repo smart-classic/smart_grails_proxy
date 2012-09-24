@@ -26,7 +26,6 @@ class SmartController {
 				break
 			case "GET":
 				def personId=params['record_id']
-				def encounterId=params['encounter_id']
 				def userId=params['user_id']
 				def locationValue=params['location_value']
 				def application=params['application']	
@@ -66,8 +65,8 @@ class SmartController {
 		switch(request.method){
 			case "POST":
 				def personId=params['record_id']
-				def encounterId=params['encounter_id']
-				encounterService.processEncounters(personId)
+				def encountersDataParam=params['encounter_data']
+				encounterService.processEncounters(encountersDataParam, personId)
 		}
 	}
 }

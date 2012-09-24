@@ -11,6 +11,8 @@ class Encounter {
 	
 	String patientId
 	
+	boolean used
+	
 	static mapping = {
 		id generator: 'assigned', name: "encounterId", type: 'string'
 		version false

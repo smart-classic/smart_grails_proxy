@@ -31,6 +31,9 @@ import groovy.xml.StreamingMarkupBuilder
 class ResultsCall extends MilleniumObjectCall{
 	private static final Log log = LogFactory.getLog(this)
 	
+	protected static final String LIMITPARAM = "limit"
+	protected static final String OFFSETPARAM = "offset"
+	
 	static Map eventSetNames
 	static int eventCount
 	
@@ -64,31 +67,51 @@ class ResultsCall extends MilleniumObjectCall{
 	* @return
 	*/
    def makeCall(recordId, moURL) throws MOCallException{
-	   	requestParams.put(RECORDIDPARAM, recordId)
-	   	def resultsMap
-	   	try{
-		   def requestXML = createRequest()
-	   
-		   long l1 = new Date().getTime()
+	   Vitals vitals
+	   boolean vitalsFound = false
+	   boolean lastCallMade = false
+	   while(!vitalsFound &&!lastCallMade){
+		   requestParams.put(RECORDIDPARAM, recordId)
 		   
-		   resultsMap = makeAsyncCall(requestXML, moURL, recordId)
-		   
-		   long l2 = new Date().getTime()
-		   log.info("Call for transaction: "+transaction+" took "+(l2-l1)/1000)
-		   
-
-		} catch (InvalidRequestException ire){
-		   log.error(ire.exceptionMessage +" for "+ recordId +" because " + ire.rootCause)
-		   throw new MOCallException(ire.exceptionMessage, ire.statusCode, ire.rootCause)
-		}
+		   String limitParam = requestParams.get(ResultsCall.LIMITPARAM)
+		   int limit
+		   if(null!=limitParam){
+			   limit = Integer.parseInt(limitParam)
+		   }
+		   vitals = vitalSignsManager.getVitalsFromCache(requestParams)
+		   if(vitals.vitalSignsSet.size()==limit){
+			   vitalsFound = true
+		   }else{
+		   //Sufficient vitals information not present in cache. Make a MO call to add to cache
+			   	def resultsMap
+			   	try{
+				   def requestXML = createRequest()
+			   
+				   long l1 = new Date().getTime()
+				   
+				   resultsMap = makeAsyncCall(requestXML, moURL, recordId)
+				   
+				   long l2 = new Date().getTime()
+				   log.info("Call for transaction: "+transaction+" took "+(l2-l1)/1000)
+				   
 		
-		long l1 = new Date().getTime()
-		def respXml = aggregateResults(resultsMap)
-		long l2 = new Date().getTime()
-		Vitals vitals = readResponse(respXml)
-		long l3 = new Date().getTime()
-		log.info("Aggregating MO response took "+(l2-l1)/1000)
-		log.info("Reading and processing MO response took "+(l3-l2)/1000)
+				} catch (InvalidRequestException ire){
+				   log.error(ire.exceptionMessage +" for "+ recordId +" because " + ire.rootCause)
+				   throw new MOCallException(ire.exceptionMessage, ire.statusCode, ire.rootCause)
+				}
+				
+				long l1 = new Date().getTime()
+				def respXml = aggregateResults(resultsMap)
+				long l2 = new Date().getTime()
+				Vitals vitalsFromResponse = readResponse(respXml)
+				if(vitalsFromResponse.vitalSignsSet.size()==0){
+					lastCallMade=true
+				}
+				long l3 = new Date().getTime()
+				log.info("Aggregating MO response took "+(l2-l1)/1000)
+				log.info("Reading and processing MO response took "+(l3-l2)/1000)
+		   }
+	   }
 		return vitals
    }
    
@@ -231,9 +254,17 @@ class ResultsCall extends MilleniumObjectCall{
 			
 			//Process away.
 			vitalSignsManager.processEvents()
+			
+			//Mark encounters for which events were returned as "used"
+			def returnedEncounterIdsSet = eventsReader.getReturnedEncounterIdsSet()
+			returnedEncounterIdsSet.each{returnedEncounterId->
+				Encounter returnedEncounter = Encounter.findByEncounterId(returnedEncounterId)
+				returnedEncounter.setUsed(true)
+				returnedEncounter.save()
+			}
 		}
 			
-		Vitals vitals = vitalSignsManager.getVitals()
-		return vitals
+		Vitals vitalsFromResponse = vitalSignsManager.getVitalsFromResponse()
+		return vitalsFromResponse
 	}
 }

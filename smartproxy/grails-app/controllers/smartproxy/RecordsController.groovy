@@ -24,7 +24,7 @@ class RecordsController {
 		def rdf
 		response.setContentType ('application/xml')
 		try{
-			record = milleniumService.makeCall(transaction, recordId)
+			record = milleniumService.makeCall(transaction, recordId, params)
 		}catch(MOCallException moce){
 			log.error(moce.getExceptionMessage())
 			log.error(moce.getRootCause())

@@ -140,4 +140,15 @@ abstract class MilleniumObjectCall {
 	 * @return
 	 */
 	def abstract readResponse(resp) throws MOCallException
+	
+	/**
+	 * Gives a MO Call object a chance to register any additional parameters that were passed in with the request.
+	 * @param paginationParams
+	 * @return
+	 */
+	def registerRequestParams(requestParamsIn){
+		if(null!=requestParamsIn){
+			requestParams.putAll(requestParamsIn)
+		}
+	}
 }

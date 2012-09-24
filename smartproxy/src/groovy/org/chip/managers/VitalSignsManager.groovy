@@ -1,12 +1,16 @@
 package org.chip.managers
 
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
+import org.chip.mo.MilleniumObjectCall;
+import org.chip.mo.ResultsCall;
 import org.chip.mo.exceptions.MOCallException;
 import org.chip.mo.mappers.SmartMapper;
 import org.chip.mo.model.Event;
@@ -31,6 +35,8 @@ class VitalSignsManager {
 	
 	Map<String, List> eventLists = new HashMap()
 	Map<String, Encounter> encountersById
+	
+	Set<VitalSigns> vitalSignsSet = new HashSet()
 	
 	/**
 	 * eventCodesMap
@@ -207,14 +213,24 @@ class VitalSignsManager {
 			
 				vitalSigns.setProperty('encounter', encountersById.get(encounterId))
 				vitalSigns.setProperty('patientId', recordId)
-				vitalSigns.setProperty('date', vitalSignsDate)
+				vitalSigns.setProperty('date', convertToDate(vitalSignsDate))
 				
 				//Run any required unit conversions
 				convertValues(vitalSigns)
 				//Save the vitalSigns object to the db.
 				vitalSigns.save(flush:true)
+				//Add the vitalSigns object to the vitalSignsSet.
+				vitalSignsSet.add(vitalSigns)
 			}
 		}
+	}
+	
+	def convertToDate(String vitalSignsDate){
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS")
+		String timeZoneString = "GMT"+vitalSignsDate.substring(23)
+		df.setTimeZone(TimeZone.getTimeZone(timeZoneString))
+		Date date = df.parse(vitalSignsDate.substring(0, 23))
+		return date
 	}
 	
 	def createVitalSign(Event event){
@@ -268,9 +284,31 @@ class VitalSignsManager {
 		}
 	}
 	
-	def getVitals(){
-		Set<VitalSigns> vitalSignsSet = new HashSet()
-		vitalSignsSet.addAll(VitalSigns.list())
+	def getVitalsFromResponse(){
 		return new Vitals(vitalSignsSet)
+	}
+	
+	def getVitalsFromCache(Map requestParams){
+		Vitals vitals
+		
+		String limitParam = requestParams.get(ResultsCall.LIMITPARAM)
+		int limit
+		if(null!=limitParam){
+			limit = Integer.parseInt(limitParam)
+		}
+		
+		String offsetParam = requestParams.get(ResultsCall.OFFSETPARAM)
+		int offset
+		if(null!=offsetParam){
+			offset= Integer.parseInt(offsetParam)
+		}
+		
+		String patientId = requestParams.get(MilleniumObjectCall.RECORDIDPARAM)
+		
+		List vitalSigns = VitalSigns.findAllByPatientId(patientId, [max:limit, offset:offset, sort:"date", order:"desc"])
+		Set<VitalSigns> vitalSignsSet = new HashSet()
+		vitalSignsSet.addAll(vitalSigns)
+		vitals = new Vitals(vitalSignsSet)
+		return vitals
 	}
 }

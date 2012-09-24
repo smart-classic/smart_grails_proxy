@@ -8,7 +8,7 @@ package org.chip.mo.model
 */
 class Event {
 	
-	def encounterId
+	String encounterId
 	def parentEventId
 	def eventEndDateTime
 	def updateDateTime
