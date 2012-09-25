@@ -8,6 +8,8 @@ import org.chip.rdf.vitals.Encounter;
 
 class EncounterService {
 
+	def sessionFactory
+	
     static transactional = true
 	
 	private static final String RECORD_DELIM="RECORD_DELIM"
@@ -36,6 +38,14 @@ class EncounterService {
 			encountersById.put(encounter.encounterId, encounter)
 		}
 		return encountersById
+	}
+	
+	def markEncountersUsed(returnedEncounterIdsSet){
+		returnedEncounterIdsSet.each{returnedEncounterId->
+			Encounter returnedEncounter = Encounter.findByEncounterId(returnedEncounterId)
+			returnedEncounter.setUsed(true)
+			returnedEncounter.save(flush:true)
+		}
 	}
 	
 	def processEncounters(encountersDataParam, personId){

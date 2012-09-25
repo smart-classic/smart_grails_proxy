@@ -37,6 +37,7 @@ class ResultsCall extends MilleniumObjectCall{
 	static Map eventSetNames
 	static int eventCount
 	
+	//Grab eventSetNames and the number of events to be fetched from configuration file
 	static{
 		def config = ConfigurationHolder.config
 		eventSetNames = config.cerner.mo.eventSetNames
@@ -52,9 +53,6 @@ class ResultsCall extends MilleniumObjectCall{
 		transaction = 'ReadResultsByCount'
 		targetServlet = 'com.cerner.results.ResultsServlet'
 		encounterService = new EncounterService()
-		
-		vitalSignsManager = new VitalSignsManager()
-		eventsReader = new EventsReader()
 	}
 	
 	/**
@@ -70,51 +68,77 @@ class ResultsCall extends MilleniumObjectCall{
 	   Vitals vitals
 	   boolean vitalsFound = false
 	   boolean lastCallMade = false
+	   
+	   requestParams.put(RECORDIDPARAM, recordId)
+	   
+	   String limitParam = requestParams.get(ResultsCall.LIMITPARAM)
+	   int limit
+	   if(null!=limitParam){
+		   limit = Integer.parseInt(limitParam)
+	   }
+	   
 	   while(!vitalsFound &&!lastCallMade){
-		   requestParams.put(RECORDIDPARAM, recordId)
+		   //Refresh the vitalSignsManager and eventsReader before making a new call.
+		   vitalSignsManager = new VitalSignsManager()
+		   eventsReader = new EventsReader()
 		   
-		   String limitParam = requestParams.get(ResultsCall.LIMITPARAM)
-		   int limit
-		   if(null!=limitParam){
-			   limit = Integer.parseInt(limitParam)
-		   }
+		   //Read vitalSigns from the cache(database)
 		   vitals = vitalSignsManager.getVitalsFromCache(requestParams)
 		   if(vitals.vitalSignsSet.size()==limit){
+			   	//Sufficient vitals information retrieved from cache.
 			   vitalsFound = true
 		   }else{
-		   //Sufficient vitals information not present in cache. Make a MO call to add to cache
+		   		//Sufficient vitals information not present in cache. Make a MO call to add to cache
 			   	def resultsMap
 			   	try{
+				   
 				   def requestXML = createRequest()
 			   
 				   long l1 = new Date().getTime()
-				   
+				   //Make multiple async calls and obtain the results for all calls in a map.
 				   resultsMap = makeAsyncCall(requestXML, moURL, recordId)
 				   
 				   long l2 = new Date().getTime()
 				   log.info("Call for transaction: "+transaction+" took "+(l2-l1)/1000)
-				   
-		
 				} catch (InvalidRequestException ire){
 				   log.error(ire.exceptionMessage +" for "+ recordId +" because " + ire.rootCause)
 				   throw new MOCallException(ire.exceptionMessage, ire.statusCode, ire.rootCause)
 				}
 				
+				//Aggregate the responses from various async calls into a single MO Response document
 				long l1 = new Date().getTime()
-				def respXml = aggregateResults(resultsMap)
-				long l2 = new Date().getTime()
-				Vitals vitalsFromResponse = readResponse(respXml)
-				if(vitalsFromResponse.vitalSignsSet.size()==0){
+				def respXml
+				try{
+					respXml = aggregateResults(resultsMap)
+				}catch(MOCallException moce){
+					//No results returned. last call has been made
 					lastCallMade=true
 				}
-				long l3 = new Date().getTime()
+				long l2 = new Date().getTime()
 				log.info("Aggregating MO response took "+(l2-l1)/1000)
+				
+				//Parse the aggregated response xml and persist vitalsigns into the database.
+				if(respXml){
+					readResponse(respXml)
+					
+					markEncountersUsed()
+				}
+				long l3 = new Date().getTime()
 				log.info("Reading and processing MO response took "+(l3-l2)/1000)
 		   }
 	   }
 		return vitals
    }
    
+   /**
+    * Reads in the request template as requestXML
+    * Makes multiple Async calls by iterating over the set of events for which MO Call has to be made.
+    * @param requestXML
+    * @param moURL
+    * @param recordId
+    * @return
+    * @throws MOCallException
+    */
    def makeAsyncCall(requestXML, moURL, recordId) throws MOCallException{
 	   def async = new AsyncHTTPBuilder(
 		   poolSize : 16,
@@ -123,20 +147,26 @@ class ResultsCall extends MilleniumObjectCall{
 	
 	   Map resultsMap = new HashMap()
 	   eventSetNames.each {key, eventSetName->
+		   //create the MO request from template
 		   String subRequestXml=requestXML.replace('EVENTSETNAME',eventSetName)
 		   
+		   //Make the async call
 		   def result = async.post(body:subRequestXml, requestContentType : ContentType.XML) { resp, xml ->
 			   return xml
 		   }
+		   
+		   //Put the response in a map.
 		   resultsMap.put(key, result)
 	   }
 	   
+	   //Iterate over the response map, checking until all calls have returned.
 	   resultsMap.each{key, result->
 		   while(!result.done){
 			   log.info("ASYNC: Waiting for MO results")
 			   Thread.sleep(500)
 		   }
 		   log.info(key+ " ASYNC MO call returned")
+		   //Handle any exceptions as indicated in the MO Response
 		   handleExceptions(result.get(), recordId)
 	   }
 	   
@@ -171,20 +201,71 @@ class ResultsCall extends MilleniumObjectCall{
 		   }
 	   }
 	   
+	   //If mapIdx is still 0, that means no payload was read in from the MO responses.
+	   //Throw MOCallException so it can be caught to indicate that the last call has been made and there are no more results.
+	   if (mapIdx==0){
+		   throw new MOCallException("No results returned", 404, "No more results for the current patient")
+	   }
+	   
+	   //Converted the aggregated response to a single xml doc
 	   def outputBuilder = new StreamingMarkupBuilder()
 	   outputBuilder.encoding="UTF-8"
 	   def writer = new StringWriter()
 	   writer<<outputBuilder.bind {mkp.yield clinicalEvents}
 	   String aggregatedResponse = writer.toString()
 	   def aggregatedResponseXml = new XmlSlurper().parseText(aggregatedResponse)
+	   
 	   log.info("Printing aggregated response")
 	   log.info(aggregatedResponse)
 	   log.info("Done printing aggregated response")
+	   
 	   return aggregatedResponseXml
    }
 	
 	/**
-	* Generates MO requests to 
+	* Pass the encountersById map containing all Encounters mapped to their id in.
+	* This will be used by the manager to assign an encounter to each VitalSigns object it creates
+	* Record results with the vitalSignsManager to process later.
+	* 
+	* @param moResponse
+	* @return vitals
+	*/
+	def readResponse(moResponseXml)throws MOCallException{
+		if(moResponseXml !=null){
+			def recordId = (String)requestParams.get(RECORDIDPARAM)
+			
+			//parse the moResonse and pass events to the vitalSignsManager
+			eventsReader.read(moResponseXml)
+			Map eventsByParentEventId = eventsReader.getEvents()
+			vitalSignsManager.recordEvents(eventsByParentEventId)
+			
+			//pass encounters to vitalSignsManager
+			Map encountersById = (HashMap)requestParams.get(MO_RESPONSE_PARAM)
+			//If no encounter call was made, encountersById will be null.
+			//Fetch encounters from the db
+			if(null==encountersById){
+				encountersById = encounterService.getEncountersByIdForPatient(recordId)
+			}
+			vitalSignsManager.recordEncounters(encountersById)
+			
+			//Process away.
+			vitalSignsManager.processEvents()
+		}
+			
+		Vitals vitalsFromResponse = vitalSignsManager.getVitalsFromResponse()
+		return vitalsFromResponse
+	}
+	
+	/**
+	 * Mark encounters for which events were returned as "used"
+	 * @return
+	 */
+	def markEncountersUsed(){
+		encounterService.markEncountersUsed(eventsReader.getReturnedEncounterIdsSet())
+	}
+	
+	/**
+	* Generates MO requests to
 	* - Get Vitals for a list of Encounters and a given patient id
 	* @param recordId
 	* @return
@@ -224,47 +305,5 @@ class ResultsCall extends MilleniumObjectCall{
 			encounterIds = encountersById.keySet()
 		}
 		return encounterIds
-	}
-	
-	/**
-	* Pass the encountersById map containing all Encounters mapped to their id in.
-	* This will be used by the manager to assign an encounter to each VitalSigns object it creates
-	* Record results with the vitalSignsManager to process later.
-	* 
-	* @param moResponse
-	* @return vitals
-	*/
-	def readResponse(moResponseXml)throws MOCallException{
-		if(moResponseXml !=null){
-			def recordId = (String)requestParams.get(RECORDIDPARAM)
-			
-			//parse the moResonse and pass events to the vitalSignsManager
-			eventsReader.read(moResponseXml)
-			Map eventsByParentEventId = eventsReader.getEvents()
-			vitalSignsManager.recordEvents(eventsByParentEventId)
-			
-			//pass encounters to vitalSignsManager
-			Map encountersById = (HashMap)requestParams.get(MO_RESPONSE_PARAM)
-			//If no encounter call was made, encountersById will be null.
-			//Fetch encounters from the db
-			if(null==encountersById){
-				encountersById = encounterService.getEncountersByIdForPatient(recordId)
-			}
-			vitalSignsManager.recordEncounters(encountersById)
-			
-			//Process away.
-			vitalSignsManager.processEvents()
-			
-			//Mark encounters for which events were returned as "used"
-			def returnedEncounterIdsSet = eventsReader.getReturnedEncounterIdsSet()
-			returnedEncounterIdsSet.each{returnedEncounterId->
-				Encounter returnedEncounter = Encounter.findByEncounterId(returnedEncounterId)
-				returnedEncounter.setUsed(true)
-				returnedEncounter.save()
-			}
-		}
-			
-		Vitals vitalsFromResponse = vitalSignsManager.getVitalsFromResponse()
-		return vitalsFromResponse
 	}
 }

@@ -49,8 +49,7 @@ abstract class MilleniumObjectCall {
 	}
 	
 	def init(){
-		writer = new StringWriter()
-		builder = new MarkupBuilder(writer)
+
 	}
 	
 	def makeCall(recordId, moUrl, moResponse){
@@ -104,6 +103,8 @@ abstract class MilleniumObjectCall {
 	}
 	
 	def createRequest(){
+		writer = new StringWriter()
+		builder = new MarkupBuilder(writer)
 		builder.RequestMessage(){
 			TransactionName(transaction)
 			Payload(){
