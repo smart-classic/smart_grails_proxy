@@ -66,6 +66,9 @@ class SmartController {
 			case "POST":
 				def personId=params['record_id']
 				def encountersDataParam=params['encounter_data']
+				log.info("Printing encoutners Data")
+				log.info(encountersDataParam)
+				log.info("Done Printing encoutners Data")
 				encounterService.processEncounters(encountersDataParam, personId)
 		}
 	}

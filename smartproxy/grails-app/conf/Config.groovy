@@ -45,7 +45,7 @@ environments{
 		externalConfigFileLocation="external_config\\"
 	}
 	test{
-		externalConfigFileLocation="${userHome}/grails-config/"
+		externalConfigFileLocation="/data2/app/smart/"
 	}
 }
 grails.config.locations = [ ]
