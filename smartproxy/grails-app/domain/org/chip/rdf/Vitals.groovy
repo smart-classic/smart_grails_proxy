@@ -1,5 +1,8 @@
 package org.chip.rdf
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
 import org.chip.rdf.vitals.CodedValue;
 import org.chip.rdf.vitals.VitalSign;
 import groovy.xml.StreamingMarkupBuilder
@@ -42,7 +45,7 @@ class Vitals extends Record {
 				vitalSignsSet.each{ vitalSigns ->
 						'sp:VitalSigns'(){
 							'sp:belongsTo'('rdf:resource':belongsToUrl+vitalSigns.getPatientId())
-							'dcterms:date'(vitalSigns.getDate())
+							'dcterms:date'(convertDateToString(vitalSigns.getDate()))
 							createEncounter(belongsToUrl, rdfBuilder, vitalSigns.getEncounter())
 							createVitalSign(rdfBuilder, vitalSigns.height, 'height')
 							createVitalSign(rdfBuilder, vitalSigns.weight, 'weight')
@@ -142,5 +145,17 @@ class Vitals extends Record {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Converts the date stored in db to a string of format: yyyy-MM-dd'T'HH:mm:ss.SSS
+	 * @param vitalSignsDate
+	 * @return
+	 */
+	def convertDateToString(Date vitalSignsDate){
+		int i = 0
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS")
+		String vitalSignsDateString = df.format(vitalSignsDate)
+		return vitalSignsDateString
 	}
 }
