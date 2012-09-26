@@ -17,8 +17,8 @@ environments {
 			url = "jdbc:postgresql://localhost:5432/smart"
 			username = "smart"
 			password = "smart"
-			loggingSql = true
-			formatSql = true
+			//loggingSql = true
+			//formatSql = true
 			//dbCreate = "update"
 		}
 	}
