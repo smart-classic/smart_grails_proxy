@@ -63,12 +63,24 @@ class EncounterService {
 				String encounterId = encounterPropertiesArray[0].split(":")[1]
 				Encounter encounter = Encounter.findByEncounterId(encounterId)
 				if(!encounter){//Encounter is not allready present. Create a new one and save it.
+					
 					//startDate
-					def startDate = encounterPropertiesArray[1].split(":")[1]	
+					def startDate=""
+					String[] startDateArray = encounterPropertiesArray[1].split(":")
+					if(startDateArray.length==2){ 
+						startDate = startDateArray[1]	
+					}
+					
 					//endDate
-					def endDate = encounterPropertiesArray[2].split(":")[1]
+					def endDate = ""
+					String[] endDateArray = encounterPropertiesArray[2].split(":")
+					if(endDateArray.length==2){
+						endDate = endDateArray[1]
+					}
+					
 					//type
 					def encounterType = encounterPropertiesArray[3].split(":")[1]
+					
 					//encounter
 					encounter = createEncounter(encounterId, startDate, endDate, encounterType, personId)
 				}
