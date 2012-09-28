@@ -54,6 +54,10 @@ class MilleniumService {
 		return moResponse
     }
 	
+	def makeCall(transaction, recordId){
+		makeCall(transaction, recordId, null)
+	}
+	
 	/**
 	 * Factory which instantiates the list of appropriate MilleniumObject using reflection.
 	 *
