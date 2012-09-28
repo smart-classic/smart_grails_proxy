@@ -64,7 +64,7 @@ class SmartController {
 	def readEncounters = {
 		switch(request.method){
 			case "POST":
-				def personId=params['record_id']
+				def personId=forwardService.extractId(params['record_id'])
 				def encountersDataParam=params['encounter_data']
 				log.info("Printing encoutners Data")
 				log.info(encountersDataParam)
