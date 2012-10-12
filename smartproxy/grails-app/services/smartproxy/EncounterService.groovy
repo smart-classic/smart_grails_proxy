@@ -9,6 +9,7 @@ import org.chip.rdf.vitals.Encounter;
 class EncounterService {
 
 	def sessionFactory
+	def forwardService
 	
     static transactional = true
 	
@@ -94,6 +95,9 @@ class EncounterService {
 	}
 	
 	def createEncounter(encounterId, startDate, endDate, encounterTypeClassValue, personId){
+		log.info("Person Id before extracting "+personId)
+		personId = forwardService.extractId(personId)
+		log.info("Person Id after extracting "+personId)
 		def encounterTypeClassDisplay= EncountersCall.encounterClassMap.get(encounterTypeClassValue)
 		if(encounterTypeClassDisplay==null) encounterTypeClassDisplay="Outpatient"
 		
