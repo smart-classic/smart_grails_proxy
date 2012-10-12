@@ -75,7 +75,7 @@ class ForwardService {
 		if (index >-1){
 			return incomingId.substring(0, index)
 		}
-		return incomingId
+		return incomingId.trim()
 	}
 
 	def getNameForPersonId(personId){
