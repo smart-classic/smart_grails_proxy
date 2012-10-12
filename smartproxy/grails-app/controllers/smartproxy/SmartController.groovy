@@ -66,9 +66,9 @@ class SmartController {
 			case "POST":
 				def personId=forwardService.extractId(params['record_id'])
 				def encountersDataParam=params['encounter_data']
-				log.info("Printing encoutners Data")
-				log.info(encountersDataParam)
-				log.info("Done Printing encoutners Data")
+				log.info("Printing personId Data")
+				log.info(params['record_id']+" becomes " + personId)
+				log.info("Done Printing personId Data")
 				encounterService.processEncounters(encountersDataParam, personId)
 		}
 	}
