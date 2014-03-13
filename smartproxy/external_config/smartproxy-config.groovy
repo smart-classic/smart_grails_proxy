@@ -1,7 +1,7 @@
 
 oauth {
     smartEmr {
-        token = 'CHANGEME'
+        token = 'CHANGEME
         secret = 'CHANGEME'
         apiBase = 'http://localhost:7000'
     }
@@ -18,7 +18,7 @@ cas{
 
 environments {
     production {
-        grails.serverURL = "http://rCHANGEME:8080/smartproxy"
+        grails.serverURL = "http://CHANGEME:8080/smartproxy"
 	grails.moURL = 'http://CHANGEME:8888/CHMObjectsToolkit/servlet/'
 	grails.smartURL = 'http://CHANGEME:7001/proxy_index'
     }
@@ -240,14 +240,23 @@ cerner{
 	
 log4j = {
     appenders {
-        file name:'file', file:'C:\\logs\\smartproxy.log'
+		environments {
+			production {
+			}
+			development {
+				file name:'file', file:'C:\\logs\\smartproxy.log'
+			}
+			test {
+				file name:'file', file:'/var/log/tomcat6/smartproxy.log'
+			}
+		}
     }
     root {
         info 'file'
 	}
 	
 	//The following line toggles logging all MO requests and responses
-	debug 	"org.apache.http.wire"
-	//debug "org.apache.http.headers"
+	//debug 	"org.apache.http.wire"
+	debug "org.apache.http.headers"
 	//debug file:'org.hibernate'
 }
