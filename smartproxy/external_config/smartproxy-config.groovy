@@ -1,7 +1,7 @@
 
 oauth {
     smartEmr {
-        token = 'CHANGEME
+        token = 'CHANGEME'
         secret = 'CHANGEME'
         apiBase = 'http://localhost:7000'
     }
