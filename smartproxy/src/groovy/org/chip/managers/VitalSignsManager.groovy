@@ -234,9 +234,9 @@ class VitalSignsManager {
 			createCode(eventCode)
 		)
 		codedValue.setTitle(SmartMapper.map(eventCode, 'Title'))
-        if (codedValue.code.type == null  || codedValue.code.system == null || codedValue.identifier == null) {
-            return null;
-        }
+        //if (codedValue.code.type == null  || codedValue.code.system == null || codedValue.identifier == null) {
+        //    return null;
+        //}
 		return codedValue
 	}
 
