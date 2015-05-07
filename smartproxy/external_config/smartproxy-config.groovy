@@ -111,6 +111,10 @@ cerner{
 			Right_upper="Right arm"
 			Left_lower= "Left thigh"
 			Right_lower= "Right thigh"
+			LUE= "Left arm"
+			RUE= "Right arm"
+			LLE= "Left thigh"
+			RLE= "Right thigh"
 		}
 		
 		codingSystemMap{
@@ -140,6 +144,10 @@ cerner{
 			Right_upper="http://purl.bioontology.org/ontology/SNOMEDCT/"
 			Left_lower= "http://purl.bioontology.org/ontology/SNOMEDCT/"
 			Right_lower= "http://purl.bioontology.org/ontology/SNOMEDCT/"
+			LUE= "http://purl.bioontology.org/ontology/SNOMEDCT/"
+			RUE= "http://purl.bioontology.org/ontology/SNOMEDCT/"
+			LLE= "http://purl.bioontology.org/ontology/SNOMEDCT/"
+			RLE= "http://purl.bioontology.org/ontology/SNOMEDCT/"
 		}
 		
 		vitalsCodeTypeMap{
@@ -165,6 +173,10 @@ cerner{
 			Right_upper="BloodPressureBodySite"
 			Left_lower= "BloodPressureBodySite"
 			Right_lower= "BloodPressureBodySite"
+			LUE= "BloodPressureBodySite"
+			RUE= "BloodPressureBodySite"
+			LLE= "BloodPressureBodySite"
+			RLE= "BloodPressureBodySite"
 		}
 		
 		vitalResource{
@@ -190,6 +202,10 @@ cerner{
 			Right_upper="368209003"
 			Left_lower="61396006"
 			Right_lower="11207009"
+			LUE="368208006"
+			RUE="368209003"
+			LLE="61396006"
+			RLE="11207009"
 		}
 		
 		vitalUnits{
