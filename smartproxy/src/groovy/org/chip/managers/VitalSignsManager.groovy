@@ -186,9 +186,11 @@ class VitalSignsManager {
 								//the event property has a value. Create a vital sign object. e.g. systolic
 								bloodPressureProperty = createVitalSign(it)
 							}
-	
-							def propertyType = SmartMapper.map(it.eventCode, 'Type')
-							bloodPressure.setProperty(propertyType, bloodPressureProperty)
+                            
+                            if (bloodPressureProperty != null) {
+                                def propertyType = SmartMapper.map(it.eventCode, 'Type')
+                                bloodPressure.setProperty(propertyType, bloodPressureProperty)
+                            }
 							
 							//read the encounterId for this event
 							encounterId = it.getEncounterId()
@@ -232,6 +234,9 @@ class VitalSignsManager {
 			createCode(eventCode)
 		)
 		codedValue.setTitle(SmartMapper.map(eventCode, 'Title'))
+        if (codedValue.code.type == null  || codedValue.code.system == null || codedValue.identifier == null) {
+            return null;
+        }
 		return codedValue
 	}
 
